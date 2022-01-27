@@ -1,0 +1,21 @@
+#include "foobar_version.h"
+
+std::string getFooBarVersion() {
+	return "@FooBar_VERSION@";
+}
+
+unsigned getFooBarVersionMajor() {
+	return @FooBar_VERSION_MAJOR@;
+}
+
+unsigned getFooBarVersionMinor() {
+	return @FooBar_VERSION_MINOR@ +0;
+}
+
+unsigned getFooBarVersionPatch() {
+	return @FooBar_VERSION_PATCH@ +0;
+}
+
+unsigned getFooBarVersionTweak() {
+	return @FooBar_VERSION_TWEAK@ +0;
+}
