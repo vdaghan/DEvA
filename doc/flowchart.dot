@@ -13,12 +13,19 @@ digraph Functions {
     Population;
     subgraph cluster_variations {
         label="Variations";
+        Copy;
+        Crossover;
+        SNV;
     }
 
     EvolutionaryAlgorithm -> Genealogy;
     Genealogy -> Generation;
-    Generation -> Population;
-    Population -> Individual;
+    Generation -> Individual;
+    Individual -> Population;
     Individual -> Genotype;
     Individual -> Phenotype;
+
+    Copy -> Genotype;
+    Crossover -> Genotype;
+    SNV -> Genotype;
 }
