@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 project(DEvA LANGUAGES CXX VERSION 0.0.0.2)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
+enable_testing()
+
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_SOURCE_DIR}/doc/flowchart.dot -o ${CMAKE_BINARY_DIR}/flowchart.svg)
 
 set(DEvA_SOURCES "src/Bibliography.cpp"
@@ -15,10 +17,11 @@ set(DEvA_SOURCES "src/Bibliography.cpp"
 				 "src/Individual.cpp"
 				 "src/Phenotype.cpp"
 				 "src/Strategy.cpp"
+				 "src/Variation.cpp"
 				 "include/Variations/CopyVariation.h"
 				 "src/Variations/CrossoverVariation.cpp"
 				 "src/Variations/SingleNucleotideVariation.cpp"
-				 "src/Variations/VariationBase.cpp")
+				 "src/Variations/VariationBase.cpp" )
 
 add_library(DEvA ${DEvA_SOURCES})
 target_link_libraries(DEvA PRIVATE DEvA_version)
