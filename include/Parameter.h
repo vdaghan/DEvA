@@ -1,23 +1,23 @@
 #pragma once
 
 #include <any>
+#include <map>
 #include <optional>
 #include <string>
-#include <vector>
 
-class Parameter {
-	public:
+namespace DEvA {
+	struct Parameter {
+		//Parameter() = delete;
+		Parameter(std::string pName) {
+			name = pName;
+		}
 		Parameter(std::string pName, std::any pValue) {
-			name_ = pName;
-			value_ = pValue;
+			name = pName;
+			value = pValue;
 		}
 
-		std::string_view name() const { return name_; };
-		std::any value() const { return value_; };
-	private:
-		std::string name_;
-		std::any value_;
-};
-
-typedef std::vector<Parameter> Parameters;
-typedef std::optional<Parameter> MaybeParameter;
+		std::string name;
+		std::any value;
+	};
+	using MaybeParameter = std::optional<Parameter>;
+}

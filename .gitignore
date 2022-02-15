@@ -48,3 +48,4 @@ CTestTestfile.cmake
 /docs/**
 /logs/**
 /out/**
+*/out/**

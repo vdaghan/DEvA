@@ -1,53 +1,53 @@
 #pragma once
-
+/*
 #include <functional>
 
-#include "Generation.h"
-#include "IdentityFunctions.h"
-#include "StrategyFunctions.h"
+#include "StandardStrategies.h"
 
-enum class Strategy_ParentRejection { CUSTOM, NONE, WORST_N, WORST_PERCENTAGE };
-enum class Strategy_ParentGrouping { CUSTOM, NONE };
+namespace DEvA {
 
-/// Parent selection strategies define who are eligible to be a parent:
-/// CUSTOM: User provided strategy
-/// ALL: Whole previous generation is a candidate
-/// FITNESS_PROPORTIONAL: 
-/// FITNESS_PROPORTIONAL_WINDOWED: 
-enum class Strategy_ParentSelection { CUSTOM, ALL, FITNESS_PROPORTIONAL, FITNESS_PROPORTIONAL_WINDOWED, TOURNAMENT };
+	enum class Strategy_ParentRejection { CUSTOM, NONE, WORST_N, WORST_PERCENTAGE };
+	enum class Strategy_ParentGrouping { CUSTOM, NONE };
 
-/// Partner selection strategies define who will be mating with whom
-/// CUSTOM: User provided strategy
-/// FURTHEST: 
-/// RANDOM: 
-enum class Strategy_PartnerSelection { CUSTOM, FURTHEST, RANDOM };
+	/// Parent selection strategies define who are eligible to be a parent:
+	/// CUSTOM: User provided strategy
+	/// ALL: Whole previous generation is a candidate
+	/// FITNESS_PROPORTIONAL: 
+	/// FITNESS_PROPORTIONAL_WINDOWED: 
+	enum class Strategy_ParentSelection { CUSTOM, ALL, FITNESS_PROPORTIONAL, FITNESS_PROPORTIONAL_WINDOWED, TOURNAMENT };
 
-/// Population size strategies define how the population size is maintained
-/// CUSTOM: User provided strategy
-/// AUTOMATIC: 
-/// FIXED: Fixed population size
-enum class Strategy_PopulationSize { CUSTOM, AUTOMATIC, FIXED };
+	/// Partner selection strategies define who will be mating with whom
+	/// CUSTOM: User provided strategy
+	/// FURTHEST: 
+	/// RANDOM: 
+	enum class Strategy_PartnerSelection { CUSTOM, FURTHEST, RANDOM };
 
-/// Population model strategies ...
-/// CUSTOM: User provided strategy
-/// FULLSTEADYSTATE: 
-/// PARTIALSTEADYSTATE: 
-/// GENERATIONAL: 
-/// GAVaPS: 
-enum class Strategy_PopulationModel { CUSTOM, FULLSTEADYSTATE, PARTIALSTEADYSTATE, GENERATIONAL, GAVaPS };
+	/// Population size strategies define how the population size is maintained
+	/// CUSTOM: User provided strategy
+	/// AUTOMATIC: 
+	/// FIXED: Fixed population size
+	enum class Strategy_PopulationSize { CUSTOM, AUTOMATIC, FIXED };
 
-/// Survivor selection strategies define who will survive to make up the next generation
-/// CUSTOM: User provided strategy
-/// REPLACE_WORST: 
-/// AGE_BASED: 
-/// FITNESS_BASED: 
-enum class Strategy_SurvivorSelection { CUSTOM, REPLACE_WORST, AGE_BASED, FITNESS_BASED };
+	/// Population model strategies ...
+	/// CUSTOM: User provided strategy
+	/// FULLSTEADYSTATE: 
+	/// PARTIALSTEADYSTATE: 
+	/// GENERATIONAL: 
+	/// GAVaPS: 
+	enum class Strategy_PopulationModel { CUSTOM, FULLSTEADYSTATE, PARTIALSTEADYSTATE, GENERATIONAL, GAVaPS };
 
-class Strategy {
+	/// Survivor selection strategies define who will survive to make up the next generation
+	/// CUSTOM: User provided strategy
+	/// REPLACE_WORST: 
+	/// AGE_BASED: 
+	/// FITNESS_BASED: 
+	enum class Strategy_SurvivorSelection { CUSTOM, REPLACE_WORST, AGE_BASED, FITNESS_BASED };
+
+	class Strategy {
 	public:
-		void setStrategy(Strategy_ParentRejection, ParentSelectionFunction = IdentityParentSelection);
-		void setStrategy(Strategy_ParentGrouping, ParentSelectionFunction = IdentityParentSelection);
-		void setStrategy(Strategy_ParentSelection, ParentSelectionFunction = IdentityParentSelection);
+		void setStrategy(Strategy_ParentRejection, ParentSelectionFunction = Strategies::IdentityParentSelection);
+		void setStrategy(Strategy_ParentGrouping, ParentSelectionFunction = Strategies::IdentityParentSelection);
+		void setStrategy(Strategy_ParentSelection, ParentSelectionFunction = Strategies::IdentityParentSelection);
 		GenerationPtr apply(GenerationPtr const) const;
 	private:
 		Strategy_ParentRejection parentRejectionStrategy;
@@ -62,4 +62,6 @@ class Strategy {
 		std::vector<IndividualPtrList> selectPartners(IndividualPtrList const);
 		IndividualPtrList createOffsprings(std::vector<IndividualPtrList> const) const;
 		IndividualPtrList selectSurvivors(IndividualPtrList const) const;
-};
+	};
+}
+*/

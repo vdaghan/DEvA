@@ -1,35 +1,36 @@
 #pragma once
 
+#include "BasicTypes.h"
+#include "Parameters.h"
+#include "Variations/StandardVariations.h"
+
 #include <any>
 #include <functional>
-#include <map>
 #include <string>
 
-#include "Parameter.h"
+namespace DEvA {
+	enum class VariationFlags { Exhaustive = 1
+								 };
 
-enum class VariationArity { UNARY_UNARY, UNARY_NARY, NARY_UNARY, NARY_NARY };
-enum class GenericVariation { COPY };
+	template <typename Types>
+	struct Variation {
+		using Genotype = Types::Genotype;
+		using GenotypePtr = Types::GenotypePtr;
+		using GenotypePtrSet = Types::GenotypePtrSet;
+		using InputOperator = std::function<GenotypePtrSet(GenotypePtrSet)>;
+		using VariationOperator = std::function<GenotypePtrSet(GenotypePtrSet)>;
 
-template <class Genotype, class VariationArity>
-class Variation {
-	public:
-		typedef std::function<Genotype(Genotype)> OperatorType;
-		Variation(std::string);
-		Variation(GenericVariation);
+		Variation(std::string name_, VariationOperator variationOperator_) {
+			name = name_;
+			variationOperator = variationOperator_;
+		}
+		GenotypePtrSet operator()(GenotypePtrSet gptrset) { return variationOperator(gptrset); };
 
-		std::string_view name() { return name; };
-
-		void setOperator(GenericVariation);
-		void setOperator(OperatorType);
-
-		Parameters getParameters() const { return parameters; };
-		MaybeParameter getParameter(std::string) const;
-		void addParameter(Parameter);
-
-		void operator()();
-	private:
-		std::function<int(int)> variationOperator;
 		std::string name;
-		bool exhaustive;
+
+		InputOperator inputOperator;
+		VariationOperator variationOperator;
+		bool hasOperator();
 		Parameters parameters;
-};
+	};
+}

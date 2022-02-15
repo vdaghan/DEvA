@@ -1,22 +1,32 @@
 #pragma once
 
-#include <deque>
 #include <memory>
+#include <unordered_set>
 
-#include "Genotype.h"
-#include "Phenotype.h"
+#include "BasicTypes.h"
 
-class Individual;
-typedef std::shared_ptr<Individual> IndividualPtr;
-typedef std::deque<IndividualPtr> IndividualPtrList;
+namespace DEvA {
+	template <typename Types>
+	class Individual {
+		public:
+			using IndividualPtr = std::shared_ptr<Individual<Types>>;
+			using IndividualPtrSet = std::unordered_set<IndividualPtr>;
 
-class Individual {
-	public:
-		Individual();
-	private:
-		GenotypePtr genotype;
-		PhenotypePtr phenotype;
-		IndividualPtrList parents;
-		IndividualPtrList children;
-		size_t age;
-};
+			Individual(IndividualPtrSet parents_, Types::GenotypePtr gptr) {
+				parents = parents_;
+				genotype = gptr;
+				for (auto it = parents.begin(); it != parents.end(); ++it) {
+					it->children.emplace_back(std::make_shared<Individual<Types>>(this));
+				}
+			};
+			Individual(Types::GenotypePtr gptr) {
+				genotype = gptr;
+			};
+
+			Types::GenotypePtr genotype;
+			Types::PhenotypePtr phenotype;
+			Types::Fitness fitness;
+			IndividualPtrSet parents;
+			IndividualPtrSet children;
+	};
+}

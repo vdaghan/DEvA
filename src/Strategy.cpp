@@ -1,5 +1,5 @@
 #include "Strategy.h"
-
+/*
 GenerationPtr Strategy::apply(GenerationPtr const generation) const {
 	auto individuals = generation->getIndividuals();
 	IndividualPtrList const parentPool = selectParents(individuals);
@@ -25,3 +25,4 @@ IndividualPtrList Strategy::createOffsprings(std::vector<IndividualPtrList> cons
 IndividualPtrList Strategy::selectSurvivors(IndividualPtrList const) const {
 	return IndividualPtrList();
 }
+*/
