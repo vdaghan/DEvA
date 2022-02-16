@@ -44,7 +44,6 @@ int main() {
 	using Fitness = size_t;
 	using Spec = DEvA::Specialisation<Genotype, Phenotype, Fitness>;
 	Spec::SEvolutionaryAlgorithm ea;
-	//DEvA::EvolutionaryAlgorithm<Spec::BT> ea;
 
 	// Initialise
 	std::default_random_engine randGen;
@@ -64,23 +63,55 @@ int main() {
 		}
 		return generation;
 	};
-	ea.genesis(initialise);
+	ea.setGenesisFunction(initialise);
 
-	/*auto extractNRandomElements = [](Spec::GenotypePtrSet gptrs, size_t N) -> Spec::FSlicerReturn {
+	Spec::FTransform ftransform = [](Spec::GenotypePtr gptr) -> Spec::PhenotypePtr {
+		return gptr;
+	};
+	ea.setTransformFunction(ftransform);
+
+	Spec::FEvaluate fevaluate = [](Spec::PhenotypePtr pptr) -> Spec::Fitness {
+		auto last = std::unique(pptr->begin(), pptr->end());
+		pptr->erase(last, pptr->end());
+
+		int fitness(0);
+		int x1(0);
+		for (auto it1 = pptr->begin(); it1 != pptr->end(); ++it1, ++x1) {
+			int y1(*it1);
+			int x2(0);
+			for (auto it2 = pptr->begin(); it2 != pptr->end(); ++it2, ++x2) {
+				int y2(*it2);
+				if (y1 == y2) {
+					continue;
+				}
+				int diffx(x1 - x2);
+				int diffy(y1 - y2);
+				if (0 != std::abs(std::abs(diffx) - std::abs(diffy))) {
+					++fitness;
+				}
+			}
+		}
+		return fitness;
+	};
+	ea.setEvaluationFunction(fevaluate);
+
+	auto extractNRandomElements = [](Spec::GenotypePtrSet domain, size_t N) -> Spec::RFGenotypePtrSet {
 		std::default_random_engine randGen;
-		Spec::GenotypePtrSet retSet;
+		Spec::GenotypePtrSet rest(domain);
+		Spec::GenotypePtrSet preimage;
 		for (size_t i = 0; i < N; ++i) {
-			std::uniform_int_distribution<int> distribution(0, gptrs.size() - 1);
+			std::uniform_int_distribution<int> distribution(0, rest.size() - 1);
 			size_t randomIndex = distribution(randGen);
-			auto it = gptrs.begin();
+			auto it = rest.begin();
 			for (size_t j = 0; j < randomIndex; ++j) {
 				++it;
 			}
-			retSet.push_back(*it);
-			gptrs.erase(it);
+			preimage.emplace(*it);
+			rest.erase(it);
 		}
-		return Spec::FSlicerReturn(retList, gptrs);
+		return Spec::RFGenotypePtrSet({ .domain = domain,.preimage = preimage, .rest = rest });
 	};
+	/*
 	auto slicer = [&](Spec::GenotypePtrList orig, size_t N) -> Spec::GenotypePtrListList {
 		Spec::GenotypePtrListList gptrlistlist;
 		while (orig.size() >= N) {

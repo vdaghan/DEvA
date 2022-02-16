@@ -3,18 +3,20 @@
 
  VERSIONING:
 
- A.B.C.D:
- | | | |-> Bugfixes
- | | |-> Internal API changes
- | |-> External API changes
- |-> Functionality changes
+     A.B.C.D:
+     | | | |-> Bugfixes
+     | | |-> Internal API changes
+     | |-> External API changes
+     |-> Functionality changes
 
  TODO:
+ * Range-ify container traversal
  * Support for different genotypes and/or different phenotypes
  * Overload with concepts DEvA::Common::iteratorForNthListElement()
  * Data passing strategies: pointer, copy, move, reference
  * Problem descriptions: Optimise mathematical function
  * Standard genotype representations, their standard mutations (unary variations) and their standard recombinations (binary variations):
+
 	+----------------+--------------------------+---------------------------------+
 	| REPRESENTATION | MUTATIONS                | RECOMBINATIONS                  |
 	+----------------+--------------------------+---------------------------------+

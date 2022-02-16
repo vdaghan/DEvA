@@ -29,6 +29,8 @@ namespace DEvA {
 		using Fitness = F;
 
 		using FCreateGenotype = std::function<GenotypePtr(void)>;
+        using FTransform = std::function<PhenotypePtr(GenotypePtr)>;
+        using FEvaluate = std::function<F(GenotypePtr)>;
 		using FSlicer = std::function<GenotypePtrSets(GenotypePtrSet)>;
 		using FSlicerReturn = std::pair<GenotypePtrSet, GenotypePtrSet>;
 	};

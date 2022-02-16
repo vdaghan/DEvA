@@ -49,27 +49,19 @@ namespace DEvA {
         using Generation = IndividualPtrSet;
         using Generations = std::list<Generation>;
 
-        //using FGenesis = std::function<Generation(void)>;
-        using FGenesis = SGenealogy::GenesisFunction;
-
-
-
-
-
-
-        using SEvolutionaryAlgorithm = EvolutionaryAlgorithm<BT>;
-        using SGenealogy = Genealogy<BT>;
-        using SIndividual = Individual<BT>;
         using SStandardVariations = StandardVariations<BT>;
 
-        using SIndividualPtr = Individual<BT>::IndividualPtr;
-        using SIndividualPtrSet = Individual<BT>::IndividualPtrSet;
-        using Generation = SIndividual::IndividualPtrSet;
-        using GenesisFunction = SGenealogy::GenesisFunction;
-
+        using FGenesis = SGenealogy::GenesisFunction;
+        using FTransform = BT::FTransform;
+        using FEvaluate = BT::FEvaluate;
         using FCreateGenotype = BT::FCreateGenotype;
-        //using PlaceGenotypeFunction = std::function<void(SGenealogy&, GenotypePtr)>;
-
+        struct RFGenotypePtrSet {
+            GenotypePtrSet domain;
+            GenotypePtrSet preimage;
+            GenotypePtrSet rest;
+            GenotypePtrSet image;
+        };
+        //using RNonSurjectiveFGenotypePtrSet = std::pair<GenotypePtrSet, GenotypePtrSet>;
 
         static GenotypePtrSet identity(GenotypePtrSet gps) { return gps; };
         static GenotypePtrSet toPointerSet(std::initializer_list<Genotype> gl) {
