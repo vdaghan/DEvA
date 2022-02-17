@@ -41,7 +41,7 @@
 int main() {
 	using Genotype = std::vector<size_t>;
 	using Phenotype = std::vector<size_t>;
-	using Fitness = size_t;
+	using Fitness = int;
 	using Spec = DEvA::Specialisation<Genotype, Phenotype, Fitness>;
 	Spec::SEvolutionaryAlgorithm ea;
 
@@ -59,7 +59,7 @@ int main() {
 		Spec::Generation generation;
 		for (size_t i = 0; i < 100; ++i) {
 			Spec::GenotypePtr gptr = createRandomGenotype();
-			generation.emplace(std::make_shared<Spec::SIndividual>(gptr));
+			generation.emplace_back(std::make_shared<Spec::SIndividual>(gptr));
 		}
 		return generation;
 	};
@@ -111,6 +111,8 @@ int main() {
 		}
 		return Spec::RFGenotypePtrSet({ .domain = domain,.preimage = preimage, .rest = rest });
 	};
+
+	ea.search(1);
 	/*
 	auto slicer = [&](Spec::GenotypePtrList orig, size_t N) -> Spec::GenotypePtrListList {
 		Spec::GenotypePtrListList gptrlistlist;

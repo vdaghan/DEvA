@@ -4,7 +4,9 @@
 #include "Genealogy.h"
 #include "Individual.h"
 
+#include <algorithm>
 #include <memory>
+#include <ranges>
 
 namespace DEvA {
 	enum class StepResult { StepCount, Convergence };
@@ -27,20 +29,29 @@ namespace DEvA {
 			void setParentSelectionFunction(ParentSelectionFunction psfunc) { parentSelectionFunction = psfunc; };
 			void setVariationFunction(VariationFunction vfunc) { variationFunction = vfunc; };
 
-			void genesis() {
-				//genesisFunction();
-				genealogy += genesisFunction();
-				transformFunction();
-				evaluationFunction();
-			};
-			StepResult step(size_t count) { 
+			StepResult search(size_t count) {
 				for (size_t i(0); i < count; ++i) {
-					survivorSelectionFunction();
-					parentSelectionFunction();
-					variationFunction();
-					transformFunction();
-					evaluationFunction();
-					[[unlikely]] if (true) return StepResult::Convergence;
+					if (0 == genealogy.generations.size()) [[unlikely]] {
+						genealogy += genesisFunction();
+					} else [[likely]] {
+						// Parent selection
+						typename SGenealogy::Generation newGeneration{};
+						// Variation
+					}
+					auto& lastGen(genealogy.generations.back());
+					// Transform
+					std::for_each(lastGen.begin(), lastGen.end(), [&](auto& iptr) { iptr->phenotype = transformFunction(iptr->genotype);});
+					// Evaluate
+					std::for_each(lastGen.begin(), lastGen.end(), [&](auto& iptr) { iptr->fitness = evaluationFunction(iptr->phenotype);});
+					std::stable_sort(lastGen.begin(), lastGen.end(), [](auto iptr1, auto iptr2) -> bool { return ((iptr1->fitness) < (iptr2->fitness)); });
+
+					// Survivor selection
+					if (1 != genealogy.generations.size()) [[likely]] {
+						//lastGen | std::ranges::drop_view(2);
+					}
+					if (false) [[unlikely]] {
+						return StepResult::Convergence;
+					}
 				}
 				return StepResult::StepCount;
 			};

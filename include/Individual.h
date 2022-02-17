@@ -1,7 +1,7 @@
 #pragma once
 
+#include <list>
 #include <memory>
-#include <unordered_set>
 
 #include "BasicTypes.h"
 
@@ -10,7 +10,7 @@ namespace DEvA {
 	class Individual {
 		public:
 			using IndividualPtr = std::shared_ptr<Individual<Types>>;
-			using IndividualPtrSet = std::unordered_set<IndividualPtr>;
+			using IndividualPtrSet = std::list<IndividualPtr>;
 
 			Individual(IndividualPtrSet parents_, Types::GenotypePtr gptr) {
 				parents = parents_;
