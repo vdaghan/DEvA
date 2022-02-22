@@ -10,8 +10,12 @@
 #include "Genealogy.h"
 #include "Individual.h"
 #include "Parameter.h"
-#include "StandardVariations.h"
+#include "StandardConvergenceCheckers.h"
+#include "StandardInitialisers.h"
 #include "StandardParentSelectors.h"
+#include "StandardSurvivorSelectors.h"
+#include "StandardTransforms.h"
+#include "StandardVariations.h"
 #include "Variation.h"
 
 namespace DEvA {
@@ -19,7 +23,9 @@ namespace DEvA {
     template <typename T> class EvolutionaryAlgorithm;
     template <typename T> class Genealogy;
     template <typename T> class Individual;
+    template <typename T> class StandardInitialisers;
     template <typename T> class StandardVariations;
+    template <typename T> class StandardTransforms;
 
     template <typename G, typename P, typename F>
     struct Specialisation {
@@ -44,8 +50,6 @@ namespace DEvA {
         using SGenealogy = Genealogy<Spec>;
         using SVariation = Variation<Spec>;
 
-        //using IndividualPtr = SIndividual::IndividualPtr;
-        //using IndividualPtrs = SIndividual::IndividualPtrs;
         using IndividualPtr = std::shared_ptr<SIndividual>;
         using IndividualPtrs = std::list<IndividualPtr>;
         using IndividualWPtr = std::weak_ptr<SIndividual>;
@@ -74,9 +78,6 @@ namespace DEvA {
 
         static GenotypePtrs identity(GenotypePtrs gps) { return gps; };
         static GenotypePtrs toPointerSet(std::initializer_list<Genotype> gl) {
-            /*GenotypePtrSet gptrs;
-
-            return std::make_shared<Genotype>(gl);*/
             return GenotypePtrs({ std::make_shared<Genotype>() });
         };
     };

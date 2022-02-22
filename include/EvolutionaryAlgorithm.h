@@ -15,21 +15,14 @@ namespace DEvA {
 	class EvolutionaryAlgorithm {
 		public:
 			using SGenealogy = Genealogy<Types>;
-			using GenesisFunction = Types::FGenesis;
-			using TransformFunction = Types::FTransform;
-			using EvaluationFunction = Types::FEvaluate;
-			using ParentSelectionFunction = Types::FParentSelection;
-			using VariationFunction = Types::FVariation;
-			using SurvivorSelectionFunction = Types::FSurvivorSelection;
-			using ConvergenceCheckFunction = Types::FConvergenceCheck;
 
-			void setGenesisFunction(GenesisFunction gfunc) { genesisFunction = gfunc; };
-			void setTransformFunction(TransformFunction tfunc) { transformFunction = tfunc; };
-			void setEvaluationFunction(EvaluationFunction efunc) { evaluationFunction = efunc; };
-			void setParentSelectionFunction(ParentSelectionFunction psfunc) { parentSelectionFunction = psfunc; };
-			void setVariationFunction(VariationFunction vfunc) { variationFunction = vfunc; };
-			void setSurvivorSelectionFunction(SurvivorSelectionFunction ssfunc) { survivorSelectionFunction = ssfunc; };
-			void setConvergenceCheckFunction(ConvergenceCheckFunction ccfunc) { convergenceCheckFunction = ccfunc; };
+			void setGenesisFunction(Types::FGenesis gfunc) { genesisFunction = gfunc; };
+			void setTransformFunction(Types::FTransform tfunc) { transformFunction = tfunc; };
+			void setEvaluationFunction(Types::FEvaluate efunc) { evaluationFunction = efunc; };
+			void setParentSelectionFunction(Types::FParentSelection psfunc) { parentSelectionFunction = psfunc; };
+			void setVariationFunction(Types::FVariation vfunc) { variationFunction = vfunc; };
+			void setSurvivorSelectionFunction(Types::FSurvivorSelection ssfunc) { survivorSelectionFunction = ssfunc; };
+			void setConvergenceCheckFunction(Types::FConvergenceCheck ccfunc) { convergenceCheckFunction = ccfunc; };
 
 			StepResult search(size_t count) {
 				for (size_t i(0); i < count; ++i) {
@@ -43,15 +36,12 @@ namespace DEvA {
 						// Variation
 						typename Types::GenotypePtrs parentGenotypes{};
 						// TODO: This does not work; inspect why
-						//std::transform(parents.begin(), parents.end(), newGenotypes.end(), [](Types::IndividualPtr& ind) { return ind->genotype;});
+						//std::transform(parents.begin(), parents.end(), parentGenotypes.end(), [](Types::IndividualPtr ind) { return ind->genotype;});
 						for (auto it = parents.begin(); it != parents.end(); ++it) {
 							parentGenotypes.push_back((*it)->genotype);
 						}
-						typename Types::GenotypePtrs newGenotypes{};
-						newGenotypes = variationFunction(parentGenotypes);
+						typename Types::GenotypePtrs newGenotypes = variationFunction(parentGenotypes);
 						typename Types::IndividualPtrs newOffsprings{};
-						// TODO: This does not work; inspect why
-						//std::transform(newGenotypes.begin(), newGenotypes.end(), newOffsprings.begin(), [&](Types::GenotypePtr gptr) { return Individual<Types>(parents, gptr); });
 						for (auto it = newGenotypes.begin(); it != newGenotypes.end(); ++it) {
 							typename Types::IndividualPtr newIndividual = std::make_shared<Individual<Types>>(*it);
 							newIndividual->setParents(parents);
@@ -91,13 +81,13 @@ namespace DEvA {
 			Types::Fitness bestFitness;
 			SGenealogy genealogy;
 		private:
-			GenesisFunction genesisFunction;
-			TransformFunction transformFunction;
-			EvaluationFunction evaluationFunction;
-			ParentSelectionFunction parentSelectionFunction;
-			VariationFunction variationFunction;
-			SurvivorSelectionFunction survivorSelectionFunction;
-			ConvergenceCheckFunction convergenceCheckFunction;
+			Types::FGenesis genesisFunction;
+			Types::FTransform transformFunction;
+			Types::FEvaluate evaluationFunction;
+			Types::FParentSelection parentSelectionFunction;
+			Types::FVariation variationFunction;
+			Types::FSurvivorSelection survivorSelectionFunction;
+			Types::FConvergenceCheck convergenceCheckFunction;
 
 	};
 }

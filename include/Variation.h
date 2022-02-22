@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Parameters.h"
-#include "Variations/StandardVariations.h"
+#include "StandardVariations.h"
 
 #include <any>
 #include <functional>
