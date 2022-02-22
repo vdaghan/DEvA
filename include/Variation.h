@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BasicTypes.h"
 #include "Parameters.h"
 #include "Variations/StandardVariations.h"
 

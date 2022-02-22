@@ -1,9 +1,9 @@
 #pragma once
 
+#include <deque>
 #include <memory>
 #include <initializer_list>
 
-#include "BasicTypes.h"
 #include "Concepts.h"
 
 #include "EvolutionaryAlgorithm.h"
@@ -24,7 +24,6 @@ namespace DEvA {
     template <typename G, typename P, typename F>
     struct Specialisation {
         // Repeat basic types used throughout code for better UX
-        using BT = BasicTypes<G, P, F>;
         using Spec = Specialisation<G, P, F>;
         using Genotype = G;
         using GenotypePtr = std::shared_ptr<Genotype>;

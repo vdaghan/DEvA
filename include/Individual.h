@@ -3,8 +3,6 @@
 #include <list>
 #include <memory>
 
-#include "BasicTypes.h"
-
 namespace DEvA {
 	template <typename Types>
 	class Individual : public std::enable_shared_from_this<Individual<Types>> {

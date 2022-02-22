@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BasicTypes.h"
 #include "Individual.h"
 
 #include <functional>
