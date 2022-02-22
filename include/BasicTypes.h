@@ -18,10 +18,10 @@ namespace DEvA {
         BasicTypes() {};
 
 		using Genotype = G;
-		using GenotypePtr = std::shared_ptr<Genotype>;
-        using GenotypePtrSet = std::unordered_set<GenotypePtr>;
-        using FGenotypePtrSet = std::function<GenotypePtrSet(GenotypePtrSet)>;
-        using GenotypePtrSets = std::deque<GenotypePtrSet>; //GenotypeSetDeque
+        using GenotypePtr = std::shared_ptr<Genotype>;
+        using GenotypePtrs = std::list<GenotypePtr>;
+        using FGenotypePtrSet = std::function<GenotypePtrs(GenotypePtrs)>;
+        using GenotypePtrsDeque = std::deque<GenotypePtrs>; //GenotypeSetDeque
 
 		using Phenotype = P;
 		using PhenotypePtr = std::shared_ptr<Phenotype>;
@@ -31,8 +31,10 @@ namespace DEvA {
 		using FCreateGenotype = std::function<GenotypePtr(void)>;
         using FTransform = std::function<PhenotypePtr(GenotypePtr)>;
         using FEvaluate = std::function<F(GenotypePtr)>;
-		using FSlicer = std::function<GenotypePtrSets(GenotypePtrSet)>;
-		using FSlicerReturn = std::pair<GenotypePtrSet, GenotypePtrSet>;
+        //using FParentSelection = std::function<GenotypePtrs(GenotypePtrs)>;
+        using FVariation = std::function<GenotypePtrs(GenotypePtrs)>;
+		using FSlicer = std::function<GenotypePtrsDeque(GenotypePtrs)>;
+		using FSlicerReturn = std::pair<GenotypePtrs, GenotypePtrs>;
 	};
     /*
     namespace Operators {

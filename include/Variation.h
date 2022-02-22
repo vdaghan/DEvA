@@ -16,15 +16,15 @@ namespace DEvA {
 	struct Variation {
 		using Genotype = Types::Genotype;
 		using GenotypePtr = Types::GenotypePtr;
-		using GenotypePtrSet = Types::GenotypePtrSet;
-		using InputOperator = std::function<GenotypePtrSet(GenotypePtrSet)>;
-		using VariationOperator = std::function<GenotypePtrSet(GenotypePtrSet)>;
+		using GenotypePtrs = Types::GenotypePtrs;
+		using InputOperator = std::function<GenotypePtrs(GenotypePtrs)>;
+		using VariationOperator = std::function<GenotypePtrs(GenotypePtrs)>;
 
 		Variation(std::string name_, VariationOperator variationOperator_) {
 			name = name_;
 			variationOperator = variationOperator_;
-		}
-		GenotypePtrSet operator()(GenotypePtrSet gptrset) { return variationOperator(gptrset); };
+		};
+		GenotypePtrs operator()(GenotypePtrs gptrs) { return variationOperator(gptrs); };
 
 		std::string name;
 

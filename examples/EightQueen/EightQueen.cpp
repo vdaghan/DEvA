@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <numeric>
 #include <vector>
 
 #include "EvolutionaryAlgorithm.h"
@@ -43,15 +45,21 @@ int main() {
 	using Phenotype = std::vector<size_t>;
 	using Fitness = int;
 	using Spec = DEvA::Specialisation<Genotype, Phenotype, Fitness>;
-	Spec::SEvolutionaryAlgorithm ea;
+	using SEvolutionaryAlgorithm = DEvA::EvolutionaryAlgorithm<Spec>;
+	SEvolutionaryAlgorithm ea;
 
 	// Initialise
 	std::default_random_engine randGen;
-	std::uniform_int_distribution<int> distribution(1, 8);
 	auto createRandomGenotype = [&]() -> Spec::GenotypePtr {
 		Spec::GenotypePtr gptr = std::make_shared<Spec::Genotype>();
+		std::vector<int> toPick(8);
+		std::iota(toPick.begin(), toPick.end(), 0);
 		for (size_t i = 0; i < 8; ++i) {
-			gptr->emplace_back(i) = distribution(randGen);
+			std::uniform_int_distribution<size_t> distribution(0, 7-i);
+			size_t randomIndex = distribution(randGen);
+			int randPosition = toPick[randomIndex];
+			std::erase(toPick, randPosition);
+			gptr->emplace_back(i) = randPosition;
 		}
 		return gptr;
 	};
@@ -81,12 +89,12 @@ int main() {
 			int x2(0);
 			for (auto it2 = pptr->begin(); it2 != pptr->end(); ++it2, ++x2) {
 				int y2(*it2);
-				if (y1 == y2) {
+				if (x1 >= x2) {
 					continue;
-				}
+				} 
 				int diffx(x1 - x2);
 				int diffy(y1 - y2);
-				if (0 != std::abs(std::abs(diffx) - std::abs(diffy))) {
+				if (0 == std::abs(std::abs(diffx) - std::abs(diffy))) {
 					++fitness;
 				}
 			}
@@ -95,38 +103,46 @@ int main() {
 	};
 	ea.setEvaluationFunction(fevaluate);
 
-	auto extractNRandomElements = [](Spec::GenotypePtrSet domain, size_t N) -> Spec::RFGenotypePtrSet {
-		std::default_random_engine randGen;
-		Spec::GenotypePtrSet rest(domain);
-		Spec::GenotypePtrSet preimage;
-		for (size_t i = 0; i < N; ++i) {
-			std::uniform_int_distribution<int> distribution(0, rest.size() - 1);
-			size_t randomIndex = distribution(randGen);
-			auto it = rest.begin();
-			for (size_t j = 0; j < randomIndex; ++j) {
-				++it;
-			}
-			preimage.emplace(*it);
-			rest.erase(it);
-		}
-		return Spec::RFGenotypePtrSet({ .domain = domain,.preimage = preimage, .rest = rest });
-	};
+	ea.setParentSelectionFunction(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>);
 
-	ea.search(1);
-	/*
-	auto slicer = [&](Spec::GenotypePtrList orig, size_t N) -> Spec::GenotypePtrListList {
-		Spec::GenotypePtrListList gptrlistlist;
-		while (orig.size() >= N) {
-			Spec::FSlicerReturn slicing = extractNRandomElements(orig, 5);
-			gptrlistlist.push_back(slicing.first);
-			orig = slicing.second;
+	Spec::FVariation variation = [](Spec::GenotypePtrs gptrs) {
+		Spec::GenotypePtrs offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(gptrs);
+		for (auto& gptr : offsprings) {
+			std::default_random_engine randGen;
+			std::uniform_int_distribution<int> distribution(0, 100);
+			size_t swapProbability = distribution(randGen);
+			if (swapProbability <= 80) {
+				gptr = DEvA::StandardVariations<Spec>::swap(gptr);
+			}
 		}
-		return gptrlistlist;
+		return offsprings;
 	};
-	auto sslicer = [&](Spec::GenotypePtrList orig) {
-		return slicer(orig, 5);
+	ea.setVariationFunction(variation);
+
+	Spec::FSurvivorSelection survivalSelection = [](Spec::IndividualPtrs& iptrs) {
+		while (iptrs.size() > 100) {
+			iptrs.erase(iptrs.begin());
+		}
 	};
-	ea.slicer = sslicer;*/
+	ea.setSurvivorSelectionFunction(survivalSelection);
+
+	Spec::FConvergenceCheck convergenceCheck = [](Spec::Fitness fitness) {
+		return (fitness == 0);
+	};
+	ea.setConvergenceCheckFunction(convergenceCheck);
+
+	auto result = ea.search(10000);
+	std::cout << "Best genotype: [";
+	for (auto it = ea.bestGenotype->begin(); it != ea.bestGenotype->end(); ++it) {
+		std::cout << *it << " ";
+	}
+	std::cout << "]\n";
+	std::cout << "Fitness: " << ea.bestFitness << "\n";
+	if (DEvA::StepResult::Convergence == result) {
+		std::cout << "Converged.\n";
+	} else {
+		std::cout << "Step limit reached.\n";
+	}
 
 	return 0;
 }

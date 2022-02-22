@@ -11,6 +11,7 @@
 #include "Individual.h"
 #include "Parameter.h"
 #include "StandardVariations.h"
+#include "StandardParentSelectors.h"
 #include "Variation.h"
 
 namespace DEvA {
@@ -24,51 +25,60 @@ namespace DEvA {
     struct Specialisation {
         // Repeat basic types used throughout code for better UX
         using BT = BasicTypes<G, P, F>;
-        using Genotype = BT::Genotype;
-        using GenotypePtr = BT::GenotypePtr;
-        using GenotypePtrSet = BT::GenotypePtrSet;
-        using GenotypePtrSets = BT::GenotypePtrSets;
-        using Phenotype = BT::Phenotype;
-        using PhenotypePtr = BT::PhenotypePtr;
-        using Fitness = BT::Fitness;
+        using Spec = Specialisation<G, P, F>;
+        using Genotype = G;
+        using GenotypePtr = std::shared_ptr<Genotype>;
+        using GenotypePtrs = std::list<GenotypePtr>;
+        template <size_t N> using GenotypePtrArray = std::array<GenotypePtr, N>;
+        using GenotypePtrsDeque = std::deque<GenotypePtrs>;
+        using Phenotype = P;
+        using PhenotypePtr = std::shared_ptr<Phenotype>;
+        using Fitness = F;
 
-        using FGenotypePtrSet = std::function<GenotypePtrSet(GenotypePtrSet)>;
-        using GenotypePtrSetDeque = std::deque<GenotypePtrSet>;
-        using FGenotypePtrSetDeque = std::function<GenotypePtrSetDeque(GenotypePtrSetDeque)>;
+        using FGenotypePtrSet = std::function<GenotypePtrs(GenotypePtrs)>;
+        using FGenotypePtrSetDeque = std::function<GenotypePtrsDeque(GenotypePtrsDeque)>;
         using DequeFGenotypePtrSet = std::deque<FGenotypePtrSet>;
 
         // Repeat non-POD types used throughout code for better UX
-        using SEvolutionaryAlgorithm = EvolutionaryAlgorithm<BT>;
-        using SIndividual = Individual<BT>;
-        using SGenealogy = Genealogy<BT>;
-        using SVariation = Variation<BT>;
+        using SEvolutionaryAlgorithm = EvolutionaryAlgorithm<Spec>;
+        using SIndividual = Individual<Spec>;
+        using SGenealogy = Genealogy<Spec>;
+        using SVariation = Variation<Spec>;
 
-        using IndividualPtr = SIndividual::IndividualPtr;
-        using IndividualPtrSet = SIndividual::IndividualPtrSet;
+        //using IndividualPtr = SIndividual::IndividualPtr;
+        //using IndividualPtrs = SIndividual::IndividualPtrs;
+        using IndividualPtr = std::shared_ptr<SIndividual>;
+        using IndividualPtrs = std::list<IndividualPtr>;
+        using IndividualWPtr = std::weak_ptr<SIndividual>;
+        using IndividualWPtrs = std::list<IndividualWPtr>;
 
-        using Generation = IndividualPtrSet;
+        using Generation = IndividualPtrs;
         using Generations = std::list<Generation>;
 
-        using SStandardVariations = StandardVariations<BT>;
+        using SStandardVariations = StandardVariations<Spec>;
 
-        using FGenesis = SGenealogy::GenesisFunction;
-        using FTransform = BT::FTransform;
-        using FEvaluate = BT::FEvaluate;
-        using FCreateGenotype = BT::FCreateGenotype;
+        using FGenesis = std::function<Generation(void)>;
+        using FCreateGenotype = std::function<GenotypePtr(void)>;
+        using FTransform = std::function<PhenotypePtr(GenotypePtr)>;
+        using FEvaluate = std::function<Fitness(GenotypePtr)>;
+        using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
+        using FVariation = std::function<GenotypePtrs(GenotypePtrs)>;
+        using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
+        using FConvergenceCheck = std::function<bool(Fitness)>;
         struct RFGenotypePtrSet {
-            GenotypePtrSet domain;
-            GenotypePtrSet preimage;
-            GenotypePtrSet rest;
-            GenotypePtrSet image;
+            GenotypePtrs domain;
+            GenotypePtrs preimage;
+            GenotypePtrs rest;
+            GenotypePtrs image;
         };
         //using RNonSurjectiveFGenotypePtrSet = std::pair<GenotypePtrSet, GenotypePtrSet>;
 
-        static GenotypePtrSet identity(GenotypePtrSet gps) { return gps; };
-        static GenotypePtrSet toPointerSet(std::initializer_list<Genotype> gl) {
+        static GenotypePtrs identity(GenotypePtrs gps) { return gps; };
+        static GenotypePtrs toPointerSet(std::initializer_list<Genotype> gl) {
             /*GenotypePtrSet gptrs;
 
             return std::make_shared<Genotype>(gl);*/
-            return GenotypePtrSet({ std::make_shared<Genotype>() });
+            return GenotypePtrs({ std::make_shared<Genotype>() });
         };
     };
     /*

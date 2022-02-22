@@ -9,10 +9,10 @@
 namespace DEvA {
 	template <typename Types>
 	struct Genealogy {
-		using Generation = Individual<Types>::IndividualPtrSet;
-		using IndividualPtr = Individual<Types>::IndividualPtr;
-		using Generations = std::list<Generation>;
-		using GenesisFunction = std::function<Generation(void)>;
+		using Generation = Types::Generation;
+		using IndividualPtr = Types::IndividualPtr;
+		using Generations = Types::Generations;
+		using GenesisFunction = Types::FGenesis;
 
 		void operator++() { generations.push_back({}); };
 		void operator+=(Generation generation) { generations.push_back(generation); };

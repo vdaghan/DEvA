@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Specialisation.h"
 #include "Common.h"
+#include "Individual.h"
+#include "Specialisation.h"
 
 #include <algorithm>
 #include <memory>
@@ -12,33 +13,70 @@ namespace DEvA {
 	struct StandardVariations {
 		using Genotype = Types::Genotype;
 		using GenotypePtr = Types::GenotypePtr;
-		using GenotypePtrList = Types::GenotypePtrList;
+		using GenotypePtrs = Types::GenotypePtrs;
 
 		static GenotypePtr copy(GenotypePtr gptr) {
 			return std::make_shared<Genotype>(*gptr);
 		}
 
-		static GenotypePtrList cutAndCrossfill(GenotypePtrList gptrlist) {
-			//static_assert(2 == gptrlist.size());
-			GenotypePtr first = std::make_shared<Genotype>(*gptrlist.front());
-			GenotypePtr second = std::make_shared<Genotype>(*gptrlist.back());
-			//static_assert(first->size() == second->size());
-			size_t genotypeSize = first->size();
+		static GenotypePtrs cutAndCrossfill(GenotypePtrs gptrs) {
+			GenotypePtr firstParent = std::make_shared<Genotype>(*(gptrs.front()));
+			GenotypePtr secondParent = std::make_shared<Genotype>(*(gptrs.back()));
+			GenotypePtr firstOffspring = std::make_shared<Genotype>();
+			GenotypePtr secondOffspring = std::make_shared<Genotype>();
 
-			std::default_random_engine randGen;
+			size_t genotypeSize = firstParent->size();
+			std::random_device r;
+			std::default_random_engine randGen(r());
 			std::uniform_int_distribution<int> distribution(0, genotypeSize - 1);
-
 			size_t crossoverIndex = distribution(randGen);
 
-			auto it1 = Common::iteratorForNthListElement(*first, crossoverIndex);
-			auto it2 = Common::iteratorForNthListElement(*second, crossoverIndex);
+			auto itCrossover1 = Common::iteratorForNthListElement<Types>(*firstParent, crossoverIndex);
+			auto itCrossover2 = Common::iteratorForNthListElement<Types>(*secondParent, crossoverIndex);
+			auto it1 = firstParent->begin();
+			auto it2 = secondParent->begin();
+			size_t ind1(0);
+			size_t ind2(0);
 
-			for (++it1, ++it2; it1 != first->end() or it2 != second->end(); ++it1, ++it2) {
-				std::iter_swap(it1, it2);
+			while (ind1 <= crossoverIndex) {
+				firstOffspring->push_back(*it1);
+				secondOffspring->push_back(*it2);
+				++it1;
+				++it2;
+				++ind1;
+				++ind2;
 			}
 
-			GenotypePtrList retList = { first, second };
+			for (auto it = secondParent->begin(); it != secondParent->end(); ++it) {
+				if (firstOffspring->end() == std::find(firstOffspring->begin(), firstOffspring->end(), *it)) {
+					firstOffspring->push_back(*it);
+				}
+			}
+
+			for (auto it = firstParent->begin(); it != firstParent->end(); ++it) {
+				if (secondOffspring->end() == std::find(secondOffspring->begin(), secondOffspring->end(), *it)) {
+					secondOffspring->push_back(*it);
+				}
+			}
+
+			GenotypePtrs retList = { firstOffspring, secondOffspring };
 			return retList;
+		}
+
+		static GenotypePtr swap(GenotypePtr gptr) {
+			GenotypePtr offspring = std::make_shared<Genotype>(*gptr);
+
+			std::default_random_engine randGen;
+			std::uniform_int_distribution<int> distribution(0, offspring->size() - 1);
+			size_t swapIndex1 = distribution(randGen);
+			size_t swapIndex2 = distribution(randGen);
+
+			auto it1 = Common::iteratorForNthListElement<Types>(*offspring, swapIndex1);
+			auto it2 = Common::iteratorForNthListElement<Types>(*offspring, swapIndex2);
+
+			std::swap(it1, it2);
+
+			return offspring;
 		}
 	};
 }
