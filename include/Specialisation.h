@@ -34,7 +34,6 @@ namespace DEvA {
         using Genotype = G;
         using GenotypePtr = std::shared_ptr<Genotype>;
         using GenotypePtrs = std::list<GenotypePtr>;
-        template <size_t N> using GenotypePtrArray = std::array<GenotypePtr, N>;
         using GenotypePtrsDeque = std::deque<GenotypePtrs>;
         using Phenotype = P;
         using PhenotypePtr = std::shared_ptr<Phenotype>;
