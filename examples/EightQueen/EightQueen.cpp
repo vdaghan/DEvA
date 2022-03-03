@@ -41,7 +41,8 @@ int main() {
 	using Genotype = std::vector<size_t>;
 	using Phenotype = std::vector<size_t>;
 	using Fitness = int;
-	using Spec = DEvA::Specialisation<Genotype, Phenotype, Fitness>;
+
+	using Spec = DEvA::Specialisation<Genotype, Phenotype, Fitness, DEvA::NullVParameters>;
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
 
 	Spec::FEvaluate fevaluate = [](Spec::PhenotypePtr pptr) -> Spec::Fitness {

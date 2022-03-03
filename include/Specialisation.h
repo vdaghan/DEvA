@@ -7,30 +7,32 @@
 #include "Concepts.h"
 
 #include "EvolutionaryAlgorithm.h"
-#include "Genealogy.h"
 #include "Individual.h"
-#include "Parameter.h"
+#include "Parameters.h"
 #include "StandardConvergenceCheckers.h"
 #include "StandardInitialisers.h"
 #include "StandardParentSelectors.h"
 #include "StandardSurvivorSelectors.h"
 #include "StandardTransforms.h"
 #include "StandardVariations.h"
-#include "Variation.h"
 
 namespace DEvA {
-    template <typename G, typename P, typename F> class BasicTypes;
     template <typename T> class EvolutionaryAlgorithm;
-    template <typename T> class Genealogy;
-    template <typename T> class Individual;
+    template <typename T, typename IP> class Individual;
     template <typename T> class StandardInitialisers;
     template <typename T> class StandardVariations;
     template <typename T> class StandardTransforms;
 
-    template <typename G, typename P, typename F>
+    template <typename T>
+    struct Parametrised {
+        T value;
+        Parameters parameters;
+    };
+
+    template <typename G, typename P, typename F, typename IP>
     struct Specialisation {
         // Repeat basic types used throughout code for better UX
-        using Spec = Specialisation<G, P, F>;
+        using Spec = Specialisation<G, P, F, IP>;
         using Genotype = G;
         using GenotypePtr = std::shared_ptr<Genotype>;
         using GenotypePtrs = std::list<GenotypePtr>;
@@ -38,6 +40,7 @@ namespace DEvA {
         using Phenotype = P;
         using PhenotypePtr = std::shared_ptr<Phenotype>;
         using Fitness = F;
+        using IndividualParameters = IP;
 
         using FGenotypePtrSet = std::function<GenotypePtrs(GenotypePtrs)>;
         using FGenotypePtrSetDeque = std::function<GenotypePtrsDeque(GenotypePtrsDeque)>;
@@ -45,9 +48,7 @@ namespace DEvA {
 
         // Repeat non-POD types used throughout code for better UX
         using SEvolutionaryAlgorithm = EvolutionaryAlgorithm<Spec>;
-        using SIndividual = Individual<Spec>;
-        using SGenealogy = Genealogy<Spec>;
-        using SVariation = Variation<Spec>;
+        using SIndividual = Individual<Spec, IndividualParameters>;
 
         using IndividualPtr = std::shared_ptr<SIndividual>;
         using IndividualPtrs = std::list<IndividualPtr>;
@@ -56,6 +57,7 @@ namespace DEvA {
 
         using Generation = IndividualPtrs;
         using Generations = std::list<Generation>;
+        using Genealogy = Generations;
 
         using SStandardVariations = StandardVariations<Spec>;
 
@@ -67,6 +69,10 @@ namespace DEvA {
         using FVariation = std::function<GenotypePtrs(GenotypePtrs)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FConvergenceCheck = std::function<bool(Fitness)>;
+
+        // Callbacks
+        using COnEpoch = std::function<void(Generation &)>;
+
         struct RFGenotypePtrSet {
             GenotypePtrs domain;
             GenotypePtrs preimage;

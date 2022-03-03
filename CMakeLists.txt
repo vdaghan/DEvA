@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include(FetchContent)
 
-project(DEvA LANGUAGES CXX VERSION 0.1.1.0)
+project(DEvA LANGUAGES CXX VERSION 0.2.0.0)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_SOURCE_DIR}/doc/flowchart.dot -o ${CMAKE_BINARY_DIR}/flowchart.svg)
