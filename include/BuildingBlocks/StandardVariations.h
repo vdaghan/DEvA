@@ -5,6 +5,7 @@
 #include "Specialisation.h"
 
 #include <algorithm>
+#include <concepts>
 #include <memory>
 #include <random>
 
@@ -19,6 +20,9 @@ namespace DEvA {
 			return std::make_shared<Genotype>(*gptr);
 		}
 
+		/*template <typename T>
+		requires std::same_as<T, GenotypePtrs> and !std::is_bounded_array<decltype(*T::first())>
+		static T cutAndCrossfill(T gptrs) {*/
 		static GenotypePtrs cutAndCrossfill(GenotypePtrs gptrs) {
 			GenotypePtr firstParent = std::make_shared<Genotype>(*(gptrs.front()));
 			GenotypePtr secondParent = std::make_shared<Genotype>(*(gptrs.back()));

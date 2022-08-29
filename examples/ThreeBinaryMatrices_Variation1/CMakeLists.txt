@@ -1,0 +1,3 @@
+add_executable(ThreeBinaryMatrices_Variation1 "ThreeBinaryMatrices_Variation1.cpp")
+add_executable(DEvA::ThreeBinaryMatrices_Variation1 ALIAS ThreeBinaryMatrices_Variation1)
+target_link_libraries(ThreeBinaryMatrices_Variation1 PUBLIC DEvA::DEvA)

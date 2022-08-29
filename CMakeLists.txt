@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.18)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(DEvA_BUILD_TESTS FALSE CACHE BOOL "Build tests for DEvA")
+
 include(FetchContent)
 
-project(DEvA LANGUAGES CXX VERSION 0.2.0.0)
+project(DEvA LANGUAGES CXX VERSION 0.2.0.1)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_SOURCE_DIR}/doc/flowchart.dot -o ${CMAKE_BINARY_DIR}/flowchart.svg)
@@ -29,5 +31,7 @@ add_library(DEvA::DEvA ALIAS DEvA)
 target_include_directories(DEvA SYSTEM PUBLIC "include")
 target_include_directories(DEvA SYSTEM PUBLIC "include/BuildingBlocks")
 
-add_subdirectory("tests")
+if (DEvA_BUILD_TESTS)
+	add_subdirectory("tests")
+endif()
 add_subdirectory("examples")
