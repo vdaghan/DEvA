@@ -29,21 +29,23 @@ namespace DEvA {
         Parameters parameters;
     };
 
-    template <typename G, typename P, typename F, typename IP>
+    template <CSpecification S>
     struct Specialisation {
+		using F = S;
+		S f;
         // Repeat basic types used throughout code for better UX
-        using Spec = Specialisation<G, P, F, IP>;
-        using Genotype = G;
-        using GenotypePtr = std::shared_ptr<Genotype>;
-        using GenotypePtrs = std::list<GenotypePtr>;
-        using GenotypePtrsDeque = std::deque<GenotypePtrs>;
-        using Phenotype = P;
-        using PhenotypePtr = std::shared_ptr<Phenotype>;
-        using Fitness = F;
-        using IndividualParameters = IP;
+        using Spec = Specialisation<S>;
+        using Genotype = S::Genotype;
+		using GenotypeProxy = S::GenotypeProxy;
+        using GenotypeProxies = std::list<GenotypeProxy>;
+        using GenotypeProxiesDeque = std::deque<GenotypeProxies>;
+        using Phenotype = S::Phenotype;
+		using PhenotypeProxy = S::PhenotypeProxy;
+        using Fitness = S::Fitness;
+        using IndividualParameters = S::IndividualParameters;
 
-        using FGenotypePtrSet = std::function<GenotypePtrs(GenotypePtrs)>;
-        using FGenotypePtrSetDeque = std::function<GenotypePtrsDeque(GenotypePtrsDeque)>;
+        using FGenotypePtrSet = std::function<GenotypeProxies(GenotypeProxies)>;
+        using FGenotypePtrSetDeque = std::function<GenotypeProxiesDeque(GenotypeProxiesDeque)>;
         using DequeFGenotypePtrSet = std::deque<FGenotypePtrSet>;
 
         // Repeat non-POD types used throughout code for better UX
@@ -62,28 +64,28 @@ namespace DEvA {
         using SStandardVariations = StandardVariations<Spec>;
 
         using FGenesis = std::function<Generation(void)>;
-        using FCreateGenotype = std::function<GenotypePtr(void)>;
-        using FTransform = std::function<PhenotypePtr(GenotypePtr)>;
-        using FEvaluate = std::function<Fitness(GenotypePtr)>;
+        using FCreateGenotype = std::function<GenotypeProxy(void)>;
+        using FTransform = std::function<PhenotypeProxy(GenotypeProxy)>;
+        using FEvaluate = std::function<Fitness(GenotypeProxy)>;
         using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
-        using FVariation = std::function<GenotypePtrs(GenotypePtrs)>;
+        using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FConvergenceCheck = std::function<bool(Fitness)>;
 
         // Callbacks
         using COnEpoch = std::function<void(Generation &)>;
 
-        struct RFGenotypePtrSet {
-            GenotypePtrs domain;
-            GenotypePtrs preimage;
-            GenotypePtrs rest;
-            GenotypePtrs image;
+        struct RFGenotypeProxySet {
+			GenotypeProxies domain;
+			GenotypeProxies preimage;
+			GenotypeProxies rest;
+			GenotypeProxies image;
         };
         //using RNonSurjectiveFGenotypePtrSet = std::pair<GenotypePtrSet, GenotypePtrSet>;
 
-        static GenotypePtrs identity(GenotypePtrs gps) { return gps; };
-        static GenotypePtrs toPointerSet(std::initializer_list<Genotype> gl) {
-            return GenotypePtrs({ std::make_shared<Genotype>() });
+        static GenotypeProxies identity(GenotypeProxies gps) { return gps; };
+        static GenotypeProxies toPointerSet(std::initializer_list<Genotype> gl) {
+            return GenotypeProxies({ std::make_shared<Genotype>() });
         };
     };
     /*

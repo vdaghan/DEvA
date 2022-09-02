@@ -12,8 +12,8 @@ namespace DEvA {
 		template <size_t N, size_t M>
 		static Types::Generation permutations() {
 			std::default_random_engine randGen;
-			auto createRandomGenotype = [&]() -> Types::GenotypePtr {
-				typename Types::GenotypePtr gptr = std::make_shared<Types::Genotype>();
+			auto createRandomGenotype = [&]() -> Types::GenotypeProxy {
+				typename Types::GenotypeProxy gpx = std::make_shared<Types::Genotype>();
 				std::vector<int> toPick(N);
 				std::iota(toPick.begin(), toPick.end(), 0);
 				for (size_t i = 0; i < N; ++i) {
@@ -21,14 +21,14 @@ namespace DEvA {
 					size_t randomIndex = distribution(randGen);
 					int randPosition = toPick[randomIndex];
 					std::erase(toPick, randPosition);
-					gptr->emplace_back(i) = randPosition;
+					gpx->emplace_back(i) = randPosition;
 				}
-				return gptr;
+				return gpx;
 			};
 			typename Types::Generation generation;
 			for (size_t i = 0; i < M; ++i) {
-				typename Types::GenotypePtr gptr = createRandomGenotype();
-				generation.emplace_back(std::make_shared<Types::SIndividual>(gptr));
+				typename Types::GenotypeProxy gpx = createRandomGenotype();
+				generation.emplace_back(std::make_shared<Types::SIndividual>(gpx));
 			}
 			return generation;
 		}

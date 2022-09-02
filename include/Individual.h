@@ -9,8 +9,8 @@ namespace DEvA {
 	template <typename Types, typename VP>
 	class Individual : public std::enable_shared_from_this<Individual<Types, VP>> {
 		public:
-			Individual(Types::GenotypePtr gptr) {
-				genotype = gptr;
+			Individual(Types::GenotypeProxy gpx) {
+				genotypeProxy = gpx;
 			};
 			void setParents(Types::IndividualPtrs parents_) {
 				parents = parents_;
@@ -20,8 +20,8 @@ namespace DEvA {
 			}
 			// TODO: Get rid of this
 			Individual<Types, VP>& operator=(Individual<Types, VP>& ind) {
-				genotype = ind.genotype;
-				phenotype = ind.phenotype;
+				genotypeProxy = ind.genotypeProxy;
+				phenotypeProxy = ind.phenotypeProxy;
 				fitness = ind.fitness;
 				parents = ind.parents;
 				children = ind.children;
@@ -29,8 +29,8 @@ namespace DEvA {
 			};
 
 
-			Types::GenotypePtr genotype;
-			Types::PhenotypePtr phenotype;
+			Types::GenotypeProxy genotypeProxy;
+			Types::PhenotypeProxy phenotypeProxy;
 			Types::Fitness fitness;
 			Types::IndividualPtrs parents;
 			Types::IndividualWPtrs children;

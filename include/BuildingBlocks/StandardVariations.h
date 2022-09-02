@@ -12,22 +12,24 @@
 namespace DEvA {
 	template <typename Types>
 	struct StandardVariations {
+		// For convenience
 		using Genotype = Types::Genotype;
-		using GenotypePtr = Types::GenotypePtr;
-		using GenotypePtrs = Types::GenotypePtrs;
+		using GenotypeProxy = Types::GenotypeProxy;
+		using GenotypeProxies = Types::GenotypeProxies;
 
-		static GenotypePtr copy(GenotypePtr gptr) {
-			return std::make_shared<Genotype>(*gptr);
-		}
+		//static GenotypeProxy copy(GenotypeProxy gpx) {
+		//	return std::make_shared<Genotype>(*gpx);
+		//}
 
 		/*template <typename T>
 		requires std::same_as<T, GenotypePtrs> and !std::is_bounded_array<decltype(*T::first())>
 		static T cutAndCrossfill(T gptrs) {*/
-		static GenotypePtrs cutAndCrossfill(GenotypePtrs gptrs) {
-			GenotypePtr firstParent = std::make_shared<Genotype>(*(gptrs.front()));
-			GenotypePtr secondParent = std::make_shared<Genotype>(*(gptrs.back()));
-			GenotypePtr firstOffspring = std::make_shared<Genotype>();
-			GenotypePtr secondOffspring = std::make_shared<Genotype>();
+		static GenotypeProxies cutAndCrossfill(GenotypeProxies gpxs) {
+			//GenotypeProxy firstParent = std::make_shared<Genotype>(*(gpxs.front()));
+			GenotypeProxy firstParent = gpxs.front();
+			GenotypeProxy secondParent = gpxs.back();
+			GenotypeProxy firstOffspring = std::make_shared<Genotype>();
+			GenotypeProxy secondOffspring = std::make_shared<Genotype>();
 
 			size_t genotypeSize = firstParent->size();
 			std::random_device r;
@@ -63,12 +65,12 @@ namespace DEvA {
 				}
 			}
 
-			GenotypePtrs retList = { firstOffspring, secondOffspring };
+			GenotypeProxies retList = { firstOffspring, secondOffspring };
 			return retList;
 		}
 
-		static GenotypePtr swap(GenotypePtr gptr) {
-			GenotypePtr offspring = std::make_shared<Genotype>(*gptr);
+		static GenotypeProxy swap(GenotypeProxy gpx) {
+			GenotypeProxy offspring = Types::F::copy(gpx);
 
 			std::default_random_engine randGen;
 			std::uniform_int_distribution<int> distribution(0, offspring->size() - 1);

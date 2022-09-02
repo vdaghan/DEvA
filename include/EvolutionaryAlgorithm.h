@@ -27,8 +27,8 @@ namespace DEvA {
 			StepResult epoch();
 			StepResult search(size_t count);
 
-			Types::GenotypePtr bestGenotype;
-			Types::PhenotypePtr bestPhenotype;
+			Types::GenotypeProxy bestGenotype;
+			Types::PhenotypeProxy bestPhenotype;
 			Types::Fitness bestFitness;
 			Types::Genealogy genealogy;
 		private:
@@ -54,11 +54,11 @@ namespace DEvA {
 			// Parent selection
 			typename Types::IndividualPtrs parents = parentSelectionFunction(genealogy.back());
 			// Variation
-			typename Types::GenotypePtrs parentGenotypes{};
+			typename Types::GenotypeProxies parentGenotypes{};
 			for (auto it = parents.begin(); it != parents.end(); ++it) {
-				parentGenotypes.push_back((*it)->genotype);
+				parentGenotypes.push_back((*it)->genotypeProxy);
 			}
-			typename Types::GenotypePtrs newGenotypes = variationFunction(parentGenotypes);
+			typename Types::GenotypeProxies newGenotypes = variationFunction(parentGenotypes);
 			typename Types::IndividualPtrs newOffsprings{};
 			for (auto it = newGenotypes.begin(); it != newGenotypes.end(); ++it) {
 				typename Types::IndividualPtr newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(*it);
@@ -71,9 +71,9 @@ namespace DEvA {
 		}
 		auto & lastGen(genealogy.back());
 		//std::cout << "Transforming...\n";
-		std::for_each(lastGen.begin(), lastGen.end(), [&](auto & iptr) { iptr->phenotype = transformFunction(iptr->genotype); });
+		std::for_each(lastGen.begin(), lastGen.end(), [&](auto & iptr) { iptr->phenotypeProxy = transformFunction(iptr->genotypeProxy); });
 		//std::cout << "Evaluating...\n";
-		std::for_each(lastGen.begin(), lastGen.end(), [&](auto & iptr) { iptr->fitness = evaluationFunction(iptr->phenotype); });
+		std::for_each(lastGen.begin(), lastGen.end(), [&](auto & iptr) { iptr->fitness = evaluationFunction(iptr->phenotypeProxy); });
 		//std::cout << "Sorting...\n";
 		std::stable_sort(lastGen.begin(), lastGen.end(), [](auto iptr1, auto iptr2) -> bool { return ((iptr1->fitness) > (iptr2->fitness)); });
 
@@ -82,8 +82,8 @@ namespace DEvA {
 			survivorSelectionFunction(genealogy.back());
 		}
 		auto bestIndividual = genealogy.back().back();
-		bestGenotype = bestIndividual->genotype;
-		bestPhenotype = bestIndividual->phenotype;
+		bestGenotype = bestIndividual->genotypeProxy;
+		bestPhenotype = bestIndividual->phenotypeProxy;
 		bestFitness = bestIndividual->fitness;
 		//std::cout << "Best fitness: " << bestFitness << "\n";
 

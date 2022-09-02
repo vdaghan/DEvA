@@ -38,14 +38,22 @@
 **/
 
 int main() {
-	using Genotype = std::vector<size_t>;
-	using Phenotype = std::vector<size_t>;
-	using Fitness = int;
+	struct Specification {
+		using Genotype = std::vector<size_t>;
+		using GenotypeProxy = std::shared_ptr<Genotype>;
+		using Phenotype = std::vector<size_t>;
+		using PhenotypeProxy = std::shared_ptr<Phenotype>;
+		using Fitness = int;
+		using IndividualParameters = DEvA::NullVParameters;
+		static Genotype genotypeFromProxy(GenotypeProxy gpx) { return *gpx; };
+		static Phenotype phenotypeFromProxy(PhenotypeProxy ppx) { return *ppx;};
+		static GenotypeProxy copy(GenotypeProxy gpx) { return gpx; };
+	};
 
-	using Spec = DEvA::Specialisation<Genotype, Phenotype, Fitness, DEvA::NullVParameters>;
+	using Spec = DEvA::Specialisation<Specification>;
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
 
-	Spec::FEvaluate fevaluate = [](Spec::PhenotypePtr pptr) -> Spec::Fitness {
+	Spec::FEvaluate fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::Fitness {
 		auto last = std::unique(pptr->begin(), pptr->end());
 		pptr->erase(last, pptr->end());
 
@@ -68,8 +76,8 @@ int main() {
 		}
 		return fitness;
 	};
-	Spec::FVariation variation = [](Spec::GenotypePtrs gptrs) {
-		Spec::GenotypePtrs offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(gptrs);
+	Spec::FVariation variation = [](Spec::GenotypeProxies gptrs) {
+		Spec::GenotypeProxies offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(gptrs);
 		for (auto& gptr : offsprings) {
 			std::default_random_engine randGen;
 			std::uniform_int_distribution<int> distribution(0, 100);

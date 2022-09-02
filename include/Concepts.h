@@ -6,6 +6,24 @@
 #include <type_traits>
 
 namespace DEvA {
+	template <typename T> concept CSpecificationTypes =
+	requires {
+		typename T::Genotype;
+		typename T::GenotypeProxy;
+		typename T::Phenotype;
+		typename T::PhenotypeProxy;
+		typename T::Fitness;
+		typename T::IndividualParameters;
+	};
+	template <typename T> concept CSpecification = 
+	CSpecificationTypes<T> and
+	requires () {
+		true;
+		//{ T::genotypeFromProxy(T::GenotypeProxy()) };
+		//{T::phenotypeFromProxy(PP)} -> std::same_as<T::Phenotype>;
+		//requires std::same_as<T::Genotype, T::genotypeFromProxy(GP)>;
+	};
+
 	template <typename F>
 	concept CCallableVoid = requires (F f) { f(); };
 
