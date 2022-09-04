@@ -37,6 +37,8 @@
 * +---------------------------+--------------------------------------+
 **/
 
+#include <functional>
+
 int main() {
 	struct Specification {
 		using Genotype = std::vector<size_t>;
@@ -45,13 +47,14 @@ int main() {
 		using PhenotypeProxy = std::shared_ptr<Phenotype>;
 		using Fitness = int;
 		using IndividualParameters = DEvA::NullVParameters;
-		static Genotype genotypeFromProxy(GenotypeProxy gpx) { return *gpx; };
-		static Phenotype phenotypeFromProxy(PhenotypeProxy ppx) { return *ppx;};
 		static GenotypeProxy copy(GenotypeProxy gpx) { return gpx; };
 	};
 
 	using Spec = DEvA::Specialisation<Specification>;
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
+
+	ea.setGenotypeFromProxyFunction([](Spec::GenotypeProxy gpx) -> Spec::Genotype { return *gpx; });
+	ea.setPhenotypeFromProxyFunction([](Spec::PhenotypeProxy ppx) -> Spec::Phenotype { return *ppx; });
 
 	Spec::FEvaluate fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::Fitness {
 		auto last = std::unique(pptr->begin(), pptr->end());

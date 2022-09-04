@@ -6,7 +6,7 @@ set(DEvA_BUILD_TESTS TRUE CACHE BOOL "Build tests for DEvA")
 
 include(FetchContent)
 
-project(DEvA LANGUAGES CXX VERSION 0.3.0.0)
+project(DEvA LANGUAGES CXX VERSION 0.3.0.1)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_SOURCE_DIR}/doc/flowchart.dot -o ${CMAKE_BINARY_DIR}/flowchart.svg)

@@ -63,6 +63,11 @@ namespace DEvA {
 
         using SStandardVariations = StandardVariations<Spec>;
 
+		// Specification function types
+		using FGenotypeFromProxy = std::function<Genotype (GenotypeProxy)>;
+		using FPhenotypeFromProxy = std::function<Phenotype (PhenotypeProxy)>;
+
+		// EA function types
         using FGenesis = std::function<Generation(void)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
         using FTransform = std::function<PhenotypeProxy(GenotypeProxy)>;

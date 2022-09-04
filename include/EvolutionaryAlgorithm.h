@@ -14,6 +14,9 @@ namespace DEvA {
 	template <typename Types>
 	class EvolutionaryAlgorithm {
 		public:
+			void setGenotypeFromProxyFunction(Types::FGenotypeFromProxy gfunc) { genotypeFromProxyFunxtion = gfunc; };
+			void setPhenotypeFromProxyFunction(Types::FPhenotypeFromProxy gfunc) { phenotypeFromProxyFunxtion = gfunc; };
+
 			void setGenesisFunction(Types::FGenesis gfunc) { genesisFunction = gfunc; };
 			void setTransformFunction(Types::FTransform tfunc) { transformFunction = tfunc; };
 			void setEvaluationFunction(Types::FEvaluate efunc) { evaluationFunction = efunc; };
@@ -32,6 +35,10 @@ namespace DEvA {
 			Types::Fitness bestFitness;
 			Types::Genealogy genealogy;
 		private:
+			// Specialisation functions
+			Types::FGenotypeFromProxy genotypeFromProxyFunxtion;
+			Types::FPhenotypeFromProxy phenotypeFromProxyFunxtion;
+			// EA functions
 			Types::FGenesis genesisFunction;
 			Types::FTransform transformFunction;
 			Types::FEvaluate evaluationFunction;
