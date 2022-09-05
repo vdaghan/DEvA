@@ -9,5 +9,13 @@ namespace DEvA {
 		static bool equalTo(Types::Fitness fitness) {
 			return fitness == N;
 		}
+		template <auto N>
+		static bool lessThan(Types::Fitness fitness) {
+			return fitness < N;
+		}
+		template <auto N>
+		static bool biggerThan(Types::Fitness fitness) {
+			return fitness > N;
+		}
 	};
 }

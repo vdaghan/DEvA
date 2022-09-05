@@ -82,10 +82,8 @@ int main() {
 	Spec::FVariation variation = [](Spec::GenotypeProxies gptrs) {
 		Spec::GenotypeProxies offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(gptrs);
 		for (auto& gptr : offsprings) {
-			std::default_random_engine randGen;
-			std::uniform_int_distribution<int> distribution(0, 100);
-			size_t swapProbability = distribution(randGen);
-			if (swapProbability <= 80) {
+			double probability = DEvA::RandomNumberGenerator::get()->getDouble();
+			if (probability <= 0.8) {
 				gptr = DEvA::StandardVariations<Spec>::swap(gptr);
 			}
 		}
@@ -95,8 +93,14 @@ int main() {
 	ea.setGenesisFunction(DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
 	ea.setTransformFunction(DEvA::StandardTransforms<Spec>::copy);
 	ea.setEvaluationFunction(fevaluate);
-	ea.setParentSelectionFunction(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>);
-	ea.setVariationFunction(variation);
+	Spec::SVariationFunctor variationFunctor;
+	variationFunctor.setParentSelectionFunction(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>);
+	variationFunctor.setVariationFunction(variation);
+	variationFunctor.setProbability(1.0);
+	variationFunctor.setRemoveParentFromMatingPool(false);
+	ea.addVariationFunctor(variationFunctor);
+	//ea.setParentSelectionFunction(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>);
+	//ea.setVariationFunction(variation);
 	ea.setSurvivorSelectionFunction(DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
 	ea.setConvergenceCheckFunction(DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>);
 

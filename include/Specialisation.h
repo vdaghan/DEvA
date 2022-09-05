@@ -15,6 +15,7 @@
 #include "StandardSurvivorSelectors.h"
 #include "StandardTransforms.h"
 #include "StandardVariations.h"
+#include "VariationFunctor.h"
 
 namespace DEvA {
     template <typename T> class EvolutionaryAlgorithm;
@@ -63,9 +64,12 @@ namespace DEvA {
 
         using SStandardVariations = StandardVariations<Spec>;
 
+		using SVariationInfo = VariationInfo<Spec>;
+		using SVariationFunctor = VariationFunctor<Spec>;
+
 		// Specification function types
-		using FGenotypeFromProxy = std::function<Genotype (GenotypeProxy)>;
-		using FPhenotypeFromProxy = std::function<Phenotype (PhenotypeProxy)>;
+		using FGenotypeFromProxy = std::function<Genotype & (GenotypeProxy)>;
+		using FPhenotypeFromProxy = std::function<Phenotype & (PhenotypeProxy)>;
 
 		// EA function types
         using FGenesis = std::function<Generation(void)>;
@@ -73,7 +77,8 @@ namespace DEvA {
         using FTransform = std::function<PhenotypeProxy(GenotypeProxy)>;
         using FEvaluate = std::function<Fitness(GenotypeProxy)>;
         using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
-        using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
+        //using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
+		using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FConvergenceCheck = std::function<bool(Fitness)>;
 

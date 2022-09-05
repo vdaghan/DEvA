@@ -2,9 +2,11 @@
 
 #include "Genealogy.h"
 #include "Individual.h"
+#include "VariationFunctor.h"
 
 #include <algorithm>
 #include <iostream>
+#include <list>
 #include <memory>
 #include <ranges>
 
@@ -20,8 +22,7 @@ namespace DEvA {
 			void setGenesisFunction(Types::FGenesis gfunc) { genesisFunction = gfunc; };
 			void setTransformFunction(Types::FTransform tfunc) { transformFunction = tfunc; };
 			void setEvaluationFunction(Types::FEvaluate efunc) { evaluationFunction = efunc; };
-			void setParentSelectionFunction(Types::FParentSelection psfunc) { parentSelectionFunction = psfunc; };
-			void setVariationFunction(Types::FVariation vfunc) { variationFunction = vfunc; };
+			void addVariationFunctor(Types::SVariationFunctor func) { variationFunctors.push_back(func); };
 			void setSurvivorSelectionFunction(Types::FSurvivorSelection ssfunc) { survivorSelectionFunction = ssfunc; };
 			void setConvergenceCheckFunction(Types::FConvergenceCheck ccfunc) { convergenceCheckFunction = ccfunc; };
 
@@ -42,15 +43,13 @@ namespace DEvA {
 			Types::FGenesis genesisFunction;
 			Types::FTransform transformFunction;
 			Types::FEvaluate evaluationFunction;
-			Types::FParentSelection parentSelectionFunction;
-			Types::FVariation variationFunction;
+			std::list<typename Types::SVariationFunctor> variationFunctors;
 			Types::FSurvivorSelection survivorSelectionFunction;
 			Types::FConvergenceCheck convergenceCheckFunction;
 
 			Types::COnEpoch onEpochCallback;
 
 	};
-
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::epoch() {
 		typename Types::Generation newGeneration{};
@@ -58,23 +57,22 @@ namespace DEvA {
 			genealogy.push_back(genesisFunction());
 			std::cout << "Genesis: " << genealogy.back().size() << " individuals.\n";
 		} else [[likely]] {
-			// Parent selection
-			typename Types::IndividualPtrs parents = parentSelectionFunction(genealogy.back());
-			// Variation
-			typename Types::GenotypeProxies parentGenotypes{};
-			for (auto it = parents.begin(); it != parents.end(); ++it) {
-				parentGenotypes.push_back((*it)->genotypeProxy);
-			}
-			typename Types::GenotypeProxies newGenotypes = variationFunction(parentGenotypes);
+			auto matingPool = genealogy.back();
 			typename Types::IndividualPtrs newOffsprings{};
-			for (auto it = newGenotypes.begin(); it != newGenotypes.end(); ++it) {
-				typename Types::IndividualPtr newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(*it);
-				newIndividual->setParents(parents);
-				newOffsprings.emplace_back(newIndividual);
+			for (auto it(variationFunctors.begin()); it != variationFunctors.end(); ++it) {
+				auto & variationFunctor = *it;
+				typename Types::SVariationInfo variationInfo = variationFunctor.apply(matingPool);
+				typename Types::GenotypeProxies newGenotypes = variationInfo.children;
+				for (auto it = newGenotypes.begin(); it != newGenotypes.end(); ++it) {
+					typename Types::IndividualPtr newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(*it);
+					newIndividual->setParents(variationInfo.parents);
+					newOffsprings.emplace_back(newIndividual);
+				}
 			}
-			//std::cout << newOffsprings.size() << " new offsprings being added to gene pool.\n";
-			newOffsprings.insert(newOffsprings.end(), genealogy.back().begin(), genealogy.back().end());
-			genealogy.push_back(newOffsprings);
+			typename Types::IndividualPtrs newGeneration{};
+			newGeneration.insert(newGeneration.end(), newOffsprings.begin(), newOffsprings.end());
+			newGeneration.insert(newGeneration.end(), genealogy.back().begin(), genealogy.back().end());
+			genealogy.push_back(newGeneration);
 		}
 		auto & lastGen(genealogy.back());
 		//std::cout << "Transforming...\n";
