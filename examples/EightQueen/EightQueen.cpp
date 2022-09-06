@@ -1,11 +1,13 @@
 #include <algorithm>
 #include <array>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <random>
 #include <utility>
 #include <vector>
 
+#include "deva_version.h"
 #include "EvolutionaryAlgorithm.h"
 #include "Specialisation.h"
 
@@ -40,6 +42,8 @@
 #include <functional>
 
 int main() {
+	std::cout << "DEvA version: " << getDEvAVersion() << std::endl;
+
 	struct Specification {
 		using Genotype = std::vector<size_t>;
 		using GenotypeProxy = std::shared_ptr<Genotype>;
@@ -53,8 +57,8 @@ int main() {
 	using Spec = DEvA::Specialisation<Specification>;
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
 
-	ea.setGenotypeFromProxyFunction([](Spec::GenotypeProxy gpx) -> Spec::Genotype { return *gpx; });
-	ea.setPhenotypeFromProxyFunction([](Spec::PhenotypeProxy ppx) -> Spec::Phenotype { return *ppx; });
+	ea.setGenotypeFromProxyFunction([](Spec::GenotypeProxy gpx) -> Spec::Genotype & { return *gpx; });
+	ea.setPhenotypeFromProxyFunction([](Spec::PhenotypeProxy ppx) -> Spec::Phenotype & { return *ppx; });
 
 	Spec::FEvaluate fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::Fitness {
 		auto last = std::unique(pptr->begin(), pptr->end());
@@ -99,8 +103,6 @@ int main() {
 	variationFunctor.setProbability(1.0);
 	variationFunctor.setRemoveParentFromMatingPool(false);
 	ea.addVariationFunctor(variationFunctor);
-	//ea.setParentSelectionFunction(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>);
-	//ea.setVariationFunction(variation);
 	ea.setSurvivorSelectionFunction(DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
 	ea.setConvergenceCheckFunction(DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>);
 

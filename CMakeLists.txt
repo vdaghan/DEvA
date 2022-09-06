@@ -6,7 +6,7 @@ set(DEvA_BUILD_TESTS TRUE CACHE BOOL "Build tests for DEvA")
 
 include(FetchContent)
 
-project(DEvA LANGUAGES CXX VERSION 0.4.0.0)
+project(DEvA LANGUAGES CXX VERSION 0.4.0.1)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_SOURCE_DIR}/doc/flowchart.dot -o ${CMAKE_BINARY_DIR}/flowchart.svg)
@@ -22,15 +22,17 @@ project(Lua C)
 add_library(Lua ${lua_SOURCE_DIR}/onelua.c)
 target_include_directories(Lua PUBLIC ${lua_SOURCE_DIR})
 
-set(DEvA_SOURCES "src/Bibliography.cpp"
-				 "src/RandomNumberGenerator.cpp"
-				 "src/Strategy.cpp")
+set(DEvA_SOURCES "${CMAKE_BINARY_DIR}/deva_version.cpp"
+				 "${CMAKE_SOURCE_DIR}/src/Bibliography.cpp"
+				 "${CMAKE_SOURCE_DIR}/src/RandomNumberGenerator.cpp"
+				 "${CMAKE_SOURCE_DIR}/src/Strategy.cpp")
 
 add_library(DEvA ${DEvA_SOURCES})
 add_library(DEvA::DEvA ALIAS DEvA)
 #target_link_libraries(DEvA PRIVATE DEvA_version)
-target_include_directories(DEvA SYSTEM PUBLIC "include")
-target_include_directories(DEvA SYSTEM PUBLIC "include/BuildingBlocks")
+target_include_directories(DEvA PUBLIC "${CMAKE_SOURCE_DIR}")
+target_include_directories(DEvA PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_include_directories(DEvA PUBLIC "${CMAKE_SOURCE_DIR}/include/BuildingBlocks")
 
 if (DEvA_BUILD_TESTS)
 	add_subdirectory("tests")

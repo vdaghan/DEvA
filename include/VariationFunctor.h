@@ -28,6 +28,11 @@ namespace DEvA {
 						matingPool.remove(*it);
 					}
 				}
+				typename Spec::GenotypeProxies parentGenotypes{};
+				for (auto it = variationInfo.parents.begin(); it != variationInfo.parents.end(); ++it) {
+					parentGenotypes.push_back((*it)->genotypeProxy);
+				}
+				variationInfo.children = m_variationFunction(parentGenotypes);
 				return variationInfo;
 			}
 			void setProbability(double p) { m_probability = p; };

@@ -1,21 +1,21 @@
-#include "foobar_version.h"
+#include "deva_version.h"
 
-std::string getFooBarVersion() {
-	return "@FooBar_VERSION@";
+std::string getDEvAVersion() {
+	return "@DEvA_VERSION@";
 }
 
-unsigned getFooBarVersionMajor() {
-	return @FooBar_VERSION_MAJOR@;
+unsigned getDEvAVersionMajor() {
+	return @DEvA_VERSION_MAJOR@;
 }
 
-unsigned getFooBarVersionMinor() {
-	return @FooBar_VERSION_MINOR@ +0;
+unsigned getDEvAVersionMinor() {
+	return @DEvA_VERSION_MINOR@ +0;
 }
 
-unsigned getFooBarVersionPatch() {
-	return @FooBar_VERSION_PATCH@ +0;
+unsigned getDEvAVersionPatch() {
+	return @DEvA_VERSION_PATCH@ +0;
 }
 
-unsigned getFooBarVersionTweak() {
-	return @FooBar_VERSION_TWEAK@ +0;
+unsigned getDEvAVersionTweak() {
+	return @DEvA_VERSION_TWEAK@ +0;
 }
