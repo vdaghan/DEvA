@@ -41,16 +41,14 @@ namespace DEvA {
 			auto itCrossover2 = Common::iteratorForNthListElement<Types>(*secondParent, crossoverIndex);
 			auto it1 = firstParent->begin();
 			auto it2 = secondParent->begin();
-			size_t ind1(0);
-			size_t ind2(0);
+			size_t ind(0);
 
 			while (ind1 <= crossoverIndex) {
 				firstOffspring->push_back(*it1);
 				secondOffspring->push_back(*it2);
 				++it1;
 				++it2;
-				++ind1;
-				++ind2;
+				++ind;;
 			}
 
 			for (auto it = secondParent->begin(); it != secondParent->end(); ++it) {

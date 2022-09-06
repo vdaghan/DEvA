@@ -31,6 +31,8 @@ namespace DEvA {
 			StepResult epoch();
 			StepResult search(size_t count);
 
+			void addGeneration(Types::Generation gen) { genealogy.push_back(gen); };
+
 			Types::GenotypeProxy bestGenotype;
 			Types::PhenotypeProxy bestPhenotype;
 			Types::Fitness bestFitness;
