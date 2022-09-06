@@ -43,12 +43,12 @@ namespace DEvA {
 			auto it2 = secondParent->begin();
 			size_t ind(0);
 
-			while (ind1 <= crossoverIndex) {
+			while (ind <= crossoverIndex) {
 				firstOffspring->push_back(*it1);
 				secondOffspring->push_back(*it2);
 				++it1;
 				++it2;
-				++ind;;
+				++ind;
 			}
 
 			for (auto it = secondParent->begin(); it != secondParent->end(); ++it) {
