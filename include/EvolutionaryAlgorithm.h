@@ -65,8 +65,8 @@ namespace DEvA {
 				auto & variationFunctor = *it;
 				typename Types::SVariationInfo variationInfo = variationFunctor.apply(matingPool);
 				typename Types::GenotypeProxies newGenotypes = variationInfo.children;
-				for (auto it = newGenotypes.begin(); it != newGenotypes.end(); ++it) {
-					typename Types::IndividualPtr newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(*it);
+				for (auto itt = newGenotypes.begin(); itt != newGenotypes.end(); ++itt) {
+					typename Types::IndividualPtr newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(*itt);
 					newIndividual->setParents(variationInfo.parents);
 					newOffsprings.emplace_back(newIndividual);
 				}

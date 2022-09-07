@@ -20,9 +20,9 @@
 namespace DEvA {
     template <typename T> class EvolutionaryAlgorithm;
     template <typename T, typename IP> class Individual;
-    template <typename T> class StandardInitialisers;
-    template <typename T> class StandardVariations;
-    template <typename T> class StandardTransforms;
+    template <typename T> struct StandardInitialisers;
+    template <typename T> struct StandardVariations;
+    template <typename T> struct StandardTransforms;
 
     template <typename T>
     struct Parametrised {

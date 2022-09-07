@@ -18,7 +18,7 @@ namespace DEvA {
 		public:
 			VariationInfo<Spec> apply(Spec::IndividualPtrs & matingPool) {
 				double probability = RandomNumberGenerator::get()->getDouble();
-				if (probability <= m_probability) {
+				if (probability >= m_probability) {
 					return {};
 				}
 				VariationInfo<Spec> variationInfo;
