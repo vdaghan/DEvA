@@ -83,6 +83,7 @@ namespace DEvA {
         using FConvergenceCheck = std::function<bool(Fitness)>;
 
         // Callbacks
+		using CVoid = std::function<void(void)>;
         using COnEpoch = std::function<void(Generation &)>;
 
         struct RFGenotypeProxySet {
