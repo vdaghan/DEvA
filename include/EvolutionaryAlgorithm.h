@@ -50,9 +50,9 @@ namespace DEvA {
 			Types::FSurvivorSelection survivorSelectionFunction;
 			Types::FConvergenceCheck convergenceCheckFunction;
 			// Callbacks
-			template <typename F> void tryExecuteCallback(F f) { if(f) f(); };
-			Types::CVoid onEpochStartCallback;
-			Types::CVoid onEpochEndCallback;
+			template <typename F, typename ... VTypes> void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
+			Types::COnEpoch onEpochStartCallback;
+			Types::COnEpoch onEpochEndCallback;
 
 	};
 	template <typename Types>
@@ -106,9 +106,9 @@ namespace DEvA {
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::search(size_t count) {
 		for (size_t i(0); i < count; ++i) {
-			tryExecuteCallback(onEpochStartCallback);
+			tryExecuteCallback<Types::COnEpoch, std::size_t>(onEpochStartCallback, genealogy.size());
 			StepResult epochResult = epoch();
-			tryExecuteCallback(onEpochEndCallback);
+			tryExecuteCallback<Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
 			if (StepResult::Inconclusive != epochResult) [[unlikely]] {
 				return epochResult;
 			}

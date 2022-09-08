@@ -84,7 +84,7 @@ namespace DEvA {
 
         // Callbacks
 		using CVoid = std::function<void(void)>;
-        using COnEpoch = std::function<void(Generation &)>;
+        using COnEpoch = std::function<void(std::size_t)>;
 
         struct RFGenotypeProxySet {
 			GenotypeProxies domain;
