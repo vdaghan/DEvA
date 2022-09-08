@@ -105,6 +105,8 @@ int main() {
 	ea.addVariationFunctor(variationFunctor);
 	ea.setSurvivorSelectionFunction(DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
 	ea.setConvergenceCheckFunction(DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>);
+	ea.setOnEpochStartCallback([](size_t gen) { std::cout << "Generation " << gen << " started.\n"; });
+	ea.setOnEpochEndCallback([](size_t gen) { std::cout << "Generation " << gen << " ended.\n"; });
 
 	auto result = ea.search(10000);
 	std::cout << "Best genotype: [";

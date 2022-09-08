@@ -26,8 +26,8 @@ namespace DEvA {
 			void setSurvivorSelectionFunction(Types::FSurvivorSelection ssfunc) { survivorSelectionFunction = ssfunc; };
 			void setConvergenceCheckFunction(Types::FConvergenceCheck ccfunc) { convergenceCheckFunction = ccfunc; };
 
-			void setOnEpochStartCallback(Types::CVoid c) { onEpochStartCallback = c; };
-			void setOnEpochEndCallback(Types::CVoid c) { onEpochEndCallback = c; };
+			void setOnEpochStartCallback(Types::COnEpoch c) { onEpochStartCallback = c; };
+			void setOnEpochEndCallback(Types::COnEpoch c) { onEpochEndCallback = c; };
 
 			StepResult epoch();
 			StepResult search(size_t count);
