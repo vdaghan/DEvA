@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Error.h"
 #include "Genealogy.h"
 #include "Individual.h"
 #include "VariationFunctor.h"
@@ -80,11 +81,15 @@ namespace DEvA {
 			genealogy.push_back(newGeneration);
 		}
 		auto & lastGen(genealogy.back());
-		//std::cout << "Transforming...\n";
-		std::for_each(lastGen.begin(), lastGen.end(), [&](auto & iptr) { iptr->phenotypeProxy = transformFunction(iptr->genotypeProxy); });
-		//std::cout << "Evaluating...\n";
-		std::for_each(lastGen.begin(), lastGen.end(), [&](auto & iptr) { iptr->fitness = evaluationFunction(iptr->phenotypeProxy); });
-		//std::cout << "Sorting...\n";
+		auto processIndividual = [this](Types::IndividualPtr iptr) {
+			iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy);
+			if (std::unexpected(ErrorCode::InvalidTransform) == iptr->maybePhenotypeProxy) {
+				return;
+			}
+			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
+		};
+		std::for_each(lastGen.begin(), lastGen.end(), [&](auto & iptr) { processIndividual(iptr); });
+
 		std::stable_sort(lastGen.begin(), lastGen.end(), [](auto iptr1, auto iptr2) -> bool { return ((iptr1->fitness) > (iptr2->fitness)); });
 
 		// Survivor selection
@@ -93,7 +98,7 @@ namespace DEvA {
 		}
 		auto bestIndividual = genealogy.back().back();
 		bestGenotype = bestIndividual->genotypeProxy;
-		bestPhenotype = bestIndividual->phenotypeProxy;
+		bestPhenotype = bestIndividual->maybePhenotypeProxy.value();
 		bestFitness = bestIndividual->fitness;
 		//std::cout << "Best fitness: " << bestFitness << "\n";
 

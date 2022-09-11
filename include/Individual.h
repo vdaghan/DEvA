@@ -21,7 +21,7 @@ namespace DEvA {
 			// TODO: Get rid of this
 			Individual<Types, VP>& operator=(Individual<Types, VP>& ind) {
 				genotypeProxy = ind.genotypeProxy;
-				phenotypeProxy = ind.phenotypeProxy;
+				maybePhenotypeProxy = ind.maybePhenotypeProxy;
 				fitness = ind.fitness;
 				parents = ind.parents;
 				children = ind.children;
@@ -30,7 +30,7 @@ namespace DEvA {
 
 
 			Types::GenotypeProxy genotypeProxy;
-			Types::PhenotypeProxy phenotypeProxy;
+			Types::MaybePhenotypeProxy maybePhenotypeProxy;
 			Types::Fitness fitness;
 			Types::IndividualPtrs parents;
 			Types::IndividualWPtrs children;

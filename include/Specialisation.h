@@ -6,6 +6,7 @@
 
 #include "Concepts.h"
 
+#include "Error.h"
 #include "EvolutionaryAlgorithm.h"
 #include "Individual.h"
 #include "Parameters.h"
@@ -42,6 +43,7 @@ namespace DEvA {
         using GenotypeProxiesDeque = std::deque<GenotypeProxies>;
         using Phenotype = S::Phenotype;
 		using PhenotypeProxy = S::PhenotypeProxy;
+		using MaybePhenotypeProxy = Maybe<PhenotypeProxy>;
         using Fitness = S::Fitness;
         using IndividualParameters = S::IndividualParameters;
 
@@ -74,7 +76,7 @@ namespace DEvA {
 		// EA function types
         using FGenesis = std::function<Generation(void)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
-        using FTransform = std::function<PhenotypeProxy(GenotypeProxy)>;
+        using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
         using FEvaluate = std::function<Fitness(GenotypeProxy)>;
         using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
         //using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
