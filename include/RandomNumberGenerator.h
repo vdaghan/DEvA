@@ -1,7 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <random>
+#include <ranges>
 
 namespace DEvA {
 	class RandomNumberGenerator {
@@ -16,7 +18,11 @@ namespace DEvA {
 				std::uniform_real_distribution<T> dist(a, b);
 				return dist(generator);
 			};
+			template <typename T> void shuffle(T & container) {
+				std::ranges::shuffle(container, std::mt19937_64{randomDevice()});
+			};
 			double getDouble();
+			unsigned int rand() { return randomDevice(); };
 		private:
 			static std::shared_ptr<RandomNumberGenerator> singletonInstance;
 			RandomNumberGenerator();

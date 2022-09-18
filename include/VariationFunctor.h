@@ -16,7 +16,7 @@ namespace DEvA {
 	template <typename Spec>
 	class VariationFunctor {
 		public:
-			VariationInfo<Spec> apply(Spec::IndividualPtrs & matingPool) {
+			VariationInfo<Spec> apply(Spec::IndividualPtrs & matingPool) const {
 				double probability = RandomNumberGenerator::get()->getDouble();
 				if (probability >= m_probability) {
 					return {};

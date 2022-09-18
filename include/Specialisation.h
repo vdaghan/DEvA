@@ -75,9 +75,11 @@ namespace DEvA {
 
 		// EA function types
         using FGenesis = std::function<Generation(void)>;
+		using FGenePoolSelection = std::function<Generation(Generation)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
         using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
-        using FEvaluate = std::function<Fitness(GenotypeProxy)>;
+		using FEvaluate = std::function<Fitness(GenotypeProxy)>;
+		using FFitnessComparison = std::function<bool(Fitness const &, Fitness const &)>;
         using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
         //using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
 		using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;

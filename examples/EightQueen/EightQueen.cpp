@@ -97,6 +97,7 @@ int main() {
 	ea.setGenesisFunction(DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
 	ea.setTransformFunction(DEvA::StandardTransforms<Spec>::copy);
 	ea.setEvaluationFunction(fevaluate);
+	ea.setFitnessComparisonFunction([&](Spec::Fitness const & lhs, Spec::Fitness const & rhs) { return lhs < rhs; });
 	Spec::SVariationFunctor variationFunctor;
 	variationFunctor.setParentSelectionFunction(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>);
 	variationFunctor.setVariationFunction(variation);
@@ -105,10 +106,10 @@ int main() {
 	ea.addVariationFunctor(variationFunctor);
 	ea.setSurvivorSelectionFunction(DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
 	ea.setConvergenceCheckFunction(DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>);
-	ea.setOnEpochStartCallback([](size_t gen) { std::cout << "Generation " << gen << " started.\n"; });
-	ea.setOnEpochEndCallback([](size_t gen) { std::cout << "Generation " << gen << " ended.\n"; });
+	//ea.setOnEpochStartCallback([](size_t gen) { std::cout << "Generation " << gen << " started.\n"; });
+	//ea.setOnEpochEndCallback([](size_t gen) { std::cout << "Generation " << gen << " ended.\n"; });
 
-	auto result = ea.search(10000);
+	auto result = ea.search(100000);
 	std::cout << "Best genotype: [";
 	for (auto it = ea.bestGenotype->begin(); it != ea.bestGenotype->end(); ++it) {
 		std::cout << *it << " ";

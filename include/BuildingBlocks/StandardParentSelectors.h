@@ -2,8 +2,10 @@
 
 #include "Common.h"
 #include "Individual.h"
+#include "RandomNumberGenerator.h"
 #include "Specialisation.h"
 
+#include <algorithm>
 #include <ranges>
 
 namespace DEvA {
@@ -14,29 +16,23 @@ namespace DEvA {
 		using GenotypeProxies = Types::GenotypeProxies;
 		using IndividualPtrs = Types::IndividualPtrs;
 
-		template <size_t N, size_t M>
+		template <std::size_t N, std::size_t M>
 		static IndividualPtrs bestNofM(IndividualPtrs domain) {
-			bool const isSorted = std::ranges::is_sorted(domain.begin(), domain.end(), [](auto iptr1, auto iptr2) -> bool { return ((iptr1->fitness) < (iptr2->fitness)); });
-			if (!isSorted) [[unlikely]] {
-				std::stable_sort(domain.begin(), domain.end(), [](auto iptr1, auto iptr2) -> bool { return ((iptr1->fitness) < (iptr2->fitness)); });
-			}
+			IndividualPtrs retVal{domain};
 
-			static std::default_random_engine randGen;
-			IndividualPtrs rest(domain);
-			IndividualPtrs preimage;
+			retVal.resize(std::min(M, retVal.size()));
+			std::vector<Types::IndividualPtr> iptrs(retVal.begin(), retVal.end());
+			RandomNumberGenerator::get()->shuffle(iptrs);
+			iptrs.resize(N);
+			retVal.clear();
+			retVal.assign(iptrs.begin(), iptrs.end());
 
-			for (size_t i = 0; i < N; ++i) {
-				std::uniform_int_distribution<int> distribution(0, rest.size() - 1);
-				size_t randomIndex = distribution(randGen);
-				auto it = rest.begin();
-				for (size_t j = 0; j < randomIndex; ++j) {
-					++it;
-				}
-				preimage.emplace_back(*it);
-				rest.erase(it);
-			}
-			//Spec::RFGenotypePtrSet rfgps({ .domain = domain,.preimage = preimage, .rest = rest });
-			return preimage;
+			return retVal;
+		};
+
+		template <std::size_t N>
+		static IndividualPtrs bestNofAll(IndividualPtrs domain) {
+			return bestNofM<N, std::numeric_limits<std::size_t>::max()>(domain);
 		};
 	};
 };
