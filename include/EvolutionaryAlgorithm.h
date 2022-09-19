@@ -35,6 +35,7 @@ namespace DEvA {
 			void setOnEpochStartCallback(Types::COnEpoch c) { onEpochStartCallback = c; };
 			void setOnEpochEndCallback(Types::COnEpoch c) { onEpochEndCallback = c; };
 
+			void setLambda(std::size_t l) { lambda = l; };
 			StepResult epoch();
 			StepResult search(size_t count);
 
@@ -45,6 +46,7 @@ namespace DEvA {
 			Types::Fitness bestFitness;
 			Types::Genealogy genealogy;
 		private:
+			std::size_t lambda;
 			// Specialisation functions
 			Types::FGenotypeFromProxy genotypeFromProxyFunxtion;
 			Types::FPhenotypeFromProxy phenotypeFromProxyFunxtion;
@@ -64,7 +66,7 @@ namespace DEvA {
 
 	};
 	template <typename Types>
-	EvolutionaryAlgorithm<Types>::EvolutionaryAlgorithm() {
+	EvolutionaryAlgorithm<Types>::EvolutionaryAlgorithm() : lambda(0) {
 		setGenePoolSelectionFunction(StandardGenePoolSelectors<Types>::all);
 	}
 	template <typename Types>
@@ -76,19 +78,25 @@ namespace DEvA {
 		} else [[likely]] {
 			auto genePool = genePoolSelectionFunction(genealogy.back());
 			typename Types::IndividualPtrs newOffsprings{};
-			for (auto const & variationFunctor: variationFunctors) {
-				auto variationInfo = variationFunctor.apply(genePool);
-				auto newGenotypes = variationInfo.children;
-				for (auto const & newGenotype : newGenotypes) {
-					auto newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(newGenotype);
-					newIndividual->setParents(variationInfo.parents);
-					newOffsprings.emplace_back(newIndividual);
+			while (newOffsprings.size() < lambda) {
+				for (auto const & variationFunctor: variationFunctors) {
+					if (newOffsprings.size() >= lambda) {
+						break;
+					}
+					auto variationInfo = variationFunctor.apply(genePool);
+					auto newGenotypes = variationInfo.children;
+					for (auto const & newGenotype : newGenotypes) {
+						auto newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(newGenotype);
+						newIndividual->setParents(variationInfo.parents);
+						newOffsprings.emplace_back(newIndividual);
+					}
 				}
 			}
 			typename Types::IndividualPtrs newGeneration{};
 			newGeneration.insert(newGeneration.end(), newOffsprings.begin(), newOffsprings.end());
 			newGeneration.insert(newGeneration.end(), genealogy.back().begin(), genealogy.back().end());
 			genealogy.push_back(newGeneration);
+			//std::cout << "Genealogy " << genealogy.size() << ": " << genealogy.back().size() << " individuals.\n";
 		}
 
 		auto processIndividual = [this](Types::IndividualPtr iptr) {
@@ -105,9 +113,8 @@ namespace DEvA {
 		};
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), fitter);
 
-		//if (1 != genealogy.size()) [[likely]] {
-			survivorSelectionFunction(genealogy.back());
-		//}
+		survivorSelectionFunction(genealogy.back());
+
 		auto bestIndividual = genealogy.back().front();
 		bestGenotype = bestIndividual->genotypeProxy;
 		bestPhenotype = bestIndividual->maybePhenotypeProxy.value();

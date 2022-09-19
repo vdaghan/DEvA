@@ -108,8 +108,9 @@ int main() {
 	ea.setConvergenceCheckFunction(DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>);
 	//ea.setOnEpochStartCallback([](size_t gen) { std::cout << "Generation " << gen << " started.\n"; });
 	//ea.setOnEpochEndCallback([](size_t gen) { std::cout << "Generation " << gen << " ended.\n"; });
+	ea.setLambda(50);
 
-	auto result = ea.search(100000);
+	auto result = ea.search(1000);
 	std::cout << "Best genotype: [";
 	for (auto it = ea.bestGenotype->begin(); it != ea.bestGenotype->end(); ++it) {
 		std::cout << *it << " ";
