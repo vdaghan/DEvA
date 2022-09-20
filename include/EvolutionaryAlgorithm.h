@@ -100,7 +100,7 @@ namespace DEvA {
 		}
 
 		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto & iptr) { iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy); });
-		std::remove_if(genealogy.back().begin(), genealogy.back().end(), [&](auto & iptr){ return !(iptr->isInvalid()); });
+		genealogy.back().remove_if([&](auto & iptr) { return iptr->isInvalid(); });
 		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto & iptr) { iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value()); });
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto & lhs, auto & rhs) { return fitnessComparisonFunction(lhs->fitness, rhs->fitness); });
 
