@@ -7,8 +7,8 @@ namespace DEvA {
 	struct StandardSurvivorSelectors {
 		template <size_t N>
 		static void clamp(Types::IndividualPtrs& iptrs) {
-			while (iptrs.size() > N) {
-				iptrs.erase(iptrs.begin());
+			if (iptrs.size() > N) {
+				iptrs.resize(N);
 			}
 		}
 	};
