@@ -27,6 +27,10 @@ namespace DEvA {
 				children = ind.children;
 				return *this;
 			};
+			bool isInvalid() {
+				bool invalidTransform = std::unexpected(ErrorCode::InvalidTransform) == maybePhenotypeProxy;
+				return invalidTransform;
+			};
 
 
 			Types::GenotypeProxy genotypeProxy;

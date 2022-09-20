@@ -99,19 +99,10 @@ namespace DEvA {
 			//std::cout << "Genealogy " << genealogy.size() << ": " << genealogy.back().size() << " individuals.\n";
 		}
 
-		auto processIndividual = [this](Types::IndividualPtr iptr) {
-			iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy);
-			if (std::unexpected(ErrorCode::InvalidTransform) == iptr->maybePhenotypeProxy) {
-				return;
-			}
-			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
-		};
-		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto & iptr) { processIndividual(iptr); });
-
-		auto fitter = [this](Types::IndividualPtr iptr1, Types::IndividualPtr iptr2) -> bool {
-			return fitnessComparisonFunction(iptr1->fitness, iptr2->fitness);
-		};
-		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), fitter);
+		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto & iptr) { iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy); });
+		std::remove_if(genealogy.back().begin(), genealogy.back().end(), [&](auto & iptr){ return !(iptr->isInvalid()); });
+		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto & iptr) { iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value()); });
+		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto & lhs, auto & rhs) { return fitnessComparisonFunction(lhs->fitness, rhs->fitness); });
 
 		survivorSelectionFunction(genealogy.back());
 
