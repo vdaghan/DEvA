@@ -80,7 +80,7 @@ namespace DEvA {
         using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
 		using FEvaluate = std::function<Fitness(GenotypeProxy)>;
 		using FFitnessComparison = std::function<bool(Fitness const &, Fitness const &)>;
-        using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
+        using FParentSelection = std::function<IndividualPtrs(FFitnessComparison, IndividualPtrs)>;
         //using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
 		using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;

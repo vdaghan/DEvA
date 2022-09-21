@@ -16,13 +16,13 @@ namespace DEvA {
 	template <typename Spec>
 	class VariationFunctor {
 		public:
-			VariationInfo<Spec> apply(Spec::IndividualPtrs & matingPool) const {
+			VariationInfo<Spec> apply(Spec::FFitnessComparison comp, Spec::IndividualPtrs & matingPool) const {
 				double probability = RandomNumberGenerator::get()->getDouble();
 				if (probability >= m_probability) {
 					return {};
 				}
 				VariationInfo<Spec> variationInfo;
-				variationInfo.parents = m_parentSelectionFunction(matingPool);
+				variationInfo.parents = m_parentSelectionFunction(comp, matingPool);
 				if (m_removeParentsFromMatingPool) {
 					for (auto it(variationInfo.parents.begin()); it != variationInfo.parents.end(); ++it) {
 						matingPool.remove(*it);

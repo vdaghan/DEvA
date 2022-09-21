@@ -83,7 +83,7 @@ namespace DEvA {
 					if (newOffsprings.size() >= lambda) {
 						break;
 					}
-					auto variationInfo = variationFunctor.apply(genePool);
+					auto variationInfo = variationFunctor.apply(fitnessComparisonFunction, genePool);
 					auto newGenotypes = variationInfo.children;
 					for (auto const & newGenotype : newGenotypes) {
 						auto newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(newGenotype);
