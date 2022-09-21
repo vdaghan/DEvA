@@ -44,7 +44,7 @@ namespace DEvA {
 
 		template <std::size_t N>
 		static IndividualPtrs bestNofAll(FFitnessComparison comp, IndividualPtrs domain) {
-			return bestNofM<N, std::numeric_limits<std::size_t>::max()>(domain);
+			return bestNofM<N, std::numeric_limits<std::size_t>::max()>(comp, domain);
 		};
 	};
 };
