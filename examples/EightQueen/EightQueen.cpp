@@ -110,6 +110,9 @@ int main() {
 	//ea.setOnEpochStartCallback([](size_t gen) { std::cout << "Generation " << gen << " started.\n"; });
 	//ea.setOnEpochEndCallback([](size_t gen) { std::cout << "Generation " << gen << " ended.\n"; });
 	ea.lambda = 50;
+	ea.logger.callback = [](DEvA::LogType t, std::string msg) {
+		std::cout << msg << std::endl;
+	};
 
 	auto result = ea.search(1000);
 	std::cout << "Best genotype: [";

@@ -3,6 +3,7 @@
 #include "Error.h"
 #include "Genealogy.h"
 #include "Individual.h"
+#include "Logger.h"
 #include "VariationFunctor.h"
 
 #include "BuildingBlocks/StandardGenePoolSelectors.h"
@@ -47,6 +48,7 @@ namespace DEvA {
 
 			void addGeneration(Types::Generation gen) { genealogy.push_back(gen); };
 
+			Logger logger;
 			Types::GenotypeProxy bestGenotype;
 			Types::PhenotypeProxy bestPhenotype;
 			Types::Fitness bestFitness;
@@ -64,7 +66,7 @@ namespace DEvA {
 		typename Types::Generation newGeneration{};
 		if (0 == genealogy.size()) [[unlikely]] {
 			genealogy.push_back(genesisFunction());
-			std::cout << "Genesis: " << genealogy.back().size() << " individuals.\n";
+			logger.info("Genesis: {} individuals.", genealogy.back().size());
 		} else [[likely]] {
 			auto genePool = genePoolSelectionFunction(genealogy.back());
 			typename Types::IndividualPtrs newOffsprings{};
