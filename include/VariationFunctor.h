@@ -10,8 +10,10 @@ namespace DEvA {
 	template <typename Spec>
 	struct VariationInfo {
 		std::string name;
-		Spec::IndividualPtrs parents;
-		Spec::GenotypeProxies children;
+		Spec::IndividualPtrs parentPtrs;
+		IndividualIdentifiers parentIds;
+		Spec::GenotypeProxies childProxies;
+		IndividualIdentifiers childIds;
 	};
 
 	template <typename Spec>
@@ -23,17 +25,17 @@ namespace DEvA {
 			}
 			VariationInfo<Spec> variationInfo;
 			variationInfo.name = name;
-			variationInfo.parents = parentSelectionFunction(comp, matingPool);
+			variationInfo.parentPtrs = parentSelectionFunction(comp, matingPool);
 			if (removeParentsFromMatingPool) {
-				for (auto it(variationInfo.parents.begin()); it != variationInfo.parents.end(); ++it) {
+				for (auto it(variationInfo.parentPtrs.begin()); it != variationInfo.parentPtrs.end(); ++it) {
 					matingPool.remove(*it);
 				}
 			}
 			typename Spec::GenotypeProxies parentGenotypes{};
-			for (auto it = variationInfo.parents.begin(); it != variationInfo.parents.end(); ++it) {
+			for (auto it = variationInfo.parentPtrs.begin(); it != variationInfo.parentPtrs.end(); ++it) {
 				parentGenotypes.push_back((*it)->genotypeProxy);
 			}
-			variationInfo.children = variationFunction(parentGenotypes);
+			variationInfo.childProxies = variationFunction(parentGenotypes);
 			return variationInfo;
 		}
 

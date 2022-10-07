@@ -107,8 +107,6 @@ int main() {
 	ea.variationFunctors.push_back(variationFunctor);
 	ea.survivorSelectionFunction = DEvA::StandardSurvivorSelectors<Spec>::clamp<100>;
 	ea.convergenceCheckFunction = DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>;
-	//ea.setOnEpochStartCallback([](size_t gen) { std::cout << "Generation " << gen << " started.\n"; });
-	//ea.setOnEpochEndCallback([](size_t gen) { std::cout << "Generation " << gen << " ended.\n"; });
 	ea.lambda = 50;
 	ea.logger.callback = [](DEvA::LogType t, std::string msg) {
 		std::cout << msg << std::endl;

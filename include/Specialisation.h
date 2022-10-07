@@ -61,7 +61,7 @@ namespace DEvA {
         using IndividualWPtrs = std::list<IndividualWPtr>;
 
         using Generation = IndividualPtrs;
-        using Generations = std::list<Generation>;
+        using Generations = std::deque<Generation>;
         using Genealogy = Generations;
 
         using SStandardVariations = StandardVariations<Spec>;
@@ -74,7 +74,7 @@ namespace DEvA {
 		using FPhenotypeFromProxy = std::function<Phenotype & (PhenotypeProxy)>;
 
 		// EA function types
-        using FGenesis = std::function<Generation(void)>;
+        using FGenesis = std::function<GenotypeProxies(void)>;
 		using FGenePoolSelection = std::function<Generation(Generation)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
         using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
