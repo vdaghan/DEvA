@@ -57,8 +57,8 @@ int main() {
 	using Spec = DEvA::Specialisation<Specification>;
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
 
-	ea.setGenotypeFromProxyFunction([](Spec::GenotypeProxy gpx) -> Spec::Genotype & { return *gpx; });
-	ea.setPhenotypeFromProxyFunction([](Spec::PhenotypeProxy ppx) -> Spec::Phenotype & { return *ppx; });
+	ea.genotypeFromProxyFunction = [](Spec::GenotypeProxy gpx) -> Spec::Genotype & { return *gpx; };
+	ea.phenotypeFromProxyFunction = [](Spec::PhenotypeProxy ppx) -> Spec::Phenotype & { return *ppx; };
 
 	Spec::FEvaluate fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::Fitness {
 		auto last = std::unique(pptr->begin(), pptr->end());
@@ -94,21 +94,22 @@ int main() {
 		return offsprings;
 	};
 
-	ea.setGenesisFunction(DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
-	ea.setTransformFunction(DEvA::StandardTransforms<Spec>::copy);
-	ea.setEvaluationFunction(fevaluate);
-	ea.setFitnessComparisonFunction([&](Spec::Fitness const & lhs, Spec::Fitness const & rhs) { return lhs < rhs; });
+	ea.genesisFunction = DEvA::StandardInitialisers<Spec>::permutations<8, 100>;
+	ea.transformFunction = DEvA::StandardTransforms<Spec>::copy;
+	ea.evaluationFunction = fevaluate;
+	ea.fitnessComparisonFunction = [&](Spec::Fitness const & lhs, Spec::Fitness const & rhs) { return lhs < rhs; };
 	Spec::SVariationFunctor variationFunctor;
-	variationFunctor.setParentSelectionFunction(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>);
-	variationFunctor.setVariationFunction(variation);
-	variationFunctor.setProbability(1.0);
-	variationFunctor.setRemoveParentFromMatingPool(false);
-	ea.addVariationFunctor(variationFunctor);
-	ea.setSurvivorSelectionFunction(DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
-	ea.setConvergenceCheckFunction(DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>);
+	variationFunctor.name = "cutAndCrossfillThenMaybeSwap";
+	variationFunctor.parentSelectionFunction = DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>;
+	variationFunctor.variationFunction = variation;
+	variationFunctor.probability = 1.0;
+	variationFunctor.removeParentsFromMatingPool = false;
+	ea.variationFunctors.push_back(variationFunctor);
+	ea.survivorSelectionFunction = DEvA::StandardSurvivorSelectors<Spec>::clamp<100>;
+	ea.convergenceCheckFunction = DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>;
 	//ea.setOnEpochStartCallback([](size_t gen) { std::cout << "Generation " << gen << " started.\n"; });
 	//ea.setOnEpochEndCallback([](size_t gen) { std::cout << "Generation " << gen << " ended.\n"; });
-	ea.setLambda(50);
+	ea.lambda = 50;
 
 	auto result = ea.search(1000);
 	std::cout << "Best genotype: [";

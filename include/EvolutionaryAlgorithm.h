@@ -20,22 +20,28 @@ namespace DEvA {
 	class EvolutionaryAlgorithm {
 		public:
 			EvolutionaryAlgorithm();
-			void setGenotypeFromProxyFunction(Types::FGenotypeFromProxy gfunc) { genotypeFromProxyFunxtion = gfunc; };
-			void setPhenotypeFromProxyFunction(Types::FPhenotypeFromProxy gfunc) { phenotypeFromProxyFunxtion = gfunc; };
 
-			void setGenesisFunction(Types::FGenesis gfunc) { genesisFunction = gfunc; };
-			void setGenePoolSelectionFunction(Types::FGenePoolSelection gfunc) { genePoolSelectionFunction = gfunc; };
-			void setTransformFunction(Types::FTransform tfunc) { transformFunction = tfunc; };
-			void setEvaluationFunction(Types::FEvaluate efunc) { evaluationFunction = efunc; };
-			void setFitnessComparisonFunction(Types::FFitnessComparison cfunc) { fitnessComparisonFunction = cfunc; };
-			void addVariationFunctor(Types::SVariationFunctor func) { variationFunctors.push_back(func); };
-			void setSurvivorSelectionFunction(Types::FSurvivorSelection ssfunc) { survivorSelectionFunction = ssfunc; };
-			void setConvergenceCheckFunction(Types::FConvergenceCheck ccfunc) { convergenceCheckFunction = ccfunc; };
+			std::size_t lambda;
 
-			void setOnEpochStartCallback(Types::COnEpoch c) { onEpochStartCallback = c; };
-			void setOnEpochEndCallback(Types::COnEpoch c) { onEpochEndCallback = c; };
+			// Specialisation functions
+			Types::FGenotypeFromProxy genotypeFromProxyFunction;
+			Types::FPhenotypeFromProxy phenotypeFromProxyFunction;
 
-			void setLambda(std::size_t l) { lambda = l; };
+			// EA functions
+			Types::FGenesis genesisFunction;
+			Types::FGenePoolSelection genePoolSelectionFunction;
+			Types::FTransform transformFunction;
+			Types::FEvaluate evaluationFunction;
+			Types::FFitnessComparison fitnessComparisonFunction;
+			std::list<typename Types::SVariationFunctor> variationFunctors;
+			Types::FSurvivorSelection survivorSelectionFunction;
+			Types::FConvergenceCheck convergenceCheckFunction;
+
+			// Callbacks
+			Types::COnEpoch onEpochStartCallback;
+			Types::COnEpoch onEpochEndCallback;
+			Types::COnVariation onVariationCallback;
+
 			StepResult epoch();
 			StepResult search(size_t count);
 
@@ -46,28 +52,12 @@ namespace DEvA {
 			Types::Fitness bestFitness;
 			Types::Genealogy genealogy;
 		private:
-			std::size_t lambda;
-			// Specialisation functions
-			Types::FGenotypeFromProxy genotypeFromProxyFunxtion;
-			Types::FPhenotypeFromProxy phenotypeFromProxyFunxtion;
-			// EA functions
-			Types::FGenesis genesisFunction;
-			Types::FGenePoolSelection genePoolSelectionFunction;
-			Types::FTransform transformFunction;
-			Types::FEvaluate evaluationFunction;
-			Types::FFitnessComparison fitnessComparisonFunction;
-			std::list<typename Types::SVariationFunctor> variationFunctors;
-			Types::FSurvivorSelection survivorSelectionFunction;
-			Types::FConvergenceCheck convergenceCheckFunction;
-			// Callbacks
 			template <typename F, typename ... VTypes> void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
-			Types::COnEpoch onEpochStartCallback;
-			Types::COnEpoch onEpochEndCallback;
 
 	};
 	template <typename Types>
 	EvolutionaryAlgorithm<Types>::EvolutionaryAlgorithm() : lambda(0) {
-		setGenePoolSelectionFunction(StandardGenePoolSelectors<Types>::all);
+		genePoolSelectionFunction = StandardGenePoolSelectors<Types>::all;
 	}
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::epoch() {
@@ -90,6 +80,7 @@ namespace DEvA {
 						newIndividual->setParents(variationInfo.parents);
 						newOffsprings.emplace_back(newIndividual);
 					}
+					tryExecuteCallback<Types::COnVariation, VariationInfo<Types> const &>(onVariationCallback, variationInfo);
 				}
 			}
 			typename Types::IndividualPtrs newGeneration{};
