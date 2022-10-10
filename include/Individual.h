@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IndividualIdentifier.h"
 #include "VParameters.h"
 
 #include <list>
@@ -7,30 +8,6 @@
 #include <vector>
 
 namespace DEvA {
-	struct IndividualIdentifier {
-		std::size_t generation;
-		std::size_t identifier;
-		friend bool operator<(IndividualIdentifier const & l, IndividualIdentifier const & r) {
-			return std::tie(l.generation, l.identifier) < std::tie(r.generation, r.identifier);
-		}
-		friend bool operator>(IndividualIdentifier const & lhs, IndividualIdentifier const & rhs) {
-			return rhs < lhs;
-		}
-		friend bool operator<=(IndividualIdentifier const & lhs, IndividualIdentifier const & rhs) {
-			return !(lhs > rhs);
-		}
-		friend bool operator>=(IndividualIdentifier const & lhs, IndividualIdentifier const & rhs) {
-			return !(lhs < rhs);
-		}
-		friend bool operator==(IndividualIdentifier const & lhs, IndividualIdentifier const & rhs) {
-			return lhs.generation == rhs.generation and lhs.identifier == rhs.identifier;
-		}
-		friend bool operator!=(IndividualIdentifier const & lhs, IndividualIdentifier const & rhs) {
-			return !(lhs == rhs);
-		}
-	};
-	using IndividualIdentifiers = std::vector<IndividualIdentifier>;
-
 	template <typename Types, typename VP>
 	class Individual : public std::enable_shared_from_this<Individual<Types, VP>> {
 		public:
@@ -44,15 +21,7 @@ namespace DEvA {
 					(* it)->children.push_back(this->shared_from_this());
 				}
 			}
-			// TODO: Get rid of this
-			//Individual<Types, VP>& operator=(Individual<Types, VP>& ind) {
-			//	genotypeProxy = ind.genotypeProxy;
-			//	maybePhenotypeProxy = ind.maybePhenotypeProxy;
-			//	fitness = ind.fitness;
-			//	parents = ind.parents;
-			//	children = ind.children;
-			//	return *this;
-			//};
+
 			bool isInvalid() {
 				bool invalidTransform = std::unexpected(ErrorCode::InvalidTransform) == maybePhenotypeProxy;
 				return invalidTransform;

@@ -6,6 +6,7 @@
 
 #include "Concepts.h"
 
+#include "EAStatistics.h"
 #include "Error.h"
 #include "EvolutionaryAlgorithm.h"
 #include "Individual.h"
@@ -88,6 +89,7 @@ namespace DEvA {
 
         // Callbacks
 		using CVoid = std::function<void(void)>;
+        using CEAStatsUpdate = std::function<void(EAStatistics)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;
 

@@ -7,7 +7,7 @@ set(DEvA_BUILD_TESTS TRUE CACHE BOOL "Build tests for DEvA")
 
 include(FetchContent)
 
-project(DEvA LANGUAGES CXX VERSION 0.4.4.4)
+project(DEvA LANGUAGES CXX VERSION 0.4.4.5)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_CURRENT_SOURCE_DIR}/doc/flowchart.dot -o ${CMAKE_CURRENT_BINARY_DIR}/flowchart.svg)
@@ -25,7 +25,6 @@ add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_CURRENT_SOURCE_DIR}/doc/fl
 
 set(DEvA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/deva_version.cpp"
 				 "${CMAKE_CURRENT_SOURCE_DIR}/src/Bibliography.cpp"
-				 "${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp"
 				 "${CMAKE_CURRENT_SOURCE_DIR}/src/RandomNumberGenerator.cpp"
 				 "${CMAKE_CURRENT_SOURCE_DIR}/src/Strategy.cpp")
 
