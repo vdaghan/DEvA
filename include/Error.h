@@ -5,7 +5,9 @@
 namespace DEvA{
 	enum class ErrorCode {
 		OK,
-		InvalidTransform
+		InvalidTransform,
+		NotApplied,
+		NotEnoughParentsToChoose
 	};
 	template <typename T> using Maybe = std::expected<T, ErrorCode>;
 }

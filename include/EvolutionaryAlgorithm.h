@@ -25,6 +25,7 @@ namespace DEvA {
 		public:
 			EvolutionaryAlgorithm();
 
+			// Targeted number of individuals
 			std::size_t lambda;
 
 			// Specialisation functions
@@ -43,6 +44,7 @@ namespace DEvA {
 
 			// Callbacks
 			Types::CEAStatsUpdate onEAStatsUpdateCallback;
+			Types::CEAStatsHistoryUpdate onEAStatsHistoryUpdateCallback;
 			Types::COnEpoch onEpochStartCallback;
 			Types::COnEpoch onEpochEndCallback;
 			Types::COnVariation onVariationCallback;
@@ -59,10 +61,12 @@ namespace DEvA {
 			Types::Fitness bestFitness;
 			Types::Genealogy genealogy;
 		private:
-			template <typename F, typename ... VTypes> void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
+			template <typename F, typename ... VTypes>
+				void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
 			VariationStatisticsMap evaluateVariations();
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
 			EAStatistics eaStatistics;
+			EAStatisticsHistory eaStatisticsHistory;
 	};
 }
 

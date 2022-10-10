@@ -67,7 +67,8 @@ namespace DEvA {
 
         using SStandardVariations = StandardVariations<Spec>;
 
-		using SVariationInfo = VariationInfo<Spec>;
+        using SVariationInfo = VariationInfo<Spec>;
+        using SMaybeVariationInfo = Maybe<VariationInfo<Spec>>;
 		using SVariationFunctor = VariationFunctor<Spec>;
 
 		// Specification function types
@@ -90,6 +91,7 @@ namespace DEvA {
         // Callbacks
 		using CVoid = std::function<void(void)>;
         using CEAStatsUpdate = std::function<void(EAStatistics)>;
+        using CEAStatsHistoryUpdate = std::function<void(EAStatisticsHistory const &)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;
 

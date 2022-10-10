@@ -16,12 +16,17 @@ namespace DEvA {
 		IndividualIdentifiers childIds;
 	};
 
+	struct VariationFunctorParameters {
+		double probability;
+		bool removeParentsFromMatingPool;
+	};
+
 	template <typename Spec>
 	struct VariationFunctor {
-		VariationInfo<Spec> apply(Spec::FFitnessComparison comp, Spec::IndividualPtrs & matingPool) const {
+		Maybe<VariationInfo<Spec>> apply(Spec::FFitnessComparison comp, Spec::IndividualPtrs & matingPool) const {
 			double p = RandomNumberGenerator::get()->getDouble();
 			if (p >= probability) {
-				return {};
+				return VariationInfo<Spec>{.name="", .parentPtrs={}, .parentIds={}, .childProxies={}, .childIds={}};
 			}
 			VariationInfo<Spec> variationInfo;
 			variationInfo.name = name;
@@ -40,9 +45,11 @@ namespace DEvA {
 		}
 
 		std::string name;
-		double probability;
 		Spec::FParentSelection parentSelectionFunction;
 		Spec::FVariation variationFunction;
+
+		double probability;
 		bool removeParentsFromMatingPool;
+		VariationFunctorParameters parameters;
 	};
 }

@@ -12,9 +12,12 @@ namespace DEvA {
 	}
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::epoch() {
+		eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration = 0;
+		eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration = 0;
 		typename Types::Generation newGeneration{};
 		if (0 == genealogy.size()) [[unlikely]] {
 			auto genotypeProxies(genesisFunction());
+			//lambda = genotypeProxies.size();
 			for (auto& genotypeProxy : genotypeProxies) {
 				auto newIndividual = std::make_shared<Individual<Types, Types::IndividualParameters>>(eaStatistics.eaProgress.currentGeneration, eaStatistics.eaProgress.nextIdentifier, genotypeProxy);
 				++eaStatistics.eaProgress.numberOfIndividualsInGeneration;
@@ -30,11 +33,20 @@ namespace DEvA {
 			std::list<VariationInfo<Types>> newVariationInfos;
 			typename Types::IndividualPtrs newOffsprings{};
 			while (newOffsprings.size() < lambda) {
+				bool notEnoughParents(true);
 				for (auto const& variationFunctor : variationFunctors) {
 					if (newOffsprings.size() >= lambda) {
 						break;
 					}
-					auto variationInfo = variationFunctor.apply(fitnessComparisonFunction, genePool);
+					auto maybeVariationInfo = variationFunctor.apply(fitnessComparisonFunction, genePool);
+					if (maybeVariationInfo == std::unexpected(ErrorCode::NotApplied)) {
+						continue;
+					}
+					if (maybeVariationInfo == std::unexpected(ErrorCode::NotEnoughParentsToChoose)) {
+						continue;
+					}
+					notEnoughParents = false;
+					auto& variationInfo = maybeVariationInfo.value();
 					for (auto& parentPtr : variationInfo.parentPtrs) {
 						variationInfo.parentIds.push_back(parentPtr->id);
 					}
@@ -51,6 +63,9 @@ namespace DEvA {
 					newVariationInfos.push_back(variationInfo);
 					tryExecuteCallback<Types::COnVariation, VariationInfo<Types> const&>(onVariationCallback, variationInfo);
 				}
+				if (notEnoughParents) {
+					break;
+				}
 			}
 			newGeneration.insert(newGeneration.end(), newOffsprings.begin(), newOffsprings.end());
 			newGeneration.insert(newGeneration.end(), genealogy.back().begin(), genealogy.back().end());
@@ -59,10 +74,25 @@ namespace DEvA {
 		genealogy.push_back(newGeneration);
 		logger.info("Epoch {}: {} individuals.", eaStatistics.eaProgress.currentGeneration, eaStatistics.eaProgress.numberOfIndividualsInGeneration);
 
-		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) { iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy); });
-		genealogy.back().remove_if([&](auto& iptr) { return iptr->isInvalid(); });
-		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) { iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value()); });
-		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) { return fitnessComparisonFunction(lhs->fitness, rhs->fitness); });
+		std::mutex eaStatusWriteMutex;
+		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
+			iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy);
+			std::lock_guard<std::mutex> lock(eaStatusWriteMutex);
+			++eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics>(onEAStatsUpdateCallback, eaStatistics);
+		});
+		genealogy.back().remove_if([&](auto& iptr) {
+			return iptr->isInvalid();
+		});
+		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
+			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
+			std::lock_guard<std::mutex> lock(eaStatusWriteMutex);
+			++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics>(onEAStatsUpdateCallback, eaStatistics);
+		});
+		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
+			return fitnessComparisonFunction(lhs->fitness, rhs->fitness);
+		});
 
 		if (!variationInfos.back().empty()) {
 			VariationStatisticsMap vSM = evaluateVariations();
@@ -78,12 +108,14 @@ namespace DEvA {
 		bestFitness = bestIndividual->fitness;
 		//std::cout << "Best fitness: " << bestFitness << "\n";
 
+		eaStatisticsHistory.push_back(eaStatistics);
+		tryExecuteCallback<Types::CEAStatsHistoryUpdate, EAStatisticsHistory>(onEAStatsHistoryUpdateCallback, eaStatisticsHistory);
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
-			if (convergenceCheckFunction(bestFitness)) [[unlikely]] {
-				return StepResult::Convergence;
-			}
+		if (convergenceCheckFunction(bestFitness)) [[unlikely]] {
+			return StepResult::Convergence;
+		}
 		return StepResult::Inconclusive;
 	}
 
@@ -107,11 +139,11 @@ namespace DEvA {
 		if (genealogy.size() <= gen) [[unlikely]] {
 			return {};
 		}
-			for (auto& indPtr : genealogy.at(gen)) {
-				if (indPtr->id == indId) {
-					return indPtr;
-				}
+		for (auto& indPtr : genealogy.at(gen)) {
+			if (indPtr->id == indId) {
+				return indPtr;
 			}
+		}
 		return {};
 	}
 
@@ -139,8 +171,7 @@ namespace DEvA {
 				}
 				if (betterThanSome) {
 					++varStat.success;
-				}
-				else {
+				} else {
 					++varStat.fail;
 				}
 			}
