@@ -10,6 +10,7 @@
 #include "BuildingBlocks/StandardGenePoolSelectors.h"
 
 #include <algorithm>
+#include <atomic>
 #include <deque>
 #include <iostream>
 #include <list>
@@ -18,7 +19,7 @@
 #include <ranges>
 
 namespace DEvA {
-	enum class StepResult { Inconclusive, StepCount, Exhaustion, Convergence };
+	enum class StepResult { Inconclusive, StepCount, Exhaustion, Convergence, Stopped };
 
 	template <typename Types>
 	class EvolutionaryAlgorithm {
@@ -48,25 +49,33 @@ namespace DEvA {
 			Types::COnEpoch onEpochStartCallback;
 			Types::COnEpoch onEpochEndCallback;
 			Types::COnVariation onVariationCallback;
+			Types::CVoid onPauseCallback;
+			Types::CVoid onStopCallback;
 
-			StepResult epoch();
 			StepResult search(size_t count);
+			void pause();
+			void stop();
+
 			Types::IndividualPtr find(IndividualIdentifier);
 
 			void addGeneration(Types::Generation gen) { genealogy.push_back(gen); };
-
 			Logger logger;
 			Types::GenotypeProxy bestGenotype;
 			Types::PhenotypeProxy bestPhenotype;
 			Types::Fitness bestFitness;
 			Types::Genealogy genealogy;
 		private:
+			StepResult epoch();
 			template <typename F, typename ... VTypes>
 				void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
 			VariationStatisticsMap evaluateVariations();
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
 			EAStatistics eaStatistics;
 			EAStatisticsHistory eaStatisticsHistory;
+
+			std::atomic<bool> pauseFlag;
+			bool checkStopFlagAndMaybeWait();
+			std::atomic<bool> stopFlag;
 	};
 }
 

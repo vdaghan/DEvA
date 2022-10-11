@@ -4,7 +4,9 @@ namespace DEvA {
 	template <typename Types>
 	EvolutionaryAlgorithm<Types>::EvolutionaryAlgorithm()
 		: lambda(0)
-		, genePoolSelectionFunction(StandardGenePoolSelectors<Types>::all) {
+		, genePoolSelectionFunction(StandardGenePoolSelectors<Types>::all)
+	    , pauseFlag(false)
+	    , stopFlag(false) {
 		eaStatistics.eaProgress.currentGeneration = 0;
 		eaStatistics.eaProgress.nextIdentifier = 0;
 		eaStatistics.eaProgress.numberOfIndividualsInGeneration = 0;
@@ -35,6 +37,9 @@ namespace DEvA {
 			while (newOffsprings.size() < lambda) {
 				bool notEnoughParents(true);
 				for (auto const& variationFunctor : variationFunctors) {
+					if (checkStopFlagAndMaybeWait()) {
+						return StepResult::Stopped;
+					}
 					if (newOffsprings.size() >= lambda) {
 						break;
 					}
@@ -76,6 +81,9 @@ namespace DEvA {
 
 		std::mutex eaStatusWriteMutex;
 		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
+			if (checkStopFlagAndMaybeWait()) {
+				return;
+			}
 			iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy);
 			std::lock_guard<std::mutex> lock(eaStatusWriteMutex);
 			++eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration;
@@ -85,6 +93,9 @@ namespace DEvA {
 			return iptr->isInvalid();
 		});
 		std::for_each(genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
+			if (checkStopFlagAndMaybeWait()) {
+				return;
+			}
 			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
 			std::lock_guard<std::mutex> lock(eaStatusWriteMutex);
 			++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;
@@ -93,6 +104,9 @@ namespace DEvA {
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
 			return fitnessComparisonFunction(lhs->fitness, rhs->fitness);
 		});
+		if (checkStopFlagAndMaybeWait()) {
+			return StepResult::Stopped;
+		}
 
 		if (!variationInfos.back().empty()) {
 			VariationStatisticsMap vSM = evaluateVariations();
@@ -122,6 +136,9 @@ namespace DEvA {
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::search(size_t count) {
 		for (size_t i(0); i < count; ++i) {
+			if (checkStopFlagAndMaybeWait()) {
+				return StepResult::Stopped;
+			}
 			tryExecuteCallback<Types::COnEpoch, std::size_t>(onEpochStartCallback, genealogy.size());
 			StepResult epochResult = epoch();
 			tryExecuteCallback<Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
@@ -131,6 +148,28 @@ namespace DEvA {
 		}
 		return StepResult::StepCount;
 	};
+
+	template <typename Types>
+	void EvolutionaryAlgorithm<Types>::pause() {
+		pauseFlag.store(!pauseFlag.load());
+		if (pauseFlag.load()) {
+			tryExecuteCallback<Types::CVoid>(onPauseCallback);
+		}
+	}
+
+	template <typename Types>
+	bool EvolutionaryAlgorithm<Types>::checkStopFlagAndMaybeWait() {
+		while (pauseFlag.load() and !stopFlag.load()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+		return stopFlag.load();
+	}
+
+	template <typename Types>
+	void EvolutionaryAlgorithm<Types>::stop() {
+		stopFlag.store(true);
+		tryExecuteCallback<Types::CVoid>(onStopCallback);
+	}
 
 	template <typename Types>
 	Types::IndividualPtr EvolutionaryAlgorithm<Types>::find(IndividualIdentifier indId) {

@@ -113,16 +113,19 @@ int main() {
 	};
 
 	auto result = ea.search(1000);
+	if (DEvA::StepResult::Convergence == result) {
+		std::cout << "Converged.\n";
+	//} else if (DEvA::StepResult::Stopped == result) {
+	//	std::cout << "Stopped.\n";
+	//	return 0;
+	} else {
+		std::cout << "Step limit reached.\n";
+	}
 	std::cout << "Best genotype: [";
 	for (auto it = ea.bestGenotype->begin(); it != ea.bestGenotype->end(); ++it) {
 		std::cout << *it << " ";
 	}
 	std::cout << "]\nFitness: " << ea.bestFitness << "\n";
-	if (DEvA::StepResult::Convergence == result) {
-		std::cout << "Converged.\n";
-	} else {
-		std::cout << "Step limit reached.\n";
-	}
 
 	return 0;
 }
