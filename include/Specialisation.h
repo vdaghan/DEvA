@@ -1,8 +1,10 @@
 #pragma once
 
 #include <deque>
-#include <memory>
 #include <initializer_list>
+#include <map>
+#include <memory>
+#include <type_traits>
 
 #include "Concepts.h"
 
@@ -10,6 +12,7 @@
 #include "Error.h"
 #include "EvolutionaryAlgorithm.h"
 #include "Individual.h"
+#include "IndividualIdentifier.h"
 #include "Parameters.h"
 #include "StandardConvergenceCheckers.h"
 #include "StandardInitialisers.h"
@@ -46,6 +49,9 @@ namespace DEvA {
 		using PhenotypeProxy = S::PhenotypeProxy;
 		using MaybePhenotypeProxy = Maybe<PhenotypeProxy>;
         using Fitness = S::Fitness;
+        using Fitnesses = std::list<Fitness>;
+        using Distance = S::Distance;
+        using DistanceMatrix = std::map<IndividualIdentifier, std::map<IndividualIdentifier, Distance>>;
         using IndividualParameters = S::IndividualParameters;
 
         using FGenotypePtrSet = std::function<GenotypeProxies(GenotypeProxies)>;
@@ -85,13 +91,16 @@ namespace DEvA {
         using FParentSelection = std::function<IndividualPtrs(FFitnessComparison, IndividualPtrs)>;
         //using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
 		using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
+        using FDistanceCalculation = std::function<Distance(IndividualIdentifier, IndividualIdentifier)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FConvergenceCheck = std::function<bool(Fitness)>;
 
         // Callbacks
 		using CVoid = std::function<void(void)>;
-        using CEAStatsUpdate = std::function<void(EAStatistics)>;
-        using CEAStatsHistoryUpdate = std::function<void(EAStatisticsHistory const &)>;
+        using CDistanceMatrixUpdate = std::function<void(DistanceMatrix const&)>;
+        using CEAStatsUpdate = std::function<void(EAStatistics<Spec>)>;
+        using CEAStatsHistoryUpdate = std::function<void(EAStatisticsHistory<Spec> const&)>;
+        using CFitnessUpdate = std::function<void(Fitnesses const&)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;
 

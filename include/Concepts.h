@@ -13,8 +13,11 @@ namespace DEvA {
 		typename T::Phenotype;
 		typename T::PhenotypeProxy;
 		typename T::Fitness;
+		typename T::Distance;
 		typename T::IndividualParameters;
 	};
+	template <typename T> concept CHasDistance = requires { typename T::Distance; };
+	template <typename T> concept CNoDistance = not CHasDistance<T>;
 	template <typename T> concept CSpecification = 
 	CSpecificationTypes<T> and
 	requires () {

@@ -50,6 +50,7 @@ int main() {
 		using Phenotype = std::vector<size_t>;
 		using PhenotypeProxy = std::shared_ptr<Phenotype>;
 		using Fitness = int;
+		using Distance = int;
 		using IndividualParameters = DEvA::NullVParameters;
 		static GenotypeProxy copy(GenotypeProxy gpx) { return gpx; };
 	};

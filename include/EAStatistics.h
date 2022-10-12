@@ -3,6 +3,7 @@
 #include "IndividualIdentifier.h"
 
 #include <deque>
+#include <list>
 #include <map>
 #include <string>
 
@@ -26,9 +27,14 @@ namespace DEvA {
 		std::size_t numberOfEvaluatedIndividualsInGeneration;
 	};
 
+	template <typename Types>
 	struct EAStatistics {
 		EAProgress eaProgress;
+		std::list<typename Types::Fitness> fitnesses;
+		typename Types::DistanceMatrix distanceMatrix;
 		VariationStatisticsMap variationStatisticsMap;
 	};
-	using EAStatisticsHistory = std::deque<EAStatistics>;
+
+	template <typename Types>
+	using EAStatisticsHistory = std::deque<EAStatistics<Types>>;
 }

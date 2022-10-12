@@ -40,12 +40,15 @@ namespace DEvA {
 			Types::FEvaluate evaluationFunction;
 			Types::FFitnessComparison fitnessComparisonFunction;
 			std::list<typename Types::SVariationFunctor> variationFunctors;
+			Types::FDistanceCalculation distanceCalculationFunction;
 			Types::FSurvivorSelection survivorSelectionFunction;
 			Types::FConvergenceCheck convergenceCheckFunction;
 
 			// Callbacks
+			Types::CDistanceMatrixUpdate onDistanceMatrixUpdateCallback;
 			Types::CEAStatsUpdate onEAStatsUpdateCallback;
 			Types::CEAStatsHistoryUpdate onEAStatsHistoryUpdateCallback;
+			Types::CFitnessUpdate onFitnessUpdateCallback;
 			Types::COnEpoch onEpochStartCallback;
 			Types::COnEpoch onEpochEndCallback;
 			Types::COnVariation onVariationCallback;
@@ -70,8 +73,8 @@ namespace DEvA {
 				void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
 			VariationStatisticsMap evaluateVariations();
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
-			EAStatistics eaStatistics;
-			EAStatisticsHistory eaStatisticsHistory;
+			EAStatistics<Types> eaStatistics;
+			EAStatisticsHistory<Types> eaStatisticsHistory;
 
 			std::atomic<bool> pauseFlag;
 			bool checkStopFlagAndMaybeWait();
