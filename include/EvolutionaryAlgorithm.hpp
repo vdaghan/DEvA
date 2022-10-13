@@ -96,15 +96,13 @@ namespace DEvA {
 			return fitnessComparisonFunction(lhs->fitness, rhs->fitness);
 		});
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
-		if (onFitnessUpdateCallback) {
-			eaStatistics.fitnesses.clear();
-			for (auto& iptr : genealogy.back()) {
-				if (!iptr->maybePhenotypeProxy) continue;
-				std::lock_guard<std::mutex> lock(eaStatisticsMutex);
-				eaStatistics.fitnesses.push_back(iptr->fitness);
-			};
-			tryExecuteCallback<typename Types::CFitnessUpdate, typename Types::Fitnesses>(onFitnessUpdateCallback, eaStatistics.fitnesses);
-		}
+		eaStatistics.fitnesses.clear();
+		for (auto& iptr : genealogy.back()) {
+			if (!iptr->maybePhenotypeProxy) continue;
+			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
+			eaStatistics.fitnesses.push_back(iptr->fitness);
+		};
+		tryExecuteCallback<typename Types::CFitnessUpdate, typename Types::Fitnesses>(onFitnessUpdateCallback, eaStatistics.fitnesses);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		if (distanceCalculationFunction) {
 			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
