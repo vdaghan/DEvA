@@ -11,7 +11,7 @@ namespace DEvA {
 		eaStatistics.eaProgress.numberOfIndividualsInGeneration = 0;
 		eaState.currentGeneration.store(0);
 		eaState.nextIdentifier.store(0);
-		tryExecuteCallback<Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
 	}
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::epoch() {
@@ -57,7 +57,7 @@ namespace DEvA {
 						newOffsprings.emplace_back(newIndividual);
 					}
 					newVariationInfos.push_back(variationInfo);
-					tryExecuteCallback<Types::COnVariation, VariationInfo<Types> const&>(onVariationCallback, variationInfo);
+					tryExecuteCallback<typename Types::COnVariation, VariationInfo<Types> const&>(onVariationCallback, variationInfo);
 				}
 				if (notEnoughParents) {
 					break;
@@ -68,9 +68,6 @@ namespace DEvA {
 			variationInfos.push_back(newVariationInfos);
 		}
 		genealogy.push_back(newGeneration);
-		eaState.currentGeneration.fetch_add(1);
-		eaStatistics.eaProgress.currentGeneration = eaState.currentGeneration.load();
-		tryExecuteCallback<Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
 		logger.info("Epoch {}: {} individuals.", eaState.currentGeneration.load(), eaStatistics.eaProgress.numberOfIndividualsInGeneration);
 
 		std::for_each(std::execution::par_unseq, genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
@@ -134,7 +131,7 @@ namespace DEvA {
 		if (!variationInfos.back().empty()) {
 			VariationStatisticsMap vSM = evaluateVariations();
 			eaStatistics.variationStatisticsMap = vSM;
-			tryExecuteCallback<Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
 		}
 
 		survivorSelectionFunction(genealogy.back());
@@ -146,7 +143,10 @@ namespace DEvA {
 		//std::cout << "Best fitness: " << bestFitness << "\n";
 
 		eaStatisticsHistory.push_back(eaStatistics);
-		tryExecuteCallback<Types::CEAStatsHistoryUpdate, EAStatisticsHistory<Types>>(onEAStatsHistoryUpdateCallback, eaStatisticsHistory);
+		tryExecuteCallback<typename Types::CEAStatsHistoryUpdate, EAStatisticsHistory<Types>>(onEAStatsHistoryUpdateCallback, eaStatisticsHistory);
+		eaState.currentGeneration.fetch_add(1);
+		eaStatistics.eaProgress.currentGeneration = eaState.currentGeneration.load();
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
@@ -162,9 +162,9 @@ namespace DEvA {
 			if (checkStopFlagAndMaybeWait()) {
 				return StepResult::Stopped;
 			}
-			tryExecuteCallback<Types::COnEpoch, std::size_t>(onEpochStartCallback, genealogy.size());
+			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochStartCallback, genealogy.size());
 			StepResult epochResult = epoch();
-			tryExecuteCallback<Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
+			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
 			if (StepResult::Inconclusive != epochResult) [[unlikely]] {
 				return epochResult;
 			}
@@ -176,7 +176,7 @@ namespace DEvA {
 	void EvolutionaryAlgorithm<Types>::pause() {
 		pauseFlag.store(!pauseFlag.load());
 		if (pauseFlag.load()) {
-			tryExecuteCallback<Types::CVoid>(onPauseCallback);
+			tryExecuteCallback<typename Types::CVoid>(onPauseCallback);
 		}
 	}
 
@@ -191,7 +191,7 @@ namespace DEvA {
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::stop() {
 		stopFlag.store(true);
-		tryExecuteCallback<Types::CVoid>(onStopCallback);
+		tryExecuteCallback<typename Types::CVoid>(onStopCallback);
 	}
 
 	template <typename Types>
@@ -203,7 +203,7 @@ namespace DEvA {
 			id = reserveNewIndividualIdentifier();
 		}
 		++eaStatistics.eaProgress.numberOfIndividualsInGeneration;
-		tryExecuteCallback<Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
 		return std::make_shared<typename Types::SIndividual>(id.generation, id.identifier, gpx);
 	}
 
