@@ -5,6 +5,7 @@
 #include <deque>
 #include <list>
 #include <map>
+#include <mutex>
 #include <string>
 
 namespace DEvA {
@@ -21,7 +22,6 @@ namespace DEvA {
 
 	struct EAProgress {
 		std::size_t currentGeneration;
-		std::size_t nextIdentifier;
 		std::size_t numberOfIndividualsInGeneration;
 		std::size_t numberOfTransformedIndividualsInGeneration;
 		std::size_t numberOfEvaluatedIndividualsInGeneration;

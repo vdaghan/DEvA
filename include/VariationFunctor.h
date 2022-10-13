@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IndividualIdentifier.h"
 #include "RandomNumberGenerator.h"
 
 #include <list>

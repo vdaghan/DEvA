@@ -1,9 +1,11 @@
 #pragma once
 
+#include "EAState.h"
 #include "EAStatistics.h"
 #include "Error.h"
 #include "Genealogy.h"
 #include "Individual.h"
+#include "IndividualIdentifier.h"
 #include "Logger.h"
 #include "VariationFunctor.h"
 
@@ -12,6 +14,7 @@
 #include <algorithm>
 #include <atomic>
 #include <deque>
+#include <execution>
 #include <iostream>
 #include <list>
 #include <map>
@@ -58,7 +61,8 @@ namespace DEvA {
 			StepResult search(size_t count);
 			void pause();
 			void stop();
-
+			Types::IndividualPtr createNewIndividual(Types::GenotypeProxy);
+			IndividualIdentifier reserveNewIndividualIdentifier();
 			Types::IndividualPtr find(IndividualIdentifier);
 
 			void addGeneration(Types::Generation gen) { genealogy.push_back(gen); };
@@ -68,12 +72,14 @@ namespace DEvA {
 			Types::Fitness bestFitness;
 			Types::Genealogy genealogy;
 		private:
+			EAState eaState;
 			StepResult epoch();
 			template <typename F, typename ... VTypes>
 				void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
 			VariationStatisticsMap evaluateVariations();
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
 			EAStatistics<Types> eaStatistics;
+			std::mutex eaStatisticsMutex;
 			EAStatisticsHistory<Types> eaStatisticsHistory;
 
 			std::atomic<bool> pauseFlag;
