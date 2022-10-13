@@ -17,6 +17,8 @@ namespace DEvA {
 	StepResult EvolutionaryAlgorithm<Types>::epoch() {
 		eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration = 0;
 		eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration = 0;
+		eaStatistics.eaProgress.numberOfIndividualsInGeneration = 0;
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
 		typename Types::Generation newGeneration{};
 		if (0 == genealogy.size()) [[unlikely]] {
 			auto genotypeProxies(genesisFunction());
