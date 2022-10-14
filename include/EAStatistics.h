@@ -27,6 +27,7 @@ namespace DEvA {
 		std::size_t numberOfEvaluatedIndividualsInGeneration;
 	};
 
+	enum class EAStatisticsUpdateType {Progress, Variation, Fitness, Distance};
 	template <typename Types>
 	struct EAStatistics {
 		EAProgress eaProgress;
@@ -34,7 +35,4 @@ namespace DEvA {
 		typename Types::DistanceMatrix distanceMatrix;
 		VariationStatisticsMap variationStatisticsMap;
 	};
-
-	template <typename Types>
-	using EAStatisticsHistory = std::deque<EAStatistics<Types>>;
 }

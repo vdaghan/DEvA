@@ -48,10 +48,8 @@ namespace DEvA {
 			Types::FConvergenceCheck convergenceCheckFunction;
 
 			// Callbacks
-			Types::CDistanceMatrixUpdate onDistanceMatrixUpdateCallback;
 			Types::CEAStatsUpdate onEAStatsUpdateCallback;
 			Types::CEAStatsHistoryUpdate onEAStatsHistoryUpdateCallback;
-			Types::CFitnessUpdate onFitnessUpdateCallback;
 			Types::COnEpoch onEpochStartCallback;
 			Types::COnEpoch onEpochEndCallback;
 			Types::COnVariation onVariationCallback;
@@ -80,7 +78,6 @@ namespace DEvA {
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
 			EAStatistics<Types> eaStatistics;
 			std::mutex eaStatisticsMutex;
-			EAStatisticsHistory<Types> eaStatisticsHistory;
 
 			std::atomic<bool> pauseFlag;
 			bool checkStopFlagAndMaybeWait();

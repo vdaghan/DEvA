@@ -11,14 +11,14 @@ namespace DEvA {
 		eaStatistics.eaProgress.numberOfIndividualsInGeneration = 0;
 		eaState.currentGeneration.store(0);
 		eaState.nextIdentifier.store(0);
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 	}
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::epoch() {
 		eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration = 0;
 		eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration = 0;
 		eaStatistics.eaProgress.numberOfIndividualsInGeneration = 0;
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		typename Types::Generation newGeneration{};
 		if (0 == genealogy.size()) [[unlikely]] {
 			auto genotypeProxies(genesisFunction());
@@ -66,37 +66,41 @@ namespace DEvA {
 				}
 			}
 			newGeneration.insert(newGeneration.end(), newOffsprings.begin(), newOffsprings.end());
-			newGeneration.insert(newGeneration.end(), genealogy.back().begin(), genealogy.back().end());
 			variationInfos.push_back(newVariationInfos);
 		}
-		genealogy.push_back(newGeneration);
-		logger.info("Epoch {}: {} individuals.", eaState.currentGeneration.load(), eaStatistics.eaProgress.numberOfIndividualsInGeneration);
+		logger.info("Epoch {}: {} new individuals.", eaState.currentGeneration.load(), eaStatistics.eaProgress.numberOfIndividualsInGeneration);
 
-		std::for_each(std::execution::par_unseq, genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
+		std::for_each(std::execution::par_unseq, newGeneration.begin(), newGeneration.end(), [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
 			}
 			iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy);
 			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
 			++eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration;
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		});
+
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
-		genealogy.back().remove_if([&](auto& iptr) {
+		newGeneration.remove_if([&](auto& iptr) {
 			return iptr->isInvalid();
 		});
-		std::for_each(std::execution::par_unseq, genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
+		std::for_each(std::execution::par_unseq, newGeneration.begin(), newGeneration.end(), [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) return;
-			if (!iptr->maybePhenotypeProxy) return;
 			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
 			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
 			++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		});
+
+		if (0 != genealogy.size()) [[likely]] {
+			newGeneration.insert(newGeneration.end(), genealogy.back().begin(), genealogy.back().end());
+		}
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
-		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
+		std::stable_sort(newGeneration.begin(), newGeneration.end(), [&](auto& lhs, auto& rhs) {
 			return fitnessComparisonFunction(lhs->fitness, rhs->fitness);
 		});
+		genealogy.push_back(newGeneration);
+
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		eaStatistics.fitnesses.clear();
 		for (auto& iptr : genealogy.back()) {
@@ -104,7 +108,8 @@ namespace DEvA {
 			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
 			eaStatistics.fitnesses.push_back(iptr->fitness);
 		};
-		tryExecuteCallback<typename Types::CFitnessUpdate, typename Types::Fitnesses>(onFitnessUpdateCallback, eaStatistics.fitnesses);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
+
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		if (distanceCalculationFunction) {
 			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
@@ -124,14 +129,14 @@ namespace DEvA {
 					eaStatistics.distanceMatrix[id1][id2] = distanceCalculationFunction(id1, id2);
 				}
 			});
-			tryExecuteCallback<typename Types::CDistanceMatrixUpdate, typename Types::DistanceMatrix>(onDistanceMatrixUpdateCallback, eaStatistics.distanceMatrix);
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Distance);
 		}
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		if (!variationInfos.back().empty()) {
 			VariationStatisticsMap vSM = evaluateVariations();
 			eaStatistics.variationStatisticsMap = vSM;
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Variation);
 		}
 
 		survivorSelectionFunction(genealogy.back());
@@ -142,11 +147,10 @@ namespace DEvA {
 		bestFitness = bestIndividual->fitness;
 		//std::cout << "Best fitness: " << bestFitness << "\n";
 
-		eaStatisticsHistory.push_back(eaStatistics);
-		tryExecuteCallback<typename Types::CEAStatsHistoryUpdate, EAStatisticsHistory<Types>>(onEAStatsHistoryUpdateCallback, eaStatisticsHistory);
+		tryExecuteCallback<typename Types::CEAStatsHistoryUpdate, EAStatistics<Types>>(onEAStatsHistoryUpdateCallback, eaStatistics);
 		eaState.currentGeneration.fetch_add(1);
 		eaStatistics.eaProgress.currentGeneration = eaState.currentGeneration.load();
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
@@ -203,7 +207,7 @@ namespace DEvA {
 			id = reserveNewIndividualIdentifier();
 		}
 		++eaStatistics.eaProgress.numberOfIndividualsInGeneration;
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		return std::make_shared<typename Types::SIndividual>(id.generation, id.identifier, gpx);
 	}
 

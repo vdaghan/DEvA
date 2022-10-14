@@ -97,10 +97,8 @@ namespace DEvA {
 
         // Callbacks
 		using CVoid = std::function<void(void)>;
-        using CDistanceMatrixUpdate = std::function<void(DistanceMatrix const&)>;
-        using CEAStatsUpdate = std::function<void(EAStatistics<Spec>)>;
-        using CEAStatsHistoryUpdate = std::function<void(EAStatisticsHistory<Spec> const&)>;
-        using CFitnessUpdate = std::function<void(Fitnesses const&)>;
+        using CEAStatsUpdate = std::function<void(EAStatistics<Spec> const &, EAStatisticsUpdateType)>;
+        using CEAStatsHistoryUpdate = std::function<void(EAStatistics<Spec> const &)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;
 
