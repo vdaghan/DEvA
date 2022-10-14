@@ -147,7 +147,7 @@ namespace DEvA {
 		bestFitness = bestIndividual->fitness;
 		//std::cout << "Best fitness: " << bestFitness << "\n";
 
-		tryExecuteCallback<typename Types::CEAStatsHistoryUpdate, EAStatistics<Types>>(onEAStatsHistoryUpdateCallback, eaStatistics);
+		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Final);
 		eaState.currentGeneration.fetch_add(1);
 		eaStatistics.eaProgress.currentGeneration = eaState.currentGeneration.load();
 		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);

@@ -27,7 +27,7 @@ namespace DEvA {
 		std::size_t numberOfEvaluatedIndividualsInGeneration;
 	};
 
-	enum class EAStatisticsUpdateType {Progress, Variation, Fitness, Distance};
+	enum class EAStatisticsUpdateType {Progress, Variation, Fitness, Distance, Final};
 	template <typename Types>
 	struct EAStatistics {
 		EAProgress eaProgress;

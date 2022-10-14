@@ -49,7 +49,6 @@ namespace DEvA {
 
 			// Callbacks
 			Types::CEAStatsUpdate onEAStatsUpdateCallback;
-			Types::CEAStatsHistoryUpdate onEAStatsHistoryUpdateCallback;
 			Types::COnEpoch onEpochStartCallback;
 			Types::COnEpoch onEpochEndCallback;
 			Types::COnVariation onVariationCallback;
