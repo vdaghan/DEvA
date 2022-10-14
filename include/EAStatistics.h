@@ -24,6 +24,7 @@ namespace DEvA {
 		std::size_t currentGeneration;
 		std::size_t numberOfIndividualsInGeneration;
 		std::size_t numberOfTransformedIndividualsInGeneration;
+		std::size_t numberOfInvalidIndividualsInGeneration;
 		std::size_t numberOfEvaluatedIndividualsInGeneration;
 	};
 
