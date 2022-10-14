@@ -70,7 +70,7 @@ namespace DEvA {
 		}
 		logger.info("Epoch {}: {} new individuals.", eaState.currentGeneration.load(), eaStatistics.eaProgress.numberOfIndividualsInGeneration);
 
-		std::for_each(std::execution::par_unseq, newGeneration.begin(), newGeneration.end(), [&](auto& iptr) {
+		std::for_each(std::execution::seq, newGeneration.begin(), newGeneration.end(), [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
 			}
@@ -84,7 +84,7 @@ namespace DEvA {
 		newGeneration.remove_if([&](auto& iptr) {
 			return iptr->isInvalid();
 		});
-		std::for_each(std::execution::par_unseq, newGeneration.begin(), newGeneration.end(), [&](auto& iptr) {
+		std::for_each(std::execution::seq, newGeneration.begin(), newGeneration.end(), [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) return;
 			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
 			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
@@ -114,7 +114,7 @@ namespace DEvA {
 		if (distanceCalculationFunction) {
 			std::lock_guard<std::mutex> lock(eaStatisticsMutex);
 			eaStatistics.distanceMatrix.clear();
-			std::for_each(std::execution::par_unseq, genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
+			std::for_each(std::execution::seq, genealogy.back().begin(), genealogy.back().end(), [&](auto& iptr) {
 				auto const& id1(iptr->id);
 				if (!iptr->maybePhenotypeProxy) {
 					return;
