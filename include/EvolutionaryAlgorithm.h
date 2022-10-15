@@ -71,9 +71,15 @@ namespace DEvA {
 		private:
 			EAState eaState;
 			StepResult epoch();
+			void transformIndividuals(Types::Generation &);
+			void removeInvalidIndividuals(Types::Generation &);
+			void evaluateIndividuals(Types::Generation &);
+			void mergeGenerations(Types::Generation &, Types::Generation &);
+			void sortGeneration(Types::Generation &);
+			void computeDistances();
+			void evaluateVariations();
 			template <typename F, typename ... VTypes>
 				void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
-			VariationStatisticsMap evaluateVariations();
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
 			EAStatistics<Types> eaStatistics;
 			std::mutex eaStatisticsMutex;
