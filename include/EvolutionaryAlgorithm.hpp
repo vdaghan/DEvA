@@ -119,7 +119,7 @@ namespace DEvA {
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		if (distanceCalculationFunction) {
-			computeDistances();
+			computeDistances(genealogy.back());
 		}
 
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
@@ -166,7 +166,10 @@ namespace DEvA {
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 
 		};
-		std::for_each(std::execution::seq, generation.begin(), generation.end(), transformLambda);
+		for (auto& iptr : generation) {
+			std::async(std::launch::async, [&] { transformLambda(iptr); });
+		}
+		//std::for_each(std::execution::seq, generation.begin(), generation.end(), transformLambda);
 	}
 
 	template <typename Types>
@@ -195,7 +198,10 @@ namespace DEvA {
 			}
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		};
-		std::for_each(std::execution::seq, generation.begin(), generation.end(), evaluateLambda);
+		for (auto & iptr : generation) {
+			std::async(std::launch::async, [&] { evaluateLambda(iptr); });
+		}
+		//std::for_each(std::execution::seq, generation.begin(), generation.end(), evaluateLambda);
 	}
 
 	template <typename Types>
@@ -211,7 +217,7 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::computeDistances() {
+	void EvolutionaryAlgorithm<Types>::computeDistances(Types::Generation & generation) {
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.distanceMatrix.clear();
@@ -229,7 +235,10 @@ namespace DEvA {
 				}
 			}
 		};
-		std::for_each(std::execution::seq, genealogy.back().begin(), genealogy.back().end(), computeDistanceLambda);
+		for (auto& iptr : generation) {
+			std::async(std::launch::async, [&] { computeDistanceLambda(iptr); });
+		}
+		//std::for_each(std::execution::seq, generation.begin(), generation.end(), computeDistanceLambda);
 		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Distance);
 	}
 
@@ -328,7 +337,7 @@ namespace DEvA {
 		}
 		{
 			auto lock(eaStatistics.lock());
-			++eaStatistics.eaProgress.numberOfIndividualsInGeneration;
+			++eaStatistics.eaProgress.numberOfNewIndividualsInGeneration;
 		}
 		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		return std::make_shared<typename Types::SIndividual>(id.generation, id.identifier, gpx);

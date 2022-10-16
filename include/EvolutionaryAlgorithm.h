@@ -15,6 +15,7 @@
 #include <atomic>
 #include <deque>
 #include <execution>
+#include <future>
 #include <iostream>
 #include <list>
 #include <map>
@@ -76,7 +77,7 @@ namespace DEvA {
 			void evaluateIndividuals(Types::Generation &);
 			void mergeGenerations(Types::Generation &, Types::Generation &);
 			void sortGeneration(Types::Generation &);
-			void computeDistances();
+			void computeDistances(Types::Generation &);
 			void evaluateVariations();
 			template <typename F, typename ... VTypes>
 				void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
