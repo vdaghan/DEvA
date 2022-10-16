@@ -22,8 +22,9 @@ namespace DEvA {
 			eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration = 0;
 			eaStatistics.eaProgress.numberOfInvalidIndividualsInGeneration = 0;
 			eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration = 0;
+			eaStatistics.eaProgress.eaStage = EAStage::Create;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		typename Types::Generation newGeneration{};
 		if (0 == genealogy.size()) [[unlikely]] {
 			auto genotypeProxies(genesisFunction());
@@ -77,10 +78,7 @@ namespace DEvA {
 			eaStatistics.eaProgress.numberOfNewIndividualsInGeneration = newGeneration.size();
 			eaStatistics.eaProgress.numberOfOldIndividualsInGeneration = 0 == genealogy.size() ? 0 : genealogy.back().size();
 			eaStatistics.eaProgress.numberOfIndividualsInGeneration = eaStatistics.eaProgress.numberOfNewIndividualsInGeneration + eaStatistics.eaProgress.numberOfOldIndividualsInGeneration;
-		}
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
-		{
-			auto lock(eaStatistics.lock());
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			std::size_t newIndividuals(eaStatistics.eaProgress.numberOfNewIndividualsInGeneration);
 			std::size_t oldIndividuals(eaStatistics.eaProgress.numberOfOldIndividualsInGeneration);
 			std::size_t individuals(eaStatistics.eaProgress.numberOfIndividualsInGeneration);
@@ -113,8 +111,11 @@ namespace DEvA {
 			if (!iptr->maybePhenotypeProxy) continue;
 			auto lock(eaStatistics.lock());
 			eaStatistics.fitnesses.push_back(iptr->fitness);
-		};
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
+		}
+		{
+			auto lock(eaStatistics.lock());
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
+		}
 
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
@@ -136,13 +137,13 @@ namespace DEvA {
 		bestFitness = bestIndividual->fitness;
 		//std::cout << "Best fitness: " << bestFitness << "\n";
 
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Final);
 		{
 			auto lock(eaStatistics.lock());
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Final);
 			eaStatistics.eaProgress.currentGeneration = eaState.currentGeneration.load();
+			eaState.currentGeneration.fetch_add(1);
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		eaState.currentGeneration.fetch_add(1);
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
@@ -154,6 +155,11 @@ namespace DEvA {
 
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::transformIndividuals(Types::Generation& generation) {
+		{
+			auto lock(eaStatistics.lock());
+			eaStatistics.eaProgress.eaStage = EAStage::Transform;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+		}
 		auto transformLambda = [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
@@ -162,14 +168,10 @@ namespace DEvA {
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration;
+				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			}
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
-
 		};
-		for (auto& iptr : generation) {
-			std::async(std::launch::async, [&] { transformLambda(iptr); });
-		}
-		//std::for_each(std::execution::seq, generation.begin(), generation.end(), transformLambda);
+		std::for_each(std::execution::par, generation.begin(), generation.end(), transformLambda);
 	}
 
 	template <typename Types>
@@ -183,25 +185,27 @@ namespace DEvA {
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.eaProgress.numberOfInvalidIndividualsInGeneration = afterRemoval - beforeRemoval;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 	}
 
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::evaluateIndividuals(Types::Generation & generation) {
+		{
+			auto lock(eaStatistics.lock());
+			eaStatistics.eaProgress.eaStage = EAStage::Evaluate;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+		}
 		auto evaluateLambda = [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) return;
 			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;
+				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			}
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		};
-		for (auto & iptr : generation) {
-			std::async(std::launch::async, [&] { evaluateLambda(iptr); });
-		}
-		//std::for_each(std::execution::seq, generation.begin(), generation.end(), evaluateLambda);
+		std::for_each(std::execution::par, generation.begin(), generation.end(), evaluateLambda);
 	}
 
 	template <typename Types>
@@ -220,6 +224,11 @@ namespace DEvA {
 	void EvolutionaryAlgorithm<Types>::computeDistances(Types::Generation & generation) {
 		{
 			auto lock(eaStatistics.lock());
+			eaStatistics.eaProgress.eaStage = EAStage::Distance;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+		}
+		{
+			auto lock(eaStatistics.lock());
 			eaStatistics.distanceMatrix.clear();
 		}
 		auto computeDistanceLambda = [&](auto& iptr) {
@@ -235,10 +244,8 @@ namespace DEvA {
 				}
 			}
 		};
-		for (auto& iptr : generation) {
-			std::async(std::launch::async, [&] { computeDistanceLambda(iptr); });
-		}
-		//std::for_each(std::execution::seq, generation.begin(), generation.end(), computeDistanceLambda);
+		std::for_each(std::execution::par, generation.begin(), generation.end(), computeDistanceLambda);
+		auto lock(eaStatistics.lock());
 		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Distance);
 	}
 
@@ -285,8 +292,8 @@ namespace DEvA {
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.variationStatisticsMap = std::move(varStatMap);
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Variation);
 		}
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Variation);
 	}
 
 	template <typename Types>
@@ -338,8 +345,8 @@ namespace DEvA {
 		{
 			auto lock(eaStatistics.lock());
 			++eaStatistics.eaProgress.numberOfNewIndividualsInGeneration;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		return std::make_shared<typename Types::SIndividual>(id.generation, id.identifier, gpx);
 	}
 

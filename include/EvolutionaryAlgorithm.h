@@ -79,8 +79,14 @@ namespace DEvA {
 			void sortGeneration(Types::Generation &);
 			void computeDistances(Types::Generation &);
 			void evaluateVariations();
+			std::mutex callbackMutex;
 			template <typename F, typename ... VTypes>
-				void tryExecuteCallback(F f, VTypes ... vargs) { if(f) f(vargs...); };
+				void tryExecuteCallback(F f, VTypes ... vargs) {
+					if (f) {
+						std::lock_guard<std::mutex> lock(callbackMutex);
+						f(vargs...);
+					}
+				};
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
 			EAStatistics<Types> eaStatistics;
 			std::mutex eaStatisticsMutex;

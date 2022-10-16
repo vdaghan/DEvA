@@ -5,6 +5,7 @@
 namespace DEvA{
 	enum class ErrorCode {
 		OK,
+		Fail,
 		InvalidTransform,
 		NotApplied,
 		NotEnoughParentsToChoose

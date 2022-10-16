@@ -20,7 +20,9 @@ namespace DEvA {
 	};
 	using VariationStatisticsMap = std::map<std::string, VariationStatistics>;
 
+	enum class EAStage {Create, Transform, Evaluate, Distance, End};
 	struct EAProgress {
+		EAStage eaStage;
 		std::size_t currentGeneration;
 		std::size_t numberOfNewIndividualsInGeneration;
 		std::size_t numberOfOldIndividualsInGeneration;
