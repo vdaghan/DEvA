@@ -22,11 +22,16 @@ namespace DEvA {
 			eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration = 0;
 			eaStatistics.eaProgress.numberOfInvalidIndividualsInGeneration = 0;
 			eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration = 0;
-			eaStatistics.eaProgress.eaStage = EAStage::Create;
+			eaStatistics.eaProgress.eaStage = EAStage::Start;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
 		typename Types::Generation newGeneration{};
 		if (0 == genealogy.size()) [[unlikely]] {
+			{
+				auto lock(eaStatistics.lock());
+				eaStatistics.eaProgress.eaStage = EAStage::Genesis;
+				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+			}
 			auto genotypeProxies(genesisFunction());
 			//lambda = genotypeProxies.size();
 			for (auto& genotypeProxy : genotypeProxies) {
@@ -35,7 +40,17 @@ namespace DEvA {
 			}
 			variationInfos.push_back({});
 		} else [[likely]] {
+			{
+				auto lock(eaStatistics.lock());
+				eaStatistics.eaProgress.eaStage = EAStage::SelectGenePool;
+				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+			}
 			auto genePool = genePoolSelectionFunction(genealogy.back());
+			{
+				auto lock(eaStatistics.lock());
+				eaStatistics.eaProgress.eaStage = EAStage::Variation;
+				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+			}
 			std::list<VariationInfo<Types>> newVariationInfos;
 			while (newGeneration.size() < lambda) {
 				bool notEnoughParents(true);
@@ -103,33 +118,40 @@ namespace DEvA {
 		sortGeneration(genealogy.back());
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
-		{
-			auto lock(eaStatistics.lock());
-			eaStatistics.fitnesses.clear();
-		}
-		for (auto& iptr : genealogy.back()) {
-			if (!iptr->maybePhenotypeProxy) continue;
-			auto lock(eaStatistics.lock());
-			eaStatistics.fitnesses.push_back(iptr->fitness);
-		}
-		{
-			auto lock(eaStatistics.lock());
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
-		}
-
-		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
-
 		if (distanceCalculationFunction) {
 			computeDistances(genealogy.back());
 		}
-
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		if (!variationInfos.back().empty()) {
 			evaluateVariations();
+			if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		}
 
+		{
+			auto lock(eaStatistics.lock());
+			eaStatistics.eaProgress.eaStage = EAStage::SelectSurvivors;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+		}
 		survivorSelectionFunction(genealogy.back());
+
+		{
+			{
+				auto lock(eaStatistics.lock());
+				eaStatistics.fitnesses.clear();
+				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
+			}
+			std::list<typename Types::Fitness> fitnesses;
+			for (auto& iptr : genealogy.back()) {
+				if (!iptr->maybePhenotypeProxy) continue;
+				fitnesses.push_back(iptr->fitness);
+			}
+			auto lock(eaStatistics.lock());
+			eaStatistics.fitnesses = fitnesses;
+			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
+		}
+
+		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		auto bestIndividual = genealogy.back().front();
 		bestGenotype = bestIndividual->genotypeProxy;
@@ -142,6 +164,7 @@ namespace DEvA {
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Final);
 			eaStatistics.eaProgress.currentGeneration = eaState.currentGeneration.load();
 			eaState.currentGeneration.fetch_add(1);
+			eaStatistics.eaProgress.eaStage = EAStage::End;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
 		if (genealogy.back().empty()) [[unlikely]] {
