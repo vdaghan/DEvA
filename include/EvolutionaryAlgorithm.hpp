@@ -27,6 +27,7 @@ namespace DEvA {
 		}
 		typename Types::Generation newGeneration{};
 		if (0 == genealogy.size()) [[unlikely]] {
+			logger.info("Creating new individuals.");
 			{
 				auto lock(eaStatistics.lock());
 				eaStatistics.eaProgress.eaStage = EAStage::Genesis;
@@ -40,12 +41,14 @@ namespace DEvA {
 			}
 			variationInfos.push_back({});
 		} else [[likely]] {
+			logger.info("Selecting gene pool.");
 			{
 				auto lock(eaStatistics.lock());
 				eaStatistics.eaProgress.eaStage = EAStage::SelectGenePool;
 				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			}
 			auto genePool = genePoolSelectionFunction(genealogy.back());
+			logger.info("Creating new individuals.");
 			{
 				auto lock(eaStatistics.lock());
 				eaStatistics.eaProgress.eaStage = EAStage::Variation;
@@ -100,34 +103,42 @@ namespace DEvA {
 			logger.info("Epoch {}: {} new, {} old, {} total individuals.", eaState.currentGeneration.load(), newIndividuals, oldIndividuals, individuals);
 		}
 		
+		logger.info("Transforming individuals.");
 		transformIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
+		logger.info("Removing invalid individuals.");
 		removeInvalidIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
+		logger.info("Evaluating individuals.");
 		evaluateIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
+		logger.info("Combining previous generation and new individuals into a new generation.");
 		if (0 != genealogy.size()) [[likely]] {
 			mergeGenerations(genealogy.back(), newGeneration);
 		}
 		genealogy.push_back(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
+		logger.info("Sorting generation.");
 		sortGeneration(genealogy.back());
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		if (distanceCalculationFunction) {
+			logger.info("Computing distances.");
 			computeDistances(genealogy.back());
 		}
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		if (!variationInfos.back().empty()) {
+			logger.info("Evaluating variations.");
 			evaluateVariations();
 			if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		}
 
+		logger.info("Selecting survivors.");
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.eaProgress.eaStage = EAStage::SelectSurvivors;
@@ -136,11 +147,6 @@ namespace DEvA {
 		survivorSelectionFunction(genealogy.back());
 
 		{
-			{
-				auto lock(eaStatistics.lock());
-				eaStatistics.fitnesses.clear();
-				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
-			}
 			std::list<typename Types::Fitness> fitnesses;
 			for (auto& iptr : genealogy.back()) {
 				if (!iptr->maybePhenotypeProxy) continue;
@@ -250,25 +256,17 @@ namespace DEvA {
 			eaStatistics.eaProgress.eaStage = EAStage::Distance;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		{
-			auto lock(eaStatistics.lock());
-			eaStatistics.distanceMatrix.clear();
-		}
+		typename Types::DistanceMatrix distanceMatrix{};
 		auto computeDistanceLambda = [&](auto& iptr) {
 			auto const& id1(iptr->id);
-			//if (!iptr->maybePhenotypeProxy) return;
 			for (auto& iptr2 : genealogy.back()) {
-				//if (checkStopFlagAndMaybeWait()) return;
 				auto const& id2(iptr2->id);
-				//if (!iptr2->maybePhenotypeProxy) return;
-				{
-					auto lock(eaStatistics.lock());
-					eaStatistics.distanceMatrix[id1][id2] = distanceCalculationFunction(id1, id2);
-				}
+				distanceMatrix[id1][id2] = distanceCalculationFunction(id1, id2);
 			}
 		};
 		std::for_each(std::execution::par, generation.begin(), generation.end(), computeDistanceLambda);
 		auto lock(eaStatistics.lock());
+		eaStatistics.distanceMatrix = distanceMatrix;
 		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Distance);
 	}
 
@@ -296,8 +294,7 @@ namespace DEvA {
 				}
 				if (betterThanSome) {
 					++varStat.success;
-				}
-				else {
+				} else {
 					++varStat.fail;
 				}
 			}
@@ -309,7 +306,7 @@ namespace DEvA {
 			double varSuccessRate = static_cast<double>(varStat.success) / totalChildren;
 			double varFailureRate = static_cast<double>(varStat.fail) / totalChildren;
 			double varErrorRate = static_cast<double>(varStat.error) / totalChildren;
-			logger.info("Variation {} : success={:5.1f}%, failure={:5.1f}%, error={:5.1f}%, total#={}", varName, varSuccessRate * 100, varFailureRate * 100, varErrorRate * 100, varStat.total);
+			logger.info("Variation {} : (success%, failure%, error%, total#) = ({:5.1f}%, {:5.1f}%, {:5.1f}%, {})", varName, varSuccessRate * 100, varFailureRate * 100, varErrorRate * 100, varStat.total);
 		}
 
 		{
