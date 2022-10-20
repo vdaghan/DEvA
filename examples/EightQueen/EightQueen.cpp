@@ -101,6 +101,7 @@ int main() {
 	ea.fitnessComparisonFunction = [&](Spec::Fitness const & lhs, Spec::Fitness const & rhs) { return lhs < rhs; };
 	Spec::SVariationFunctor variationFunctor;
 	variationFunctor.name = "cutAndCrossfillThenMaybeSwap";
+	variationFunctor.numberOfParents = 2;
 	variationFunctor.parentSelectionFunction = DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>;
 	variationFunctor.variationFunction = variation;
 	variationFunctor.probability = 1.0;

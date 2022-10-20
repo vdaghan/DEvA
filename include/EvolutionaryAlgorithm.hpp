@@ -57,19 +57,22 @@ namespace DEvA {
 			std::list<VariationInfo<Types>> newVariationInfos;
 			while (newGeneration.size() < lambda) {
 				bool notEnoughParents(true);
-				for (auto const& variationFunctor : variationFunctors) {
+				for (auto const & variationFunctor : variationFunctors) {
 					if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 					if (newGeneration.size() >= lambda) {
 						break;
 					}
-					auto maybeVariationInfo = variationFunctor.apply(fitnessComparisonFunction, genePool);
-					if (maybeVariationInfo == std::unexpected(ErrorCode::NotApplied)) {
+					if (genePool.size() < variationFunctor.numberOfParents) [[unlikely]] {
 						continue;
 					}
+					auto maybeVariationInfo = variationFunctor.apply(fitnessComparisonFunction, genePool);
 					if (maybeVariationInfo == std::unexpected(ErrorCode::NotEnoughParentsToChoose)) {
 						continue;
 					}
 					notEnoughParents = false;
+					if (!maybeVariationInfo.has_value()) {
+						continue;
+					}
 					auto& variationInfo = maybeVariationInfo.value();
 					for (auto& parentPtr : variationInfo.parentPtrs) {
 						variationInfo.parentIds.push_back(parentPtr->id);
