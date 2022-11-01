@@ -29,6 +29,7 @@ namespace DEvA {
 
 			IndividualIdentifier const id;
 			Types::GenotypeProxy const genotypeProxy;
+			Types::Genotype genotype;
 			Types::MaybePhenotypeProxy maybePhenotypeProxy;
 			Types::Fitness fitness;
 			Types::IndividualPtrs parents;
