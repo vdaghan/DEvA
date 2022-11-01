@@ -41,18 +41,24 @@ namespace DEvA {
 					matingPool.remove(parentPtr);
 				}
 			}
+			if (variationFunctionFromIndividualPtrs) {
+				variationInfo.childProxies = variationFunctionFromIndividualPtrs(matingPool);
+			}
 			typename Spec::GenotypeProxies parentGenotypes{};
 			for (auto & parentPtr : variationInfo.parentPtrs) {
 				parentGenotypes.emplace_back(parentPtr->genotypeProxy);
 			}
-			variationInfo.childProxies = variationFunction(parentGenotypes);
+			if (variationFunctionFromGenotypeProxies) {
+				variationInfo.childProxies = variationFunctionFromGenotypeProxies(parentGenotypes);
+			}
 			return variationInfo;
 		}
 
 		std::string name{};
 		std::size_t numberOfParents{};
 		Spec::FParentSelection parentSelectionFunction{};
-		Spec::FVariation variationFunction{};
+		Spec::FVariationFromGenotypeProxies variationFunctionFromGenotypeProxies{};
+		Spec::FVariationFromIndividualPtrs variationFunctionFromIndividualPtrs{};
 
 		double probability{};
 		bool removeParentsFromMatingPool{};

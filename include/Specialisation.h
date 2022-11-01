@@ -90,7 +90,8 @@ namespace DEvA {
 		using FFitnessComparison = std::function<bool(Fitness const &, Fitness const &)>;
         using FParentSelection = std::function<IndividualPtrs(FFitnessComparison, IndividualPtrs)>;
         //using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
-		using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
+        using FVariationFromGenotypeProxies = std::function<GenotypeProxies(GenotypeProxies)>;
+        using FVariationFromIndividualPtrs = std::function<GenotypeProxies(IndividualPtrs)>;
         using FDistanceCalculation = std::function<Distance(IndividualIdentifier, IndividualIdentifier)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FConvergenceCheck = std::function<bool(Fitness)>;

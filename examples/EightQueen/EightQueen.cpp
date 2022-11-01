@@ -84,7 +84,7 @@ int main() {
 		}
 		return fitness;
 	};
-	Spec::FVariation variation = [](Spec::GenotypeProxies gptrs) {
+	Spec::FVariationFromGenotypeProxies variation = [](Spec::GenotypeProxies gptrs) {
 		Spec::GenotypeProxies offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(gptrs);
 		for (auto& gptr : offsprings) {
 			double probability = DEvA::RandomNumberGenerator::get()->getDouble();
@@ -103,7 +103,7 @@ int main() {
 	variationFunctor.name = "cutAndCrossfillThenMaybeSwap";
 	variationFunctor.numberOfParents = 2;
 	variationFunctor.parentSelectionFunction = DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>;
-	variationFunctor.variationFunction = variation;
+	variationFunctor.variationFunctionFromGenotypeProxies = variation;
 	variationFunctor.probability = 1.0;
 	variationFunctor.removeParentsFromMatingPool = false;
 	ea.variationFunctors.push_back(variationFunctor);
