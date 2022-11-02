@@ -285,7 +285,7 @@ namespace DEvA {
 			for (auto const& childId : varInfo.childIds) {
 				auto const& child = find(childId);
 				++varStat.total;
-				if (!child->maybePhenotypeProxy.has_value()) {
+				if (!child or !child->maybePhenotypeProxy.has_value()) {
 					++varStat.fail;
 					continue;
 				}
