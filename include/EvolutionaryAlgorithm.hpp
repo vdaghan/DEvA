@@ -69,6 +69,9 @@ namespace DEvA {
 					if (maybeVariationInfo == std::unexpected(ErrorCode::NotEnoughParentsToChoose)) {
 						continue;
 					}
+					if (maybeVariationInfo == std::unexpected(ErrorCode::NoSuitableParentsToChoose)) {
+						continue;
+					}
 					notEnoughParents = false;
 					if (!maybeVariationInfo.has_value()) {
 						continue;

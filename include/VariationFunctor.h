@@ -36,6 +36,9 @@ namespace DEvA {
 			VariationInfo<Spec> variationInfo;
 			variationInfo.name = name;
 			variationInfo.parentPtrs = parentSelectionFunction(comp, matingPool);
+			if (variationInfo.parentPtrs.empty()) {
+				return std::unexpected(ErrorCode::NoSuitableParentsToChoose);
+			}
 			if (removeParentsFromMatingPool) {
 				for (auto & parentPtr : variationInfo.parentPtrs) {
 					matingPool.remove(parentPtr);
