@@ -33,9 +33,9 @@ namespace DEvA {
 		EvaluateIndividualFromGenotypeProxy,
 		EvaluateIndividualFromIndividualPtr,
 		EvaluateGeneration,
-		FitnessComparison,
 		DistanceCalculation,
 		SurvivorSelection,
+		SortIndividuals,
 		ConvergenceCheck
 	};
 	enum class Callback { StatsUpdate, EpochStart, EpochEnd, Variation, Pause, Stop };
@@ -75,6 +75,9 @@ namespace DEvA {
 			void registerCallback(Callback callbackType, Types::CVariant function) {
 				callbacks.emplace(std::make_pair(callbackType, function));
 			}
+			void registerMetricComparison(std::string metricName, Types::FMetricComparison function) {
+				metricComparisons.emplace(std::make_pair(metricName, function));
+			}
 
 			StepResult search(size_t count);
 			void pause();
@@ -96,6 +99,7 @@ namespace DEvA {
 			StepResult epoch();
 			Types::FVariantMap eaFunctions;
 			Types::CVariantMap callbacks;
+			Types::MetricComparisonMap metricComparisons;
 			std::map<std::string, typename Types::SVariationFunctor> registeredVariationFunctors;
 			std::set<std::string> variationFunctorsInUse;
 
@@ -104,7 +108,6 @@ namespace DEvA {
 			void evaluateIndividualMetrics(Types::Generation &);
 			void mergeGenerations(Types::Generation &, Types::Generation &);
 			void sortGeneration(Types::Generation &);
-			void computeDistances(Types::Generation &);
 			void evaluateVariations();
 			std::mutex callbackMutex;
 			template <typename F, typename ... VTypes>

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <ranges>
+#include <string_view>
 #include <vector>
 
 namespace DEvA {
@@ -17,34 +18,35 @@ namespace DEvA {
 		using GenotypeProxies = Types::GenotypeProxies;
 		using IndividualPtr = Types::IndividualPtr;
 		using IndividualPtrs = Types::IndividualPtrs;
-		using FFitnessComparison = Types::FFitnessComparison;
 
 		template <std::size_t N, std::size_t M>
-		static IndividualPtrs bestNofM(FFitnessComparison comp, IndividualPtrs domain) {
+		static IndividualPtrs bestNofM(std::string metricName, Types::MetricComparisonMap const & compMap, IndividualPtrs domain) {
 			std::vector<IndividualPtr> tmp(domain.begin(), domain.end());
 			RandomNumberGenerator::get()->shuffle(tmp);
 			domain.clear();
 			domain.assign(tmp.begin(), tmp.end());
 			domain.resize(std::min(M, domain.size()));
-			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs){ return comp(lhs->metrics, rhs->metrics); });
+			auto const & comp(compMap.at(metricName));
+			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs){ return comp(lhs->metrics.at(metricName), rhs->metrics.at(metricName)); });
 			domain.resize(N);
 			return domain;
 		};
 
 		template <std::size_t N>
-		static IndividualPtrs randomN(FFitnessComparison comp, IndividualPtrs domain) {
+		static IndividualPtrs randomN(std::string metricName, Types::MetricComparisonMap const & compMap, IndividualPtrs domain) {
 			std::vector<IndividualPtr> tmp(domain.begin(), domain.end());
 			RandomNumberGenerator::get()->shuffle(tmp);
 			domain.clear();
 			domain.assign(tmp.begin(), tmp.end());
 			domain.resize(N);
-			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs) { return comp(lhs->metrics, rhs->metrics); });
+			auto const& comp(compMap.at(metricName));
+			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs) { return comp(lhs->metrics.at(metricName), rhs->metrics.at(metricName)); });
 			return domain;
 		};
 
 		template <std::size_t N>
-		static IndividualPtrs bestNofAll(FFitnessComparison comp, IndividualPtrs domain) {
-			return bestNofM<N, std::numeric_limits<std::size_t>::max()>(comp, domain);
+		static IndividualPtrs bestNofAll(std::string metricName, Types::MetricComparisonMap const & compMap, IndividualPtrs domain) {
+			return bestNofM<N, std::numeric_limits<std::size_t>::max()>(metricName, compMap, domain);
 		};
 	};
 };

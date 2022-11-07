@@ -67,8 +67,8 @@ namespace DEvA {
 					if (genePool.size() < variationFunctor.numberOfParents) [[unlikely]] {
 						continue;
 					}
-					auto & fitnessComparisonFunction = std::get<typename Types::FFitnessComparison>(eaFunctions.at(EAFunction::FitnessComparison));
-					auto maybeVariationInfo = variationFunctor.apply(fitnessComparisonFunction, genePool);
+					//auto & fitnessComparisonFunction = std::get<typename Types::FMetricComparison>(metricComparisons.at(EAFunction::MetricComparison));
+					auto maybeVariationInfo = variationFunctor.apply(metricComparisons, genePool);
 					if (maybeVariationInfo == std::unexpected(ErrorCode::NotEnoughParentsToChoose)) {
 						continue;
 					}
@@ -133,12 +133,6 @@ namespace DEvA {
 
 		logger.info("Sorting generation.");
 		sortGeneration(genealogy.back());
-		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
-
-		if (eaFunctions.contains(EAFunction::DistanceCalculation)) {
-			logger.info("Computing distances.");
-			computeDistances(genealogy.back());
-		}
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		if (!variationInfos.back().empty()) {
@@ -263,35 +257,20 @@ namespace DEvA {
 
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::sortGeneration(Types::Generation & generation) {
+		if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
+			return;
+		}
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
-			return std::get<typename Types::FFitnessComparison>(eaFunctions.at(EAFunction::FitnessComparison))(lhs->metrics, rhs->metrics);
+			return std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals))(lhs, rhs);
 		});
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::computeDistances(Types::Generation & generation) {
-		{
-			auto lock(eaStatistics.lock());
-			eaStatistics.eaProgress.eaStage = EAStage::Distance;
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
-		}
-		typename Types::DistanceMatrix distanceMatrix{};
-		auto computeDistanceLambda = [&](auto& iptr) {
-			auto const& id1(iptr->id);
-			for (auto& iptr2 : genealogy.back()) {
-				auto const& id2(iptr2->id);
-				//distanceMatrix[id1][id2] = distanceCalculationFunction(id1, id2);
-				distanceMatrix[id1][id2] = std::get<typename Types::FDistanceCalculation>(eaFunctions.at(EAFunction::DistanceCalculation))(id1, id2);
-			}
-		};
-		std::for_each(std::execution::par, generation.begin(), generation.end(), computeDistanceLambda);
-		auto lock(eaStatistics.lock());
-		eaStatistics.distanceMatrix = distanceMatrix;
-		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Distance);
-	}
-
-	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::evaluateVariations() {
+		if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
+			return;
+		}
+		auto & sortFunction(std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals)));
 		auto const& varInfos = variationInfos.back();
 		VariationStatisticsMap varStatMap{};
 		for (auto const& varInfo : varInfos) {
@@ -308,8 +287,7 @@ namespace DEvA {
 				}
 				bool betterThanSome(false);
 				for (auto const& parent : varInfo.parentPtrs) {
-					auto & metricComparison = std::get<typename Types::FFitnessComparison>(eaFunctions.at(EAFunction::FitnessComparison));
-					if (metricComparison(child->metrics, parent->metrics)) {
+					if (sortFunction(child, parent)) {
 						betterThanSome = true;
 					}
 				}

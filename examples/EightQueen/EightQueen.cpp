@@ -100,11 +100,14 @@ int main() {
 	ea.registerEAFunction(DEvA::EAFunction::Initialisation, DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
 	ea.registerEAFunction(DEvA::EAFunction::Transformation, DEvA::StandardTransforms<Spec>::copy);
 	ea.registerEAFunction(DEvA::EAFunction::EvaluateIndividualFromGenotypeProxy, fevaluate);
-	ea.registerEAFunction(DEvA::EAFunction::FitnessComparison, [&](Spec::MetricVariantMap const& lhs, Spec::MetricVariantMap const& rhs) { return std::get<int>(lhs.at("fitness")) < std::get<int>(rhs.at("fitness")); });
+	ea.registerEAFunction(DEvA::EAFunction::SortIndividuals, [](Spec::IndividualPtr const & lhs, Spec::IndividualPtr const & rhs) {
+		return lhs->metrics.at("fitness") < rhs->metrics.at("fitness");
+	});
+	ea.registerMetricComparison("fitness", [](Spec::MetricVariant const& lhs, Spec::MetricVariant const& rhs) { return std::get<int>(lhs) < std::get<int>(rhs); });
 	Spec::SVariationFunctor variationFunctor{
 		.name = "cutAndCrossfillThenMaybeSwap",
 		.numberOfParents = 2,
-		.parentSelectionFunction = DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>,
+		.parentSelectionFunction = std::bind_front(DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>, "fitness"),
 		.variationFunctionFromGenotypeProxies = variation,
 		.probability = 1.0,
 		.removeParentsFromMatingPool = false
@@ -126,11 +129,24 @@ int main() {
 	} else {
 		std::cout << "Step limit reached.\n";
 	}
+
 	std::cout << "Best genotype: [";
 	for (auto it = ea.bestGenotype->begin(); it != ea.bestGenotype->end(); ++it) {
 		std::cout << *it << " ";
 	}
-	std::cout << "]\nFitness: " << std::get<int>(ea.bestIndividualMetric.at("fitness")) << "\n";
+	std::cout << "]" << std::endl;
+	auto bestGenotype(*ea.bestGenotype);
+	for (std::size_t row(0); row != bestGenotype.size(); ++row) {
+		for (std::size_t col(0); col != bestGenotype.size(); ++col) {
+			if (col == bestGenotype[row]) {
+				std::cout << "O ";
+			} else {
+				std::cout << ". ";
+			}
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "Fitness: " << std::get<int>(ea.bestIndividualMetric.at("fitness")) << "\n";
 
 	return 0;
 }

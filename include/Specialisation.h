@@ -89,12 +89,13 @@ namespace DEvA {
         using FEvaluateIndividualFromGenotypeProxy = std::function<MetricVariantMap(GenotypeProxy)>;
         using FEvaluateIndividualFromIndividualPtr = std::function<MetricVariantMap(IndividualPtr)>;
         using FEvaluateGeneration = std::function<MetricVariantMap(Generation)>;
-		using FFitnessComparison = std::function<bool(MetricVariantMap const &, MetricVariantMap const &)>;
-        using FParentSelection = std::function<IndividualPtrs(FFitnessComparison, IndividualPtrs)>;
+        using FMetricComparison = std::function<bool(MetricVariant, MetricVariant)>;
+        using MetricComparisonMap = std::map<std::string, FMetricComparison>;
+        using FParentSelection = std::function<IndividualPtrs(MetricComparisonMap const &, IndividualPtrs)>;
         using FVariationFromGenotypeProxies = std::function<GenotypeProxies(GenotypeProxies)>;
         using FVariationFromIndividualPtrs = std::function<GenotypeProxies(IndividualPtrs)>;
-        using FDistanceCalculation = std::function<Distance(IndividualIdentifier, IndividualIdentifier)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
+        using FSortIndividuals = std::function<bool(IndividualPtr, IndividualPtr)>;
         using FConvergenceCheck = std::function<bool(MetricVariantMap const &)>;
         using FVariant = std::variant<
             FGenesis,
@@ -104,12 +105,11 @@ namespace DEvA {
             FEvaluateIndividualFromGenotypeProxy,
             FEvaluateIndividualFromIndividualPtr,
             FEvaluateGeneration,
-            FFitnessComparison,
             FParentSelection,
             FVariationFromGenotypeProxies,
             FVariationFromIndividualPtrs,
-            FDistanceCalculation,
             FSurvivorSelection,
+            FSortIndividuals,
             FConvergenceCheck>;
         using FVariantMap = std::map<EAFunction, FVariant>;
 
