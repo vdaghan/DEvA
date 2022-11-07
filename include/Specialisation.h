@@ -86,7 +86,9 @@ namespace DEvA {
 		using FGenePoolSelection = std::function<Generation(Generation)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
         using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
-		using FEvaluate = std::function<MetricVariantMap(GenotypeProxy)>;
+        using FEvaluateIndividualFromGenotypeProxy = std::function<MetricVariantMap(GenotypeProxy)>;
+        using FEvaluateIndividualFromIndividualPtr = std::function<MetricVariantMap(IndividualPtr)>;
+        using FEvaluateGeneration = std::function<MetricVariantMap(Generation)>;
 		using FFitnessComparison = std::function<bool(MetricVariantMap const &, MetricVariantMap const &)>;
         using FParentSelection = std::function<IndividualPtrs(FFitnessComparison, IndividualPtrs)>;
         using FVariationFromGenotypeProxies = std::function<GenotypeProxies(GenotypeProxies)>;
@@ -99,7 +101,9 @@ namespace DEvA {
             FGenePoolSelection,
             FCreateGenotype,
             FTransform,
-            FEvaluate,
+            FEvaluateIndividualFromGenotypeProxy,
+            FEvaluateIndividualFromIndividualPtr,
+            FEvaluateGeneration,
             FFitnessComparison,
             FParentSelection,
             FVariationFromGenotypeProxies,

@@ -61,7 +61,7 @@ int main() {
 	ea.genotypeFromProxyFunction = [](Spec::GenotypeProxy gpx) -> Spec::Genotype & { return *gpx; };
 	ea.phenotypeFromProxyFunction = [](Spec::PhenotypeProxy ppx) -> Spec::Phenotype & { return *ppx; };
 
-	Spec::FEvaluate fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::MetricVariantMap {
+	Spec::FEvaluateIndividualFromGenotypeProxy fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::MetricVariantMap {
 		auto last = std::unique(pptr->begin(), pptr->end());
 		pptr->erase(last, pptr->end());
 
@@ -99,7 +99,7 @@ int main() {
 
 	ea.registerEAFunction(DEvA::EAFunction::Initialisation, DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
 	ea.registerEAFunction(DEvA::EAFunction::Transformation, DEvA::StandardTransforms<Spec>::copy);
-	ea.registerEAFunction(DEvA::EAFunction::Evaluation, fevaluate);
+	ea.registerEAFunction(DEvA::EAFunction::EvaluateIndividualFromGenotypeProxy, fevaluate);
 	ea.registerEAFunction(DEvA::EAFunction::FitnessComparison, [&](Spec::MetricVariantMap const& lhs, Spec::MetricVariantMap const& rhs) { return std::get<int>(lhs.at("fitness")) < std::get<int>(rhs.at("fitness")); });
 	Spec::SVariationFunctor variationFunctor{
 		.name = "cutAndCrossfillThenMaybeSwap",

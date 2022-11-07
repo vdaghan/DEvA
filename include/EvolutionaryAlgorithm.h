@@ -26,7 +26,18 @@
 namespace DEvA {
 	enum class StepResult { Inconclusive, StepCount, Exhaustion, Convergence, Stopped };
 
-	enum class EAFunction { Initialisation, GenePoolSelection, Transformation, Evaluation, FitnessComparison, DistanceCalculation, SurvivorSelection, ConvergenceCheck };
+	enum class EAFunction {
+		Initialisation,
+		GenePoolSelection,
+		Transformation,
+		EvaluateIndividualFromGenotypeProxy,
+		EvaluateIndividualFromIndividualPtr,
+		EvaluateGeneration,
+		FitnessComparison,
+		DistanceCalculation,
+		SurvivorSelection,
+		ConvergenceCheck
+	};
 	enum class Callback { StatsUpdate, EpochStart, EpochEnd, Variation, Pause, Stop };
 
 	template <typename Types>
@@ -90,7 +101,7 @@ namespace DEvA {
 
 			void transformIndividuals(Types::Generation &);
 			void removeInvalidIndividuals(Types::Generation &);
-			void evaluateIndividuals(Types::Generation &);
+			void evaluateIndividualMetrics(Types::Generation &);
 			void mergeGenerations(Types::Generation &, Types::Generation &);
 			void sortGeneration(Types::Generation &);
 			void computeDistances(Types::Generation &);

@@ -120,8 +120,8 @@ namespace DEvA {
 		removeInvalidIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
-		logger.info("Evaluating individuals.");
-		evaluateIndividuals(newGeneration);
+		logger.info("Evaluating individual metrics.");
+		evaluateIndividualMetrics(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		logger.info("Combining previous generation and new individuals into a new generation.");
@@ -227,7 +227,7 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::evaluateIndividuals(Types::Generation & generation) {
+	void EvolutionaryAlgorithm<Types>::evaluateIndividualMetrics(Types::Generation & generation) {
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.eaProgress.eaStage = EAStage::Evaluate;
@@ -235,7 +235,18 @@ namespace DEvA {
 		}
 		auto evaluateLambda = [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) return;
-			iptr->metrics = std::get<typename Types::FEvaluate>(eaFunctions.at(EAFunction::Evaluation))(iptr->maybePhenotypeProxy.value());
+			if (eaFunctions.contains(EAFunction::EvaluateIndividualFromGenotypeProxy)) {
+				auto && metrics(std::get<typename Types::FEvaluateIndividualFromGenotypeProxy>(eaFunctions.at(EAFunction::EvaluateIndividualFromGenotypeProxy))(iptr->maybePhenotypeProxy.value()));
+				iptr->metrics.insert(metrics.begin(), metrics.end());
+			}
+			if (eaFunctions.contains(EAFunction::EvaluateIndividualFromIndividualPtr)) {
+				auto && metrics(std::get<typename Types::FEvaluateIndividualFromIndividualPtr>(eaFunctions.at(EAFunction::EvaluateIndividualFromIndividualPtr))(iptr));
+				iptr->metrics.insert(metrics.begin(), metrics.end());
+			}
+			if (eaFunctions.contains(EAFunction::EvaluateGeneration)) {
+				auto && metrics(std::get<typename Types::FEvaluateGeneration>(eaFunctions.at(EAFunction::EvaluateGeneration))(generation));
+				iptr->metrics.insert(metrics.begin(), metrics.end());
+			}
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;
