@@ -48,8 +48,8 @@ namespace DEvA {
         using Phenotype = S::Phenotype;
 		using PhenotypeProxy = S::PhenotypeProxy;
 		using MaybePhenotypeProxy = Maybe<PhenotypeProxy>;
-        using Fitness = S::Fitness;
-        using Fitnesses = std::list<Fitness>;
+        using MetricVariant = S::MetricVariant;
+        using MetricVariantMap = std::map<std::string, MetricVariant>;
         using Distance = S::Distance;
         using DistanceMatrix = std::map<IndividualIdentifier, std::map<IndividualIdentifier, Distance>>;
         using IndividualParameters = S::IndividualParameters;
@@ -86,21 +86,40 @@ namespace DEvA {
 		using FGenePoolSelection = std::function<Generation(Generation)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
         using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
-		using FEvaluate = std::function<Fitness(GenotypeProxy)>;
-		using FFitnessComparison = std::function<bool(Fitness const &, Fitness const &)>;
+		using FEvaluate = std::function<MetricVariantMap(GenotypeProxy)>;
+		using FFitnessComparison = std::function<bool(MetricVariantMap const &, MetricVariantMap const &)>;
         using FParentSelection = std::function<IndividualPtrs(FFitnessComparison, IndividualPtrs)>;
-        //using FVariation = std::function<GenotypeProxies(GenotypeProxies)>;
         using FVariationFromGenotypeProxies = std::function<GenotypeProxies(GenotypeProxies)>;
         using FVariationFromIndividualPtrs = std::function<GenotypeProxies(IndividualPtrs)>;
         using FDistanceCalculation = std::function<Distance(IndividualIdentifier, IndividualIdentifier)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
-        using FConvergenceCheck = std::function<bool(Fitness)>;
+        using FConvergenceCheck = std::function<bool(MetricVariantMap const &)>;
+        using FVariant = std::variant<
+            FGenesis,
+            FGenePoolSelection,
+            FCreateGenotype,
+            FTransform,
+            FEvaluate,
+            FFitnessComparison,
+            FParentSelection,
+            FVariationFromGenotypeProxies,
+            FVariationFromIndividualPtrs,
+            FDistanceCalculation,
+            FSurvivorSelection,
+            FConvergenceCheck>;
+        using FVariantMap = std::map<EAFunction, FVariant>;
 
         // Callbacks
 		using CVoid = std::function<void(void)>;
         using CEAStatsUpdate = std::function<void(EAStatistics<Spec> const &, EAStatisticsUpdateType)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;
+        using CVariant = std::variant<
+            CVoid,
+            CEAStatsUpdate,
+            COnEpoch,
+            COnVariation>;
+        using CVariantMap = std::map<Callback, CVariant>;
 
         struct RFGenotypeProxySet {
 			GenotypeProxies domain;

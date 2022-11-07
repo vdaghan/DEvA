@@ -46,17 +46,23 @@ namespace DEvA {
 		public:
 			EAStatistics()
 				: eaProgress({})
-				, fitnesses({})
+				, individualMetrics({})
+				, generationMetrics({})
+				, genealogyMetrics({})
 				, distanceMatrix({})
 				, variationStatisticsMap({}) {};
 			EAStatistics(EAStatistics const& other)
 				: eaProgress(other.eaProgress)
-				, fitnesses(other.fitnesses)
+				, individualMetrics(other.individualMetrics)
+				, generationMetrics(other.generationMetrics)
+				, genealogyMetrics(other.genealogyMetrics)
 				, distanceMatrix(other.distanceMatrix)
 				, variationStatisticsMap(other.variationStatisticsMap) {};
 
 			EAProgress eaProgress;
-			std::list<typename Types::Fitness> fitnesses;
+			std::list<typename Types::MetricVariantMap> individualMetrics;
+			Types::MetricVariantMap generationMetrics;
+			Types::MetricVariantMap genealogyMetrics;
 			typename Types::DistanceMatrix distanceMatrix;
 			VariationStatisticsMap variationStatisticsMap;
 

@@ -12,7 +12,7 @@ namespace DEvA {
 		typename T::GenotypeProxy;
 		typename T::Phenotype;
 		typename T::PhenotypeProxy;
-		typename T::Fitness;
+		typename T::MetricVariant;
 		typename T::Distance;
 		typename T::IndividualParameters;
 	};

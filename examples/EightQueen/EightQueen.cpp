@@ -49,7 +49,7 @@ int main() {
 		using GenotypeProxy = std::shared_ptr<Genotype>;
 		using Phenotype = std::vector<size_t>;
 		using PhenotypeProxy = std::shared_ptr<Phenotype>;
-		using Fitness = int;
+		using MetricVariant = std::variant<int>;
 		using Distance = int;
 		using IndividualParameters = DEvA::NullVParameters;
 		static GenotypeProxy copy(GenotypeProxy gpx) { return gpx; };
@@ -61,7 +61,7 @@ int main() {
 	ea.genotypeFromProxyFunction = [](Spec::GenotypeProxy gpx) -> Spec::Genotype & { return *gpx; };
 	ea.phenotypeFromProxyFunction = [](Spec::PhenotypeProxy ppx) -> Spec::Phenotype & { return *ppx; };
 
-	Spec::FEvaluate fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::Fitness {
+	Spec::FEvaluate fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::MetricVariantMap {
 		auto last = std::unique(pptr->begin(), pptr->end());
 		pptr->erase(last, pptr->end());
 
@@ -82,7 +82,9 @@ int main() {
 				}
 			}
 		}
-		return fitness;
+		Spec::MetricVariantMap retVal;
+		retVal.emplace(std::make_pair("fitness", fitness));
+		return retVal;
 	};
 	Spec::FVariationFromGenotypeProxies variation = [](Spec::GenotypeProxies gptrs) {
 		Spec::GenotypeProxies offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(gptrs);
@@ -95,20 +97,21 @@ int main() {
 		return offsprings;
 	};
 
-	ea.genesisFunction = DEvA::StandardInitialisers<Spec>::permutations<8, 100>;
-	ea.transformFunction = DEvA::StandardTransforms<Spec>::copy;
-	ea.evaluationFunction = fevaluate;
-	ea.fitnessComparisonFunction = [&](Spec::Fitness const & lhs, Spec::Fitness const & rhs) { return lhs < rhs; };
-	Spec::SVariationFunctor variationFunctor;
-	variationFunctor.name = "cutAndCrossfillThenMaybeSwap";
-	variationFunctor.numberOfParents = 2;
-	variationFunctor.parentSelectionFunction = DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>;
-	variationFunctor.variationFunctionFromGenotypeProxies = variation;
-	variationFunctor.probability = 1.0;
-	variationFunctor.removeParentsFromMatingPool = false;
-	ea.variationFunctors.push_back(variationFunctor);
-	ea.survivorSelectionFunction = DEvA::StandardSurvivorSelectors<Spec>::clamp<100>;
-	ea.convergenceCheckFunction = DEvA::StandardConvergenceCheckers<Spec>::equalTo<0>;
+	ea.registerEAFunction(DEvA::EAFunction::Initialisation, DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
+	ea.registerEAFunction(DEvA::EAFunction::Transformation, DEvA::StandardTransforms<Spec>::copy);
+	ea.registerEAFunction(DEvA::EAFunction::Evaluation, fevaluate);
+	ea.registerEAFunction(DEvA::EAFunction::FitnessComparison, [&](Spec::MetricVariantMap const& lhs, Spec::MetricVariantMap const& rhs) { return std::get<int>(lhs.at("fitness")) < std::get<int>(rhs.at("fitness")); });
+	Spec::SVariationFunctor variationFunctor{
+		.name = "cutAndCrossfillThenMaybeSwap",
+		.numberOfParents = 2,
+		.parentSelectionFunction = DEvA::StandardParentSelectors<Spec>::bestNofM<2, 5>,
+		.variationFunctionFromGenotypeProxies = variation,
+		.probability = 1.0,
+		.removeParentsFromMatingPool = false
+	};
+	ea.registerVariationFunctor(variationFunctor, true);
+	ea.registerEAFunction(DEvA::EAFunction::SurvivorSelection, DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
+	ea.registerEAFunction(DEvA::EAFunction::ConvergenceCheck, [](Spec::MetricVariantMap const & metricMap) { return 0 == std::get<int>(metricMap.at("fitness")); });
 	ea.lambda = 50;
 	ea.logger.callback = [](DEvA::LogType t, std::string msg) {
 		std::cout << msg << std::endl;
@@ -127,7 +130,7 @@ int main() {
 	for (auto it = ea.bestGenotype->begin(); it != ea.bestGenotype->end(); ++it) {
 		std::cout << *it << " ";
 	}
-	std::cout << "]\nFitness: " << ea.bestFitness << "\n";
+	std::cout << "]\nFitness: " << std::get<int>(ea.bestIndividualMetric.at("fitness")) << "\n";
 
 	return 0;
 }

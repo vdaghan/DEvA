@@ -26,7 +26,7 @@ namespace DEvA {
 			domain.clear();
 			domain.assign(tmp.begin(), tmp.end());
 			domain.resize(std::min(M, domain.size()));
-			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs){ return comp(lhs->fitness, rhs->fitness); });
+			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs){ return comp(lhs->metrics, rhs->metrics); });
 			domain.resize(N);
 			return domain;
 		};
@@ -38,7 +38,7 @@ namespace DEvA {
 			domain.clear();
 			domain.assign(tmp.begin(), tmp.end());
 			domain.resize(N);
-			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs) { return comp(lhs->fitness, rhs->fitness); });
+			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs) { return comp(lhs->metrics, rhs->metrics); });
 			return domain;
 		};
 

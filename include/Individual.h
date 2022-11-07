@@ -4,7 +4,9 @@
 #include "VParameters.h"
 
 #include <list>
+#include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace DEvA {
@@ -31,7 +33,7 @@ namespace DEvA {
 			Types::GenotypeProxy const genotypeProxy;
 			Types::Genotype genotype;
 			Types::MaybePhenotypeProxy maybePhenotypeProxy;
-			Types::Fitness fitness;
+			Types::MetricVariantMap metrics;
 			Types::IndividualPtrs parents;
 			Types::IndividualWPtrs children;
 		private:

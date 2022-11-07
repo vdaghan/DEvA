@@ -4,9 +4,9 @@ namespace DEvA {
 	template <typename Types>
 	EvolutionaryAlgorithm<Types>::EvolutionaryAlgorithm()
 		: lambda(0)
-		, genePoolSelectionFunction(StandardGenePoolSelectors<Types>::all)
 	    , pauseFlag(false)
 	    , stopFlag(false) {
+		//registerEAFunction(DEvA::EAFunction::GenePoolSelection, StandardGenePoolSelectors<Types>::all);
 		eaStatistics.eaProgress.currentGeneration = 0;
 		eaState.currentGeneration.store(0);
 		eaState.nextIdentifier.store(0);
@@ -33,7 +33,7 @@ namespace DEvA {
 				eaStatistics.eaProgress.eaStage = EAStage::Genesis;
 				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			}
-			auto genotypeProxies(genesisFunction());
+			auto genotypeProxies(std::get<typename Types::FGenesis>(eaFunctions.at(EAFunction::Initialisation))());
 			//lambda = genotypeProxies.size();
 			for (auto& genotypeProxy : genotypeProxies) {
 				auto newIndividual = createNewIndividual(genotypeProxy);
@@ -41,13 +41,14 @@ namespace DEvA {
 			}
 			variationInfos.push_back({});
 		} else [[likely]] {
-			logger.info("Selecting gene pool.");
-			{
-				auto lock(eaStatistics.lock());
-				eaStatistics.eaProgress.eaStage = EAStage::SelectGenePool;
-				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
-			}
-			auto genePool = genePoolSelectionFunction(genealogy.back());
+			//logger.info("Selecting gene pool.");
+			//{
+			//	auto lock(eaStatistics.lock());
+			//	eaStatistics.eaProgress.eaStage = EAStage::SelectGenePool;
+			//	tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
+			//}
+			//auto genePool = genePoolSelectionFunction(genealogy.back());
+			auto genePool = genealogy.back();
 			logger.info("Creating new individuals.");
 			{
 				auto lock(eaStatistics.lock());
@@ -57,7 +58,8 @@ namespace DEvA {
 			std::list<VariationInfo<Types>> newVariationInfos;
 			while (newGeneration.size() < lambda) {
 				bool notEnoughParents(true);
-				for (auto const & variationFunctor : variationFunctors) {
+				for (auto const & variationFunctorName : variationFunctorsInUse) {
+					auto const & variationFunctor(registeredVariationFunctors.at(variationFunctorName));
 					if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 					if (newGeneration.size() >= lambda) {
 						break;
@@ -65,6 +67,7 @@ namespace DEvA {
 					if (genePool.size() < variationFunctor.numberOfParents) [[unlikely]] {
 						continue;
 					}
+					auto & fitnessComparisonFunction = std::get<typename Types::FFitnessComparison>(eaFunctions.at(EAFunction::FitnessComparison));
 					auto maybeVariationInfo = variationFunctor.apply(fitnessComparisonFunction, genePool);
 					if (maybeVariationInfo == std::unexpected(ErrorCode::NotEnoughParentsToChoose)) {
 						continue;
@@ -132,7 +135,7 @@ namespace DEvA {
 		sortGeneration(genealogy.back());
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
-		if (distanceCalculationFunction) {
+		if (eaFunctions.contains(EAFunction::DistanceCalculation)) {
 			logger.info("Computing distances.");
 			computeDistances(genealogy.back());
 		}
@@ -150,16 +153,16 @@ namespace DEvA {
 			eaStatistics.eaProgress.eaStage = EAStage::SelectSurvivors;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		survivorSelectionFunction(genealogy.back());
+		std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
 
 		{
-			std::list<typename Types::Fitness> fitnesses;
+			std::list<typename Types::MetricVariantMap> individualMetrics;
 			for (auto& iptr : genealogy.back()) {
 				if (!iptr->maybePhenotypeProxy) continue;
-				fitnesses.push_back(iptr->fitness);
+				individualMetrics.push_back(iptr->metrics);
 			}
 			auto lock(eaStatistics.lock());
-			eaStatistics.fitnesses = fitnesses;
+			eaStatistics.individualMetrics = individualMetrics;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
 		}
 
@@ -168,8 +171,7 @@ namespace DEvA {
 		auto bestIndividual = genealogy.back().front();
 		bestGenotype = bestIndividual->genotypeProxy;
 		bestPhenotype = bestIndividual->maybePhenotypeProxy.value();
-		bestFitness = bestIndividual->fitness;
-		//std::cout << "Best fitness: " << bestFitness << "\n";
+		bestIndividualMetric = bestIndividual->metrics;
 
 		{
 			auto lock(eaStatistics.lock());
@@ -182,7 +184,7 @@ namespace DEvA {
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
-		if (convergenceCheckFunction(bestFitness)) [[unlikely]] {
+		if (std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividualMetric)) [[unlikely]] {
 			return StepResult::Convergence;
 		}
 		return StepResult::Inconclusive;
@@ -199,7 +201,7 @@ namespace DEvA {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
 			}
-			iptr->maybePhenotypeProxy = transformFunction(iptr->genotypeProxy);
+			iptr->maybePhenotypeProxy = std::get<typename Types::FTransform>(eaFunctions.at(EAFunction::Transformation))(iptr->genotypeProxy);
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration;
@@ -233,7 +235,7 @@ namespace DEvA {
 		}
 		auto evaluateLambda = [&](auto& iptr) {
 			if (checkStopFlagAndMaybeWait()) return;
-			iptr->fitness = evaluationFunction(iptr->maybePhenotypeProxy.value());
+			iptr->metrics = std::get<typename Types::FEvaluate>(eaFunctions.at(EAFunction::Evaluation))(iptr->maybePhenotypeProxy.value());
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;
@@ -251,7 +253,7 @@ namespace DEvA {
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::sortGeneration(Types::Generation & generation) {
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
-			return fitnessComparisonFunction(lhs->fitness, rhs->fitness);
+			return std::get<typename Types::FFitnessComparison>(eaFunctions.at(EAFunction::FitnessComparison))(lhs->metrics, rhs->metrics);
 		});
 	}
 
@@ -267,7 +269,8 @@ namespace DEvA {
 			auto const& id1(iptr->id);
 			for (auto& iptr2 : genealogy.back()) {
 				auto const& id2(iptr2->id);
-				distanceMatrix[id1][id2] = distanceCalculationFunction(id1, id2);
+				//distanceMatrix[id1][id2] = distanceCalculationFunction(id1, id2);
+				distanceMatrix[id1][id2] = std::get<typename Types::FDistanceCalculation>(eaFunctions.at(EAFunction::DistanceCalculation))(id1, id2);
 			}
 		};
 		std::for_each(std::execution::par, generation.begin(), generation.end(), computeDistanceLambda);
@@ -294,7 +297,8 @@ namespace DEvA {
 				}
 				bool betterThanSome(false);
 				for (auto const& parent : varInfo.parentPtrs) {
-					if (child->fitness > parent->fitness) {
+					auto & metricComparison = std::get<typename Types::FFitnessComparison>(eaFunctions.at(EAFunction::FitnessComparison));
+					if (metricComparison(child->metrics, parent->metrics)) {
 						betterThanSome = true;
 					}
 				}
