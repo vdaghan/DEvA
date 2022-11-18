@@ -131,14 +131,14 @@ int main() {
 	}
 
 	std::cout << "Best genotype: [";
-	for (auto it = ea.bestGenotype->begin(); it != ea.bestGenotype->end(); ++it) {
+	auto & bestGenotype(ea.bestIndividual->genotypeProxy);
+	for (auto it = bestGenotype->begin(); it != bestGenotype->end(); ++it) {
 		std::cout << *it << " ";
 	}
 	std::cout << "]" << std::endl;
-	auto bestGenotype(*ea.bestGenotype);
-	for (std::size_t row(0); row != bestGenotype.size(); ++row) {
-		for (std::size_t col(0); col != bestGenotype.size(); ++col) {
-			if (col == bestGenotype[row]) {
+	for (std::size_t row(0); row != bestGenotype->size(); ++row) {
+		for (std::size_t col(0); col != bestGenotype->size(); ++col) {
+			if (col == bestGenotype->at(row)) {
 				std::cout << "O ";
 			} else {
 				std::cout << ". ";
@@ -146,7 +146,8 @@ int main() {
 		}
 		std::cout << std::endl;
 	}
-	std::cout << "Fitness: " << std::get<int>(ea.bestIndividualMetric.at("fitness")) << "\n";
+	auto & bestIndividualMetric(ea.bestIndividual->metrics);
+	std::cout << "Fitness: " << std::get<int>(bestIndividualMetric.at("fitness")) << "\n";
 
 	return 0;
 }

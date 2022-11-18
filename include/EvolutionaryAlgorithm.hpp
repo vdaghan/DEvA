@@ -175,7 +175,7 @@ namespace DEvA {
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
-		if (std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividualMetric)) [[unlikely]] {
+		if (std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividual->metrics)) [[unlikely]] {
 			return StepResult::Convergence;
 		}
 		return StepResult::Inconclusive;
