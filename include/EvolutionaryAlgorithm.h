@@ -88,9 +88,8 @@ namespace DEvA {
 
 			void addGeneration(Types::Generation gen) { genealogy.push_back(gen); };
 			Logger logger;
-			Types::GenotypeProxy bestGenotype;
-			Types::PhenotypeProxy bestPhenotype;
-			Types::MetricVariantMap bestIndividualMetric;
+			Types::IndividualPtr bestIndividual;
+			Types::Generation newGeneration;
 			Types::Genealogy genealogy;
 			std::deque<typename Types::MetricVariantMap> generationMetrics;
 			Types::MetricVariantMap genealogyMetrics;

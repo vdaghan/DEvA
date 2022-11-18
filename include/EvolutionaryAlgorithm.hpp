@@ -162,10 +162,7 @@ namespace DEvA {
 
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
-		auto bestIndividual = genealogy.back().front();
-		bestGenotype = bestIndividual->genotypeProxy;
-		bestPhenotype = bestIndividual->maybePhenotypeProxy.value();
-		bestIndividualMetric = bestIndividual->metrics;
+		bestIndividual = genealogy.back().front();
 
 		{
 			auto lock(eaStatistics.lock());
@@ -382,10 +379,15 @@ namespace DEvA {
 	Types::IndividualPtr EvolutionaryAlgorithm<Types>::find(IndividualIdentifier indId) {
 		auto const& gen = indId.generation;
 		auto const& id = indId.identifier;
-		if (genealogy.size() <= gen) [[unlikely]] {
+		if (genealogy.size() <= gen and newGeneration.empty()) [[unlikely]] {
 			return {};
 		}
-		for (auto& indPtr : genealogy.at(gen)) {
+		for (auto & indPtr : genealogy.at(gen)) {
+			if (indPtr->id == indId) {
+				return indPtr;
+			}
+		}
+		for (auto & indPtr : newGeneration) {
 			if (indPtr->id == indId) {
 				return indPtr;
 			}
