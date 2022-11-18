@@ -25,7 +25,7 @@ namespace DEvA {
 			eaStatistics.eaProgress.eaStage = EAStage::Start;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		typename Types::Generation newGeneration{};
+		newGeneration = {};
 		if (0 == genealogy.size()) [[unlikely]] {
 			logger.info("Creating new individuals.");
 			{
