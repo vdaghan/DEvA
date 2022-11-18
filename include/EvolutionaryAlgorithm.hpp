@@ -379,17 +379,18 @@ namespace DEvA {
 	Types::IndividualPtr EvolutionaryAlgorithm<Types>::find(IndividualIdentifier indId) {
 		auto const& gen = indId.generation;
 		auto const& id = indId.identifier;
-		if (genealogy.size() <= gen and newGeneration.empty()) [[unlikely]] {
-			return {};
-		}
-		for (auto & indPtr : genealogy.at(gen)) {
-			if (indPtr->id == indId) {
-				return indPtr;
+		if (genealogy.size() > gen) [[likely]] {
+			for (auto& indPtr : genealogy.at(gen)) {
+				if (indPtr->id == indId) {
+					return indPtr;
+				}
 			}
 		}
-		for (auto & indPtr : newGeneration) {
-			if (indPtr->id == indId) {
-				return indPtr;
+		if (!newGeneration.empty()) [[likely]] {
+			for (auto& indPtr : newGeneration) {
+				if (indPtr->id == indId) {
+					return indPtr;
+				}
 			}
 		}
 		return {};
