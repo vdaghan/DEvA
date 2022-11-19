@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IndividualIdentifier.h"
+#include "VariationFunctor.h"
 #include "VParameters.h"
 
 #include <list>
@@ -30,6 +31,7 @@ namespace DEvA {
 			};
 
 			IndividualIdentifier const id;
+			VariationInfo<Types> variationInfo;
 			Types::GenotypeProxy const genotypeProxy;
 			Types::Genotype genotype;
 			Types::MaybePhenotypeProxy maybePhenotypeProxy;

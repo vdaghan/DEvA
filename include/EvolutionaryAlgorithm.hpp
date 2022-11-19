@@ -79,13 +79,14 @@ namespace DEvA {
 					if (!maybeVariationInfo.has_value()) {
 						continue;
 					}
-					auto& variationInfo = maybeVariationInfo.value();
+					auto & variationInfo = maybeVariationInfo.value();
 					for (auto& parentPtr : variationInfo.parentPtrs) {
 						variationInfo.parentIds.push_back(parentPtr->id);
 					}
 					auto newGenotypeProxies = variationInfo.childProxies;
 					for (auto const& newGenotypeProxy : newGenotypeProxies) {
 						auto newIndividual = createNewIndividual(newGenotypeProxy);
+						newIndividual->variationInfo = variationInfo;
 						newIndividual->setParents(variationInfo.parentPtrs);
 						variationInfo.childIds.push_back(newIndividual->id);
 						newGeneration.emplace_back(newIndividual);
