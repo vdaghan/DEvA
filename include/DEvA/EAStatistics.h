@@ -60,9 +60,9 @@ namespace DEvA {
 				, variationStatisticsMap(other.variationStatisticsMap) {};
 
 			EAProgress eaProgress;
-			std::list<typename Types::MetricVariantMap> individualMetrics;
-			Types::MetricVariantMap generationMetrics;
-			Types::MetricVariantMap genealogyMetrics;
+			std::list<typename Types::SMetricMap> individualMetrics;
+			Types::SMetricMap generationMetrics;
+			Types::SMetricMap genealogyMetrics;
 			typename Types::DistanceMatrix distanceMatrix;
 			VariationStatisticsMap variationStatisticsMap;
 

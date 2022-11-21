@@ -80,8 +80,6 @@ namespace DEvA {
         using SMetric = Metric<Spec>;
         using SMetricMap = MetricMap<Spec>;
         using SMetricFunctor = MetricFunctor<Spec>;
-        using MetricVariant = S::MetricVariant;
-        using MetricVariantMap = std::map<std::string, MetricVariant>;
 
         // Specification function types
         using FGenotypeFromProxy = std::function<Genotype & (GenotypeProxy)>;
@@ -92,11 +90,6 @@ namespace DEvA {
         using FGenePoolSelection = std::function<Generation(Generation)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
         using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
-        using FEvaluateIndividualFromGenotypeProxy = std::function<MetricVariantMap(GenotypeProxy)>;
-        using FEvaluateIndividualFromIndividualPtr = std::function<MetricVariantMap(IndividualPtr)>;
-        using FEvaluateGeneration = std::function<MetricVariantMap(Generation)>;
-        using FMetricComparison = std::function<bool(MetricVariant, MetricVariant)>;
-        using MetricComparisonMap = std::map<std::string, FMetricComparison>;
         using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
         using FVariationFromGenotypeProxies = std::function<GenotypeProxies(GenotypeProxies)>;
         using FVariationFromIndividualPtrs = std::function<GenotypeProxies(IndividualPtrs)>;
@@ -108,9 +101,6 @@ namespace DEvA {
             FGenePoolSelection,
             FCreateGenotype,
             FTransform,
-            FEvaluateIndividualFromGenotypeProxy,
-            FEvaluateIndividualFromIndividualPtr,
-            FEvaluateGeneration,
             FParentSelection,
             FVariationFromGenotypeProxies,
             FVariationFromIndividualPtrs,

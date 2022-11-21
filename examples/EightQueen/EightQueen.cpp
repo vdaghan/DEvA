@@ -49,7 +49,6 @@ int main() {
 		using GenotypeProxy = std::shared_ptr<Genotype>;
 		using Phenotype = std::vector<size_t>;
 		using PhenotypeProxy = std::shared_ptr<Phenotype>;
-		using MetricVariant = std::variant<int>;
 		using Distance = int;
 		using IndividualParameters = DEvA::NullVParameters;
 		static GenotypeProxy copy(GenotypeProxy gpx) { return gpx; };
@@ -88,10 +87,14 @@ int main() {
 	auto fitnessComparison = [](std::any const & lhs, std::any const & rhs) {
 		return std::any_cast<int>(lhs) < std::any_cast<int>(rhs);
 	};
+	auto fitnessToStringFunction = [](std::any const& v) {
+		return std::format("{}", std::any_cast<int>(v));
+	};
 	DEvA::MetricFunctor<Spec> metricFunctor{
 		.name = "fitness",
 		.computeFromIndividualPtrFunction = fevaluate,
-		.betterThanFunction = fitnessComparison
+		.betterThanFunction = fitnessComparison,
+		.metricToStringFunction = fitnessToStringFunction
 	};
 	ea.registerMetricFunctor(metricFunctor, true);
 

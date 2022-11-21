@@ -9,11 +9,13 @@ namespace DEvA {
     struct Metric {
         using FMetricEquivalence = std::function<bool(std::any const &, std::any const &)>;
         using FMetricOrdering = std::function<bool(std::any const &, std::any const &)>;
+        using FMetricToString = std::function<std::string(std::any const &)>;
 
         std::string const name;
         std::any const value;
         FMetricEquivalence const equivalentToFunction;
         FMetricOrdering const betterThanFunction;
+        FMetricToString const metricToStringFunction;
 
         bool isEquivalence() const {
             return equivalentToFunction.operator bool();
@@ -42,6 +44,12 @@ namespace DEvA {
         T as() const {
             return std::any_cast<T>(value);
         }
+        std::string print() {
+            if (!metricToStringFunction) {
+                return "";
+            }
+            return metricToStringFunction(value);
+        }
         bool operator<(Metric const & otherMetric) const {
             return betterThanFunction(value, otherMetric.value);
         };
@@ -63,6 +71,7 @@ namespace DEvA {
         FComputeFromGeneration computeFromGenerationFunction{};
         Metric<Types>::FMetricEquivalence equivalentToFunction{};
         Metric<Types>::FMetricOrdering betterThanFunction{};
+        Metric<Types>::FMetricToString metricToStringFunction{};
 
         template <typename T>
         Metric<Types> compute(T const & t) const {
@@ -78,7 +87,8 @@ namespace DEvA {
                 .name = name,
                 .value = value,
                 .equivalentToFunction = equivalentToFunction,
-                .betterThanFunction = betterThanFunction
+                .betterThanFunction = betterThanFunction,
+                .metricToStringFunction = metricToStringFunction
             };
             return metric;
         }
