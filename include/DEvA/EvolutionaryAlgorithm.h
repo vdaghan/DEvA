@@ -1,15 +1,15 @@
 #pragma once
 
-#include "EAState.h"
-#include "EAStatistics.h"
-#include "Error.h"
-#include "Genealogy.h"
-#include "Individual.h"
-#include "IndividualIdentifier.h"
-#include "Logger.h"
-#include "VariationFunctor.h"
+#include "DEvA/EAState.h"
+#include "DEvA/EAStatistics.h"
+#include "DEvA/Error.h"
+#include "DEvA/Individual.h"
+#include "DEvA/IndividualIdentifier.h"
+#include "DEvA/Logger.h"
+#include "DEvA/Metric.h"
+#include "DEvA/VariationFunctor.h"
 
-#include "BuildingBlocks/StandardGenePoolSelectors.h"
+#include "DEvA/BuildingBlocks/StandardGenePoolSelectors.h"
 
 #include <algorithm>
 #include <atomic>
@@ -63,7 +63,7 @@ namespace DEvA {
 			void registerEAFunction(EAFunction functionType, Types::FVariant function) {
 				eaFunctions.emplace(std::make_pair(functionType, function));
 			}
-			void registerVariationFunctor(typename Types::SVariationFunctor variationFunctor, bool use = false) {
+			void registerVariationFunctor(VariationFunctor<Types> variationFunctor, bool use = false) {
 				registeredVariationFunctors[variationFunctor.name] = variationFunctor;
 				if (use) {
 					useVariationFunctor(variationFunctor.name);
@@ -72,11 +72,17 @@ namespace DEvA {
 			void useVariationFunctor(std::string vfName) {
 				variationFunctorsInUse.emplace(vfName);
 			}
+			void registerMetricFunctor(MetricFunctor<Types> metricFunctor, bool use = false) {
+				registeredMetricFunctors[metricFunctor.name] = metricFunctor;
+				if (use) {
+					useMetricFunctor(metricFunctor.name);
+				}
+			}
+			void useMetricFunctor(std::string mfName) {
+				metricFunctorsInUse.emplace(mfName);
+			}
 			void registerCallback(Callback callbackType, Types::CVariant function) {
 				callbacks.emplace(std::make_pair(callbackType, function));
-			}
-			void registerMetricComparison(std::string metricName, Types::FMetricComparison function) {
-				metricComparisons.emplace(std::make_pair(metricName, function));
 			}
 
 			StepResult search(size_t count);
@@ -91,15 +97,16 @@ namespace DEvA {
 			Types::IndividualPtr bestIndividual;
 			Types::Generation newGeneration;
 			Types::Genealogy genealogy;
-			std::deque<typename Types::MetricVariantMap> generationMetrics;
-			Types::MetricVariantMap genealogyMetrics;
+			//std::deque<typename Types::SMetricMap> generationMetricMap;
+			//Types::SMetricMap genealogyMetricMap;
 		private:
 			EAState eaState;
 			StepResult epoch();
 			Types::FVariantMap eaFunctions;
 			Types::CVariantMap callbacks;
-			Types::MetricComparisonMap metricComparisons;
-			std::map<std::string, typename Types::SVariationFunctor> registeredVariationFunctors;
+			std::map<std::string, MetricFunctor<Types>> registeredMetricFunctors;
+			std::set<std::string> metricFunctorsInUse;
+			std::map<std::string, VariationFunctor<Types>> registeredVariationFunctors;
 			std::set<std::string> variationFunctorsInUse;
 
 			void transformIndividuals(Types::Generation &);

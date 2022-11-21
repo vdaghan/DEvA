@@ -1,8 +1,9 @@
 #pragma once
 
-#include "IndividualIdentifier.h"
-#include "VariationFunctor.h"
-#include "VParameters.h"
+#include "DEvA/IndividualIdentifier.h"
+#include "DEvA/Metric.h"
+#include "DEvA/VariationFunctor.h"
+#include "DEvA/VParameters.h"
 
 #include <list>
 #include <map>
@@ -35,7 +36,7 @@ namespace DEvA {
 			Types::GenotypeProxy const genotypeProxy;
 			Types::Genotype genotype;
 			Types::MaybePhenotypeProxy maybePhenotypeProxy;
-			Types::MetricVariantMap metrics;
+			Types::SMetricMap metricMap;
 			Types::IndividualPtrs parents;
 			Types::IndividualWPtrs children;
 		private:

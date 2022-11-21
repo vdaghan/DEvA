@@ -68,7 +68,7 @@ namespace DEvA {
 						continue;
 					}
 					//auto & fitnessComparisonFunction = std::get<typename Types::FMetricComparison>(metricComparisons.at(EAFunction::MetricComparison));
-					auto maybeVariationInfo = variationFunctor.apply(metricComparisons, genePool);
+					auto maybeVariationInfo = variationFunctor.apply(genePool);
 					if (maybeVariationInfo == std::unexpected(ErrorCode::NotEnoughParentsToChoose)) {
 						continue;
 					}
@@ -150,16 +150,16 @@ namespace DEvA {
 		}
 		std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
 
-		{
-			std::list<typename Types::MetricVariantMap> individualMetrics;
-			for (auto& iptr : genealogy.back()) {
-				if (!iptr->maybePhenotypeProxy) continue;
-				individualMetrics.push_back(iptr->metrics);
-			}
-			auto lock(eaStatistics.lock());
-			eaStatistics.individualMetrics = individualMetrics;
-			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
-		}
+		//{
+		//	std::list<typename Types::MetricVariantMap> individualMetrics;
+		//	for (auto& iptr : genealogy.back()) {
+		//		if (!iptr->maybePhenotypeProxy) continue;
+		//		individualMetrics.push_back(iptr->metrics);
+		//	}
+		//	auto lock(eaStatistics.lock());
+		//	eaStatistics.individualMetrics = individualMetrics;
+		//	tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Fitness);
+		//}
 
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
@@ -176,7 +176,7 @@ namespace DEvA {
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
-		if (std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividual->metrics)) [[unlikely]] {
+		if (std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividual->metricMap)) [[unlikely]] {
 			return StepResult::Convergence;
 		}
 		return StepResult::Inconclusive;
@@ -225,20 +225,29 @@ namespace DEvA {
 			eaStatistics.eaProgress.eaStage = EAStage::Evaluate;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		auto evaluateLambda = [&](auto& iptr) {
+		auto evaluateLambda = [&](auto & iptr) {
+			for (auto const & metricFunctorName : metricFunctorsInUse) {
+				if (checkStopFlagAndMaybeWait()) return;
+				auto & metricFunctor(registeredMetricFunctors.at(metricFunctorName));
+				if (metricFunctor.valid()) [[likely]] {
+					if (metricFunctor.computeFromIndividualPtrFunction) {
+						iptr->metricMap.emplace(std::make_pair(metricFunctorName, metricFunctor.compute<typename Types::IndividualPtr>(iptr)));
+					}
+				}
+			}
 			if (checkStopFlagAndMaybeWait()) return;
-			if (eaFunctions.contains(EAFunction::EvaluateIndividualFromGenotypeProxy)) {
-				auto && metrics(std::get<typename Types::FEvaluateIndividualFromGenotypeProxy>(eaFunctions.at(EAFunction::EvaluateIndividualFromGenotypeProxy))(iptr->maybePhenotypeProxy.value()));
-				iptr->metrics.insert(metrics.begin(), metrics.end());
-			}
-			if (eaFunctions.contains(EAFunction::EvaluateIndividualFromIndividualPtr)) {
-				auto && metrics(std::get<typename Types::FEvaluateIndividualFromIndividualPtr>(eaFunctions.at(EAFunction::EvaluateIndividualFromIndividualPtr))(iptr));
-				iptr->metrics.insert(metrics.begin(), metrics.end());
-			}
-			if (eaFunctions.contains(EAFunction::EvaluateGeneration)) {
-				auto && metrics(std::get<typename Types::FEvaluateGeneration>(eaFunctions.at(EAFunction::EvaluateGeneration))(generation));
-				iptr->metrics.insert(metrics.begin(), metrics.end());
-			}
+			//if (eaFunctions.contains(EAFunction::EvaluateIndividualFromGenotypeProxy)) {
+			//	auto && metrics(std::get<typename Types::FEvaluateIndividualFromGenotypeProxy>(eaFunctions.at(EAFunction::EvaluateIndividualFromGenotypeProxy))(iptr->maybePhenotypeProxy.value()));
+			//	iptr->metrics.insert(metrics.begin(), metrics.end());
+			//}
+			//if (eaFunctions.contains(EAFunction::EvaluateIndividualFromIndividualPtr)) {
+			//	auto && metrics(std::get<typename Types::FEvaluateIndividualFromIndividualPtr>(eaFunctions.at(EAFunction::EvaluateIndividualFromIndividualPtr))(iptr));
+			//	iptr->metrics.insert(metrics.begin(), metrics.end());
+			//}
+			//if (eaFunctions.contains(EAFunction::EvaluateGeneration)) {
+			//	auto && metrics(std::get<typename Types::FEvaluateGeneration>(eaFunctions.at(EAFunction::EvaluateGeneration))(generation));
+			//	iptr->metrics.insert(metrics.begin(), metrics.end());
+			//}
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;

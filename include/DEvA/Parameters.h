@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 
-#include "Parameter.h"
+#include "DEvA/Parameter.h"
 
 namespace DEvA {
 	struct Parameters {

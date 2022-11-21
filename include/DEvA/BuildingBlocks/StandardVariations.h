@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Common.h"
-#include "Individual.h"
-#include "Specialisation.h"
+#include "DEvA/Common.h"
+#include "DEvA/Individual.h"
+#include "DEvA/Specialisation.h"
 
 #include <algorithm>
 #include <concepts>

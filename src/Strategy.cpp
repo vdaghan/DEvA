@@ -1,4 +1,4 @@
-#include "Strategy.h"
+#include "DEvA/Strategy.h"
 /*
 GenerationPtr Strategy::apply(GenerationPtr const generation) const {
 	auto individuals = generation->getIndividuals();

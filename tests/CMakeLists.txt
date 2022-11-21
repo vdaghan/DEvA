@@ -12,7 +12,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 message(STATUS "gtest_SOURCE_DIR = ${gtest_SOURCE_DIR}")
 
-add_executable(DEvA_Tests  "DEvA_Parameters.cpp" "DEvA_UserOperators.cpp" "DEvA_Concepts.cpp")
+add_executable(DEvA_Tests  "DEvA_Parameters.cpp" "DEvA_UserOperators.cpp" "DEvA_Concepts.cpp" )
 add_executable(DEvA::Tests ALIAS DEvA_Tests)
 target_link_libraries(DEvA_Tests PUBLIC DEvA)
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IndividualIdentifier.h"
-#include "RandomNumberGenerator.h"
+#include "DEvA/IndividualIdentifier.h"
+#include "DEvA/RandomNumberGenerator.h"
 
 #include <list>
 #include <memory>
@@ -25,7 +25,7 @@ namespace DEvA {
 
 	template <typename Spec>
 	struct VariationFunctor {
-		Maybe<VariationInfo<Spec>> apply(Spec::MetricComparisonMap const & compMap, Spec::IndividualPtrs & matingPool) const {
+		Maybe<VariationInfo<Spec>> apply(Spec::IndividualPtrs & matingPool) const {
 			if (matingPool.size() < numberOfParents) {
 				return std::unexpected(ErrorCode::NotEnoughParentsToChoose);
 			}
@@ -35,7 +35,7 @@ namespace DEvA {
 			}
 			VariationInfo<Spec> variationInfo;
 			variationInfo.name = name;
-			variationInfo.parentPtrs = parentSelectionFunction(compMap, matingPool);
+			variationInfo.parentPtrs = parentSelectionFunction(matingPool);
 			if (variationInfo.parentPtrs.empty()) {
 				return std::unexpected(ErrorCode::NoSuitableParentsToChoose);
 			}

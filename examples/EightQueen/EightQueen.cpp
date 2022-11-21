@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "deva_version.h"
-#include "EvolutionaryAlgorithm.h"
-#include "Specialisation.h"
+#include "DEvA/EvolutionaryAlgorithm.h"
+#include "DEvA/Specialisation.h"
 
 /**
 * Chapter 2.4.1, Eiben, 2009, Introduction to Evolutionary Computing
@@ -61,7 +61,8 @@ int main() {
 	ea.genotypeFromProxyFunction = [](Spec::GenotypeProxy gpx) -> Spec::Genotype & { return *gpx; };
 	ea.phenotypeFromProxyFunction = [](Spec::PhenotypeProxy ppx) -> Spec::Phenotype & { return *ppx; };
 
-	Spec::FEvaluateIndividualFromGenotypeProxy fevaluate = [](Spec::PhenotypeProxy pptr) -> Spec::MetricVariantMap {
+	auto fevaluate = [](Spec::IndividualPtr iptr) -> std::any {
+		auto const & pptr(iptr->maybePhenotypeProxy.value());
 		auto last = std::unique(pptr->begin(), pptr->end());
 		pptr->erase(last, pptr->end());
 
@@ -82,10 +83,18 @@ int main() {
 				}
 			}
 		}
-		Spec::MetricVariantMap retVal;
-		retVal.emplace(std::make_pair("fitness", fitness));
-		return retVal;
+		return fitness;
 	};
+	auto fitnessComparison = [](std::any const & lhs, std::any const & rhs) {
+		return std::any_cast<int>(lhs) < std::any_cast<int>(rhs);
+	};
+	DEvA::MetricFunctor<Spec> metricFunctor{
+		.name = "fitness",
+		.computeFromIndividualPtrFunction = fevaluate,
+		.betterThanFunction = fitnessComparison
+	};
+	ea.registerMetricFunctor(metricFunctor, true);
+
 	Spec::FVariationFromGenotypeProxies variation = [](Spec::GenotypeProxies gptrs) {
 		Spec::GenotypeProxies offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(gptrs);
 		for (auto& gptr : offsprings) {
@@ -96,14 +105,6 @@ int main() {
 		}
 		return offsprings;
 	};
-
-	ea.registerEAFunction(DEvA::EAFunction::Initialisation, DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
-	ea.registerEAFunction(DEvA::EAFunction::Transformation, DEvA::StandardTransforms<Spec>::copy);
-	ea.registerEAFunction(DEvA::EAFunction::EvaluateIndividualFromGenotypeProxy, fevaluate);
-	ea.registerEAFunction(DEvA::EAFunction::SortIndividuals, [](Spec::IndividualPtr const & lhs, Spec::IndividualPtr const & rhs) {
-		return lhs->metrics.at("fitness") < rhs->metrics.at("fitness");
-	});
-	ea.registerMetricComparison("fitness", [](Spec::MetricVariant const& lhs, Spec::MetricVariant const& rhs) { return std::get<int>(lhs) < std::get<int>(rhs); });
 	Spec::SVariationFunctor variationFunctor{
 		.name = "cutAndCrossfillThenMaybeSwap",
 		.numberOfParents = 2,
@@ -113,8 +114,14 @@ int main() {
 		.removeParentsFromMatingPool = false
 	};
 	ea.registerVariationFunctor(variationFunctor, true);
+
+	ea.registerEAFunction(DEvA::EAFunction::Initialisation, DEvA::StandardInitialisers<Spec>::permutations<8, 100>);
+	ea.registerEAFunction(DEvA::EAFunction::Transformation, DEvA::StandardTransforms<Spec>::copy);
+	ea.registerEAFunction(DEvA::EAFunction::SortIndividuals, [](Spec::IndividualPtr const & lhs, Spec::IndividualPtr const & rhs) {
+		return lhs->metricMap.at("fitness") < rhs->metricMap.at("fitness");
+	});
 	ea.registerEAFunction(DEvA::EAFunction::SurvivorSelection, DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
-	ea.registerEAFunction(DEvA::EAFunction::ConvergenceCheck, [](Spec::MetricVariantMap const & metricMap) { return 0 == std::get<int>(metricMap.at("fitness")); });
+	ea.registerEAFunction(DEvA::EAFunction::ConvergenceCheck, [](Spec::SMetricMap const & metricMap) { return 0 == metricMap.at("fitness").as<int>(); });
 	ea.lambda = 50;
 	ea.logger.callback = [](DEvA::LogType t, std::string msg) {
 		std::cout << msg << std::endl;
@@ -146,8 +153,9 @@ int main() {
 		}
 		std::cout << std::endl;
 	}
-	auto & bestIndividualMetric(ea.bestIndividual->metrics);
-	std::cout << "Fitness: " << std::get<int>(bestIndividualMetric.at("fitness")) << "\n";
+	auto & bestIndividualMetricMap(ea.bestIndividual->metricMap);
+	auto & bestIndividualFitness(bestIndividualMetricMap.at("fitness"));
+	std::cout << "Fitness: " << bestIndividualFitness.as<int>() << "\n";
 
 	return 0;
 }

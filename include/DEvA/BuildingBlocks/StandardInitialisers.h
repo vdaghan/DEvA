@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RandomNumberGenerator.h"
-#include "Specialisation.h"
+#include "DEvA/RandomNumberGenerator.h"
+#include "DEvA/Specialisation.h"
 
 #include <numeric>
 #include <random>

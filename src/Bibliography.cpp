@@ -1,6 +1,6 @@
-#include "Bibliography.h"
+#include "DEvA/Bibliography.h"
 
-#include "Reference.h"
+#include "DEvA/Reference.h"
 
 Bibliography::Bibliography() {
 }

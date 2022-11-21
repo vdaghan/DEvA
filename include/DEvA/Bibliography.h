@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "Reference.h"
+#include "DEvA/Reference.h"
 
 class Bibliography {
 	public:

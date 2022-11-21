@@ -6,21 +6,22 @@
 #include <memory>
 #include <type_traits>
 
-#include "Concepts.h"
+#include "DEvA/Concepts.h"
 
-#include "EAStatistics.h"
-#include "Error.h"
-#include "EvolutionaryAlgorithm.h"
-#include "Individual.h"
-#include "IndividualIdentifier.h"
-#include "Parameters.h"
-#include "StandardConvergenceCheckers.h"
-#include "StandardInitialisers.h"
-#include "StandardParentSelectors.h"
-#include "StandardSurvivorSelectors.h"
-#include "StandardTransforms.h"
-#include "StandardVariations.h"
-#include "VariationFunctor.h"
+#include "DEvA/EAStatistics.h"
+#include "DEvA/Error.h"
+#include "DEvA/EvolutionaryAlgorithm.h"
+#include "DEvA/Individual.h"
+#include "DEvA/IndividualIdentifier.h"
+#include "DEvA/Metric.h"
+#include "DEvA/Parameters.h"
+#include "DEvA/BuildingBlocks/StandardConvergenceCheckers.h"
+#include "DEvA/BuildingBlocks/StandardInitialisers.h"
+#include "DEvA/BuildingBlocks/StandardParentSelectors.h"
+#include "DEvA/BuildingBlocks/StandardSurvivorSelectors.h"
+#include "DEvA/BuildingBlocks/StandardTransforms.h"
+#include "DEvA/BuildingBlocks/StandardVariations.h"
+#include "DEvA/VariationFunctor.h"
 
 namespace DEvA {
     template <typename T> class EvolutionaryAlgorithm;
@@ -37,19 +38,17 @@ namespace DEvA {
 
     template <CSpecification S>
     struct Specialisation {
-		using F = S;
-		S f;
+        using F = S;
+        S f;
         // Repeat basic types used throughout code for better UX
         using Spec = Specialisation<S>;
         using Genotype = S::Genotype;
-		using GenotypeProxy = S::GenotypeProxy;
+        using GenotypeProxy = S::GenotypeProxy;
         using GenotypeProxies = std::list<GenotypeProxy>;
         using GenotypeProxiesDeque = std::deque<GenotypeProxies>;
         using Phenotype = S::Phenotype;
-		using PhenotypeProxy = S::PhenotypeProxy;
-		using MaybePhenotypeProxy = Maybe<PhenotypeProxy>;
-        using MetricVariant = S::MetricVariant;
-        using MetricVariantMap = std::map<std::string, MetricVariant>;
+        using PhenotypeProxy = S::PhenotypeProxy;
+        using MaybePhenotypeProxy = Maybe<PhenotypeProxy>;
         using Distance = S::Distance;
         using DistanceMatrix = std::map<IndividualIdentifier, std::map<IndividualIdentifier, Distance>>;
         using IndividualParameters = S::IndividualParameters;
@@ -75,15 +74,22 @@ namespace DEvA {
 
         using SVariationInfo = VariationInfo<Spec>;
         using SMaybeVariationInfo = Maybe<VariationInfo<Spec>>;
-		using SVariationFunctor = VariationFunctor<Spec>;
+        using SVariationFunctor = VariationFunctor<Spec>;
 
-		// Specification function types
-		using FGenotypeFromProxy = std::function<Genotype & (GenotypeProxy)>;
-		using FPhenotypeFromProxy = std::function<Phenotype & (PhenotypeProxy)>;
+        // Metric types
+        using SMetric = Metric<Spec>;
+        using SMetricMap = MetricMap<Spec>;
+        using SMetricFunctor = MetricFunctor<Spec>;
+        using MetricVariant = S::MetricVariant;
+        using MetricVariantMap = std::map<std::string, MetricVariant>;
 
-		// EA function types
+        // Specification function types
+        using FGenotypeFromProxy = std::function<Genotype & (GenotypeProxy)>;
+        using FPhenotypeFromProxy = std::function<Phenotype & (PhenotypeProxy)>;
+
+        // EA function types
         using FGenesis = std::function<GenotypeProxies(void)>;
-		using FGenePoolSelection = std::function<Generation(Generation)>;
+        using FGenePoolSelection = std::function<Generation(Generation)>;
         using FCreateGenotype = std::function<GenotypeProxy(void)>;
         using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
         using FEvaluateIndividualFromGenotypeProxy = std::function<MetricVariantMap(GenotypeProxy)>;
@@ -91,12 +97,12 @@ namespace DEvA {
         using FEvaluateGeneration = std::function<MetricVariantMap(Generation)>;
         using FMetricComparison = std::function<bool(MetricVariant, MetricVariant)>;
         using MetricComparisonMap = std::map<std::string, FMetricComparison>;
-        using FParentSelection = std::function<IndividualPtrs(MetricComparisonMap const &, IndividualPtrs)>;
+        using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
         using FVariationFromGenotypeProxies = std::function<GenotypeProxies(GenotypeProxies)>;
         using FVariationFromIndividualPtrs = std::function<GenotypeProxies(IndividualPtrs)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FSortIndividuals = std::function<bool(IndividualPtr, IndividualPtr)>;
-        using FConvergenceCheck = std::function<bool(MetricVariantMap const &)>;
+        using FConvergenceCheck = std::function<bool(SMetricMap const &)>;
         using FVariant = std::variant<
             FGenesis,
             FGenePoolSelection,
@@ -114,7 +120,7 @@ namespace DEvA {
         using FVariantMap = std::map<EAFunction, FVariant>;
 
         // Callbacks
-		using CVoid = std::function<void(void)>;
+        using CVoid = std::function<void(void)>;
         using CEAStatsUpdate = std::function<void(EAStatistics<Spec> const &, EAStatisticsUpdateType)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;
@@ -138,37 +144,4 @@ namespace DEvA {
             return GenotypeProxies({ std::make_shared<Genotype>() });
         };
     };
-    /*
-    template <typename G, typename P, typename F>
-    typename Specialisation<G, P, F>::GenotypePtrSets operator>>(typename Specialisation<G, P, F>::GenotypePtrSet gs, typename Specialisation<G, P, F>::FGenotypePtrSetDeque fgsd) {
-        Specialisation<G, P, F>::GenotypePtrSets gpsd({ gs });
-        return fgsd(gpsd);
-    }
-
-    template <typename G, typename P, typename F>
-    typename Specialisation<G, P, F>::GenotypePtrSets operator>>(typename Specialisation<G, P, F>::GenotypePtrSets gsd, typename Specialisation<G, P, F>::FGenotypePtrSetDeque fgsd) {
-        return fgsd(gsd);
-    }
-
-    template <typename G, typename P, typename F>
-    typename Specialisation<G, P, F>::GenotypePtrSet operator>>(typename Specialisation<G, P, F>::GenotypePtrSet gs, typename Specialisation<G, P, F>::FGenotypePtrSet fgs) {
-        return fgs(gs);
-    }
-
-    template <typename G, typename P, typename F>
-    typename Specialisation<G, P, F>::GenotypePtrSets operator>>(typename Specialisation<G, P, F>::GenotypePtrSets gsd, typename Specialisation<G, P, F>::DequeFGenotypePtrSet dfgs) {
-        typename Specialisation<G, P, F>::GenotypePtrSets ret;
-        size_t s_dfgs = dfgs.size();
-        size_t s_gsd = gsd.size();
-        size_t m = std::min(s_dfgs, s_gsd);
-        for (size_t i = 0; i < m; ++i) {
-            typename Specialisation<G, P, F>::FGenotypePtrSet f = dfgs[i];
-            typename Specialisation<G, P, F>::GenotypePtrSet& gs = gsd[i];
-            ret.push_back(gs >> f);
-        }
-        for (size_t i = m; i < s_gsd; ++i) {
-            ret.push_back(gsd[i]);
-        }
-        return ret;
-    };*/
 }
