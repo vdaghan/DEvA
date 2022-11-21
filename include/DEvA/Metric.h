@@ -15,24 +15,24 @@ namespace DEvA {
         FMetricEquivalence const equivalentToFunction;
         FMetricOrdering const betterThanFunction;
 
-        bool isEquivalence() {
+        bool isEquivalence() const {
             return equivalentToFunction.operator bool();
         };
-        bool isOrdering() {
+        bool isOrdering() const {
             return betterThanFunction.operator bool();
         };
-        bool relationTypesMatch(Metric const & other) {
+        bool relationTypesMatch(Metric const & other) const {
             bool bothAreEquivalence(isEquivalence() and other.isEquivalence());
             bool bothAreOrdering(isOrdering() and other.isOrdering());
             bool consistent((isOrdering() and not other.isEquivalence()) or (isEquivalence() and not other.isOrdering()));
             return (bothAreEquivalence or bothAreOrdering) and consistent;
         };
-        bool comparableInTheory(Metric const & other) {
+        bool comparableInTheory(Metric const & other) const {
             bool namesMatch(name == other.name);
             bool typesMatch(value.type() == other.value.type());
             return namesMatch and typesMatch and relationTypesMatch(other);
         };
-        bool comparableWith(Metric const & other) {
+        bool comparableWith(Metric const & other) const {
             bool hasValue(value.has_value());
             bool otherHasValue(other.value.has_value());
             bool comparable(comparableInTheory(other));
@@ -42,10 +42,10 @@ namespace DEvA {
         T as() const {
             return std::any_cast<T>(value);
         }
-        bool operator<(Metric const & otherMetric) {
+        bool operator<(Metric const & otherMetric) const {
             return betterThanFunction(value, otherMetric.value);
         };
-        bool operator==(Metric const & otherMetric) {
+        bool operator==(Metric const & otherMetric) const {
             return equivalentToFunction(value, otherMetric.value);
         };
     };
@@ -83,7 +83,7 @@ namespace DEvA {
             return metric;
         }
         
-        bool valid() {
+        bool valid() const {
             bool hasExactlyOneComparisonFunction(equivalentToFunction.operator bool() xor betterThanFunction.operator bool());
             bool hasExactlyOneComputeFunction(computeFromGenerationFunction.operator bool() xor computeFromIndividualPtrFunction.operator bool());
             return hasExactlyOneComparisonFunction and hasExactlyOneComputeFunction;
