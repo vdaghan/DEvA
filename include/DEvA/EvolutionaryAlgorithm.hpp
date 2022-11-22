@@ -235,6 +235,7 @@ namespace DEvA {
 					}
 				}
 			}
+			tryExecuteCallback<IndividualIdentifier>(Callback::Evaluation, iptr->id);
 			if (checkStopFlagAndMaybeWait()) return;
 			//if (eaFunctions.contains(EAFunction::EvaluateIndividualFromGenotypeProxy)) {
 			//	auto && metrics(std::get<typename Types::FEvaluateIndividualFromGenotypeProxy>(eaFunctions.at(EAFunction::EvaluateIndividualFromGenotypeProxy))(iptr->maybePhenotypeProxy.value()));

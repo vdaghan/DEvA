@@ -114,11 +114,13 @@ namespace DEvA {
         using CEAStatsUpdate = std::function<void(EAStatistics<Spec> const &, EAStatisticsUpdateType)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;
+        using COnEvaluate = std::function<void(IndividualIdentifier)>;
         using CVariant = std::variant<
             CVoid,
             CEAStatsUpdate,
             COnEpoch,
-            COnVariation>;
+            COnVariation,
+            COnEvaluate>;
         using CVariantMap = std::map<Callback, CVariant>;
 
         struct RFGenotypeProxySet {

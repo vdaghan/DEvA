@@ -38,7 +38,7 @@ namespace DEvA {
 		SortIndividuals,
 		ConvergenceCheck
 	};
-	enum class Callback { StatsUpdate, EpochStart, EpochEnd, Variation, Pause, Stop };
+	enum class Callback { StatsUpdate, EpochStart, EpochEnd, Variation, Evaluation, Pause, Stop };
 
 	template <typename Types>
 	class EvolutionaryAlgorithm {
@@ -127,7 +127,11 @@ namespace DEvA {
 				void tryExecuteCallback(Callback callbackType, VTypes ... vargs) {
 					if (callbacks.contains(callbackType)) {
 						std::lock_guard<std::mutex> lock(callbackMutex);
-						callbacks.at(callbackType)(vargs...);
+						auto & callback(callbacks.at(callbackType));
+						if (Callback::Evaluation == callbackType) {
+							std::get<typename Types::COnEvaluate>(callback)(vargs...);
+						}
+						//callbacks.at(callbackType)(vargs...);
 					}
 				};
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
