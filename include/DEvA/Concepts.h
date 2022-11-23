@@ -12,8 +12,6 @@ namespace DEvA {
 		typename T::GenotypeProxy;
 		typename T::Phenotype;
 		typename T::PhenotypeProxy;
-		typename T::Distance;
-		typename T::IndividualParameters;
 	};
 	template <typename T> concept CHasDistance = requires { typename T::Distance; };
 	template <typename T> concept CNoDistance = not CHasDistance<T>;
@@ -77,5 +75,5 @@ namespace DEvA {
 			}
 			return retVal;
 		};
-	};
+	}
 }

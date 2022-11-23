@@ -6,7 +6,7 @@ namespace DEvA {
 	template <typename Types>
 	struct StandardSurvivorSelectors {
 		template <size_t N>
-		static void clamp(Types::IndividualPtrs& iptrs) {
+		static void clamp(typename Types::IndividualPtrs & iptrs) {
 			if (iptrs.size() > N) {
 				iptrs.resize(N);
 			}

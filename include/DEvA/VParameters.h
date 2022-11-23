@@ -11,12 +11,12 @@ namespace DEvA {
         } else {
             return getType<lookingFor, curIndex + 1, Types ...>();
         }
-    };
+    }
 
     template <size_t lookingFor, typename ... Types>
     constexpr auto getType() {
         return getType<lookingFor, 0, Types ...>();
-    };
+    }
 
     template <typename EnumClass, typename ... Types>
     class VParameters {

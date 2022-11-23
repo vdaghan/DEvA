@@ -25,7 +25,7 @@
 
 namespace DEvA {
     template <typename T> class EvolutionaryAlgorithm;
-    template <typename T, typename IP> class Individual;
+    template <typename T> class Individual;
     template <typename T> struct StandardInitialisers;
     template <typename T> struct StandardVariations;
     template <typename T> struct StandardTransforms;
@@ -42,16 +42,13 @@ namespace DEvA {
         S f;
         // Repeat basic types used throughout code for better UX
         using Spec = Specialisation<S>;
-        using Genotype = S::Genotype;
-        using GenotypeProxy = S::GenotypeProxy;
+        using Genotype = typename S::Genotype;
+        using GenotypeProxy = typename S::GenotypeProxy;
         using GenotypeProxies = std::list<GenotypeProxy>;
         using GenotypeProxiesDeque = std::deque<GenotypeProxies>;
-        using Phenotype = S::Phenotype;
-        using PhenotypeProxy = S::PhenotypeProxy;
+        using Phenotype = typename S::Phenotype;
+        using PhenotypeProxy = typename S::PhenotypeProxy;
         using MaybePhenotypeProxy = Maybe<PhenotypeProxy>;
-        using Distance = S::Distance;
-        using DistanceMatrix = std::map<IndividualIdentifier, std::map<IndividualIdentifier, Distance>>;
-        using IndividualParameters = S::IndividualParameters;
 
         using FGenotypePtrSet = std::function<GenotypeProxies(GenotypeProxies)>;
         using FGenotypePtrSetDeque = std::function<GenotypeProxiesDeque(GenotypeProxiesDeque)>;
@@ -59,7 +56,7 @@ namespace DEvA {
 
         // Repeat non-POD types used throughout code for better UX
         using SEvolutionaryAlgorithm = EvolutionaryAlgorithm<Spec>;
-        using SIndividual = Individual<Spec, IndividualParameters>;
+        using SIndividual = Individual<Spec>;
 
         using IndividualPtr = std::shared_ptr<SIndividual>;
         using IndividualPtrs = std::list<IndividualPtr>;

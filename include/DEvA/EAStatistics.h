@@ -26,7 +26,6 @@ namespace DEvA {
 	                   , Variation
 	                   , Transform
 	                   , Evaluate
-	                   , Distance
 	                   , SelectSurvivors
 	                   , End};
 	struct EAProgress {
@@ -40,7 +39,7 @@ namespace DEvA {
 		std::size_t numberOfEvaluatedIndividualsInGeneration;
 	};
 
-	enum class EAStatisticsUpdateType {Progress, Variation, Fitness, Distance, Final};
+	enum class EAStatisticsUpdateType {Progress, Variation, Evaluation, Final};
 	template <typename Types>
 	class EAStatistics {
 		public:
@@ -49,21 +48,18 @@ namespace DEvA {
 				, individualMetrics({})
 				, generationMetrics({})
 				, genealogyMetrics({})
-				, distanceMatrix({})
 				, variationStatisticsMap({}) {};
 			EAStatistics(EAStatistics const& other)
 				: eaProgress(other.eaProgress)
 				, individualMetrics(other.individualMetrics)
 				, generationMetrics(other.generationMetrics)
 				, genealogyMetrics(other.genealogyMetrics)
-				, distanceMatrix(other.distanceMatrix)
 				, variationStatisticsMap(other.variationStatisticsMap) {};
 
 			EAProgress eaProgress;
 			std::list<typename Types::SMetricMap> individualMetrics;
 			Types::SMetricMap generationMetrics;
 			Types::SMetricMap genealogyMetrics;
-			typename Types::DistanceMatrix distanceMatrix;
 			VariationStatisticsMap variationStatisticsMap;
 
 			std::unique_lock<std::mutex> lock() const { return std::unique_lock(accessMutex); };

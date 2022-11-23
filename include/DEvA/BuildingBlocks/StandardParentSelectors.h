@@ -13,11 +13,11 @@
 namespace DEvA {
 	template <typename Types>
 	struct StandardParentSelectors {
-		using Genotype = Types::Genotype;
-		using GenotypeProxy = Types::GenotypeProxy;
-		using GenotypeProxies = Types::GenotypeProxies;
-		using IndividualPtr = Types::IndividualPtr;
-		using IndividualPtrs = Types::IndividualPtrs;
+		using Genotype = typename Types::Genotype;
+		using GenotypeProxy = typename Types::GenotypeProxy;
+		using GenotypeProxies = typename Types::GenotypeProxies;
+		using IndividualPtr = typename Types::IndividualPtr;
+		using IndividualPtrs = typename Types::IndividualPtrs;
 
 		template <std::size_t N, std::size_t M>
 		static IndividualPtrs bestNofM(std::string metricName, IndividualPtrs domain) {
@@ -51,4 +51,4 @@ namespace DEvA {
 			return bestNofM<N, std::numeric_limits<std::size_t>::max()>(metricName, domain);
 		};
 	};
-};
+}

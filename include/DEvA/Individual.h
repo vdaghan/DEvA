@@ -12,44 +12,39 @@
 #include <vector>
 
 namespace DEvA {
-	template <typename Types, typename VP>
-	class Individual : public std::enable_shared_from_this<Individual<Types, VP>> {
-		public:
-			Individual(std::size_t gen, std::size_t id, Types::GenotypeProxy gpx)
-					: id(IndividualIdentifier{.generation = gen, .identifier = id})
-					, genotypeProxy(gpx) {
-			};
-			void setParents(Types::IndividualPtrs parents_) {
-				parents = parents_;
-				for (auto it = parents.begin(); it != parents.end(); ++it) {
-					(* it)->children.push_back(this->shared_from_this());
-				}
-			}
+	template <typename Types>
+	struct Individual : public std::enable_shared_from_this<Individual<Types>> {
+		Individual(IndividualIdentifier individualIdentifier, typename Types::GenotypeProxy gpx)
+			: id(individualIdentifier)
+			, genotypeProxy(gpx) {
+		};
+		Individual(Individual && other) noexcept = default;
+		void setParents(typename Types::IndividualPtrs parents_) {
+			parents = parents_;
+		}
 
-			bool isInvalid() {
-				bool invalidTransform = std::unexpected(ErrorCode::InvalidTransform) == maybePhenotypeProxy;
-				return invalidTransform;
-			};
+		[[nodiscard]] bool isInvalid() {
+			bool invalidTransform = std::unexpected(ErrorCode::InvalidTransform) == maybePhenotypeProxy;
+			return invalidTransform;
+		}
 
-			IndividualIdentifier const id;
-			VariationInfo<Types> variationInfo;
-			Types::GenotypeProxy const genotypeProxy;
-			Types::Genotype genotype;
-			Types::MaybePhenotypeProxy maybePhenotypeProxy;
-			Types::SMetricMap metricMap;
-			Types::IndividualPtrs parents;
-			Types::IndividualWPtrs children;
-		private:
-			VP vparameters;
+		IndividualIdentifier id;
+		VariationInfo<Types> variationInfo;
+		typename Types::GenotypeProxy genotypeProxy;
+		typename Types::Genotype genotype;
+		typename Types::MaybePhenotypeProxy maybePhenotypeProxy;
+		typename Types::SMetricMap metricMap;
+		std::vector<IndividualIdentifier> parentIdentifiers;
+		typename Types::IndividualPtrs parents;
 	};
 
 
-	template <typename Types, typename VP>
-	bool operator==(Individual<Types, VP> const & lhs, Individual<Types, VP> const & rhs) {
+	template <typename Types>
+	bool operator==(Individual<Types> const & lhs, Individual<Types> const & rhs) {
 		return lhs.id == rhs.id;
 	}
-	template <typename Types, typename VP>
-	bool operator==(std::shared_ptr<Individual<Types, VP>> const & lhs, std::shared_ptr<Individual<Types, VP>> const & rhs) {
+	template <typename Types>
+	bool operator==(std::shared_ptr<Individual<Types>> const & lhs, std::shared_ptr<Individual<Types>> const & rhs) {
 		return *lhs == *rhs;
 	}
 }

@@ -112,7 +112,7 @@ namespace DEvA {
 			std::size_t individuals(eaStatistics.eaProgress.numberOfIndividualsInGeneration);
 			logger.info("Epoch {}: {} new, {} old, {} total individuals.", eaState.currentGeneration.load(), newIndividuals, oldIndividuals, individuals);
 		}
-		
+
 		logger.info("Transforming individuals.");
 		transformIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
@@ -141,6 +141,9 @@ namespace DEvA {
 			evaluateVariations();
 			if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		}
+
+		logger.info("Saving data.");
+		saveData();
 
 		logger.info("Selecting survivors.");
 		{
@@ -183,13 +186,13 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::transformIndividuals(Types::Generation& generation) {
+	void EvolutionaryAlgorithm<Types>::transformIndividuals(typename Types::Generation & generation) {
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.eaProgress.eaStage = EAStage::Transform;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		auto transformLambda = [&](auto& iptr) {
+		auto transformLambda = [&](auto & iptr) {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
 			}
@@ -204,7 +207,7 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::removeInvalidIndividuals(Types::Generation & generation) {
+	void EvolutionaryAlgorithm<Types>::removeInvalidIndividuals(typename Types::Generation & generation) {
 		std::size_t beforeRemoval(generation.size());
 		auto removeInvalidsLambda = [&](auto& iptr) {
 			return iptr->isInvalid();
@@ -219,7 +222,7 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::evaluateIndividualMetrics(Types::Generation & generation) {
+	void EvolutionaryAlgorithm<Types>::evaluateIndividualMetrics(typename Types::Generation & generation) {
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.eaProgress.eaStage = EAStage::Evaluate;
@@ -237,18 +240,6 @@ namespace DEvA {
 			}
 			tryExecuteCallback<IndividualIdentifier>(Callback::Evaluation, iptr->id);
 			if (checkStopFlagAndMaybeWait()) return;
-			//if (eaFunctions.contains(EAFunction::EvaluateIndividualFromGenotypeProxy)) {
-			//	auto && metrics(std::get<typename Types::FEvaluateIndividualFromGenotypeProxy>(eaFunctions.at(EAFunction::EvaluateIndividualFromGenotypeProxy))(iptr->maybePhenotypeProxy.value()));
-			//	iptr->metrics.insert(metrics.begin(), metrics.end());
-			//}
-			//if (eaFunctions.contains(EAFunction::EvaluateIndividualFromIndividualPtr)) {
-			//	auto && metrics(std::get<typename Types::FEvaluateIndividualFromIndividualPtr>(eaFunctions.at(EAFunction::EvaluateIndividualFromIndividualPtr))(iptr));
-			//	iptr->metrics.insert(metrics.begin(), metrics.end());
-			//}
-			//if (eaFunctions.contains(EAFunction::EvaluateGeneration)) {
-			//	auto && metrics(std::get<typename Types::FEvaluateGeneration>(eaFunctions.at(EAFunction::EvaluateGeneration))(generation));
-			//	iptr->metrics.insert(metrics.begin(), metrics.end());
-			//}
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfEvaluatedIndividualsInGeneration;
@@ -259,12 +250,12 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::mergeGenerations(Types::Generation & from, Types::Generation & to) {
+	void EvolutionaryAlgorithm<Types>::mergeGenerations(typename Types::Generation & from, typename Types::Generation & to) {
 		to.insert(to.end(), from.begin(), from.end());
 	}
 
 	template <typename Types>
-	void EvolutionaryAlgorithm<Types>::sortGeneration(Types::Generation & generation) {
+	void EvolutionaryAlgorithm<Types>::sortGeneration(typename Types::Generation & generation) {
 		if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
 			return;
 		}
@@ -306,13 +297,13 @@ namespace DEvA {
 				}
 			}
 		}
-		for (auto const& varStatPair : varStatMap) {
-			auto const& varName = varStatPair.first;
-			auto const& varStat = varStatPair.second;
-			double totalChildren = static_cast<double>(varStat.total);
-			double varSuccessRate = static_cast<double>(varStat.success) / totalChildren;
-			double varFailureRate = static_cast<double>(varStat.fail) / totalChildren;
-			double varErrorRate = static_cast<double>(varStat.error) / totalChildren;
+		for (auto const & varStatPair : varStatMap) {
+			auto const & varName = varStatPair.first;
+			auto const & varStat = varStatPair.second;
+			auto totalChildren = static_cast<double>(varStat.total);
+            auto varSuccessRate = static_cast<double>(varStat.success) / totalChildren;
+            auto varFailureRate = static_cast<double>(varStat.fail) / totalChildren;
+            auto varErrorRate = static_cast<double>(varStat.error) / totalChildren;
 			logger.info("Variation {} : (success%, failure%, error%, total#) = ({:5.1f}%, {:5.1f}%, {:5.1f}%, {})", varName, varSuccessRate * 100, varFailureRate * 100, varErrorRate * 100, varStat.total);
 		}
 
@@ -337,7 +328,7 @@ namespace DEvA {
 			}
 		}
 		return StepResult::StepCount;
-	};
+	}
 
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::pause() {
@@ -362,8 +353,8 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	Types::IndividualPtr EvolutionaryAlgorithm<Types>::createNewIndividual(Types::GenotypeProxy gpx) {
-		IndividualIdentifier id;
+	typename Types::IndividualPtr EvolutionaryAlgorithm<Types>::createNewIndividual(typename Types::GenotypeProxy gpx) {
+		IndividualIdentifier id{};
 		if constexpr (std::is_same<typename Types::GenotypeProxy, IndividualIdentifier>()) {
 			id = gpx;
 		} else {
@@ -374,7 +365,7 @@ namespace DEvA {
 			++eaStatistics.eaProgress.numberOfNewIndividualsInGeneration;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		return std::make_shared<typename Types::SIndividual>(id.generation, id.identifier, gpx);
+		return std::make_shared<typename Types::SIndividual>(id, gpx);
 	}
 
 	template <typename Types>
@@ -387,7 +378,7 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	Types::IndividualPtr EvolutionaryAlgorithm<Types>::find(IndividualIdentifier indId) {
+	typename Types::IndividualPtr EvolutionaryAlgorithm<Types>::find(IndividualIdentifier indId) {
 		auto const& gen = indId.generation;
 		auto const& id = indId.identifier;
 		if (genealogy.size() > gen) [[likely]] {

@@ -49,3 +49,4 @@ CTestTestfile.cmake
 /logs/**
 /out/**
 */out/**
+.idea/*

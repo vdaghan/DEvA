@@ -11,13 +11,13 @@ namespace DEvA {
 	template <typename Types>
 	struct StandardInitialisers {
 		template <std::size_t N, std::size_t M>
-		static Types::GenotypeProxies permutations() {
-			auto createRandomGenotype = [&]() -> Types::GenotypeProxy {
+		static typename Types::GenotypeProxies permutations() {
+			auto createRandomGenotype = [&]() -> typename Types::GenotypeProxy {
 				typename Types::GenotypeProxy gpx = std::make_shared<Types::Genotype>();
 				std::vector<int> toPick(N);
 				std::iota(toPick.begin(), toPick.end(), 0);
 				for (std::size_t i = 0; i < N; ++i) {
-					std::size_t randomIndex = RandomNumberGenerator::get()->getIntBetween<std::size_t>(0, N - 1 - i);
+					auto randomIndex = RandomNumberGenerator::get()->getIntBetween<std::size_t>(0, N - 1 - i);
 					int randPosition = toPick[randomIndex];
 					std::erase(toPick, randPosition);
 					gpx->emplace_back(i) = randPosition;

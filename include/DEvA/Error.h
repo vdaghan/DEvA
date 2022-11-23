@@ -9,7 +9,12 @@ namespace DEvA{
 		InvalidTransform,
 		NotApplied,
 		NoSuitableParentsToChoose,
-		NotEnoughParentsToChoose
+		NotEnoughParentsToChoose,
+
+		// JSON errors
+		FileNotOpen,
+		FileNotFound,
+		ParseError
 	};
 	template <typename T> using Maybe = std::expected<T, ErrorCode>;
 }

@@ -6,15 +6,15 @@ namespace DEvA {
 	template <typename Types>
 	struct StandardConvergenceCheckers {
 		template <auto N>
-		static bool equalTo(Types::Fitness fitness) {
+		static bool equalTo(typename Types::Fitness fitness) {
 			return fitness == N;
 		}
 		template <auto N>
-		static bool lessThan(Types::Fitness fitness) {
+		static bool lessThan(typename Types::Fitness fitness) {
 			return fitness < N;
 		}
 		template <auto N>
-		static bool biggerThan(Types::Fitness fitness) {
+		static bool biggerThan(typename Types::Fitness fitness) {
 			return fitness > N;
 		}
 	};

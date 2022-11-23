@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DEvA/JSON/Common.h"
+
 #include <any>
 #include <functional>
 #include <string>
@@ -9,18 +11,18 @@ namespace DEvA {
     struct Metric {
         using FMetricEquivalence = std::function<bool(std::any const &, std::any const &)>;
         using FMetricOrdering = std::function<bool(std::any const &, std::any const &)>;
-        using FMetricToString = std::function<std::string(std::any const &)>;
+        using FMetricToJSONObject = std::function<JSON(std::any const &)>;
 
         std::string const name;
         std::any const value;
-        FMetricEquivalence const equivalentToFunction;
-        FMetricOrdering const betterThanFunction;
-        FMetricToString const metricToStringFunction;
+        FMetricEquivalence equivalentToFunction;
+        FMetricOrdering betterThanFunction;
+        FMetricToJSONObject metricToJSONObjectFunction;
 
-        bool isEquivalence() const {
+        [[nodiscard]] bool isEquivalence() const {
             return equivalentToFunction.operator bool();
         };
-        bool isOrdering() const {
+        [[nodiscard]] bool isOrdering() const {
             return betterThanFunction.operator bool();
         };
         bool relationTypesMatch(Metric const & other) const {
@@ -44,12 +46,6 @@ namespace DEvA {
         T as() const {
             return std::any_cast<T>(value);
         }
-        std::string print() {
-            if (!metricToStringFunction) {
-                return "";
-            }
-            return metricToStringFunction(value);
-        }
         bool operator<(Metric const & otherMetric) const {
             return betterThanFunction(value, otherMetric.value);
         };
@@ -69,9 +65,16 @@ namespace DEvA {
         std::string name{};
         FComputeFromIndividualPtr computeFromIndividualPtrFunction{};
         FComputeFromGeneration computeFromGenerationFunction{};
-        Metric<Types>::FMetricEquivalence equivalentToFunction{};
-        Metric<Types>::FMetricOrdering betterThanFunction{};
-        Metric<Types>::FMetricToString metricToStringFunction{};
+        typename Metric<Types>::FMetricEquivalence equivalentToFunction{};
+        typename Metric<Types>::FMetricOrdering betterThanFunction{};
+        typename Metric<Types>::FMetricToJSONObject metricToJSONObjectFunction{};
+
+        template <typename T>
+        void constructDefaultJSONConverter() {
+            metricToJSONObjectFunction = [&](std::any const & value) -> JSON {
+                return std::any_cast<T>(value);
+            };
+        }
 
         template <typename T>
         Metric<Types> compute(T const & t) const {
@@ -85,18 +88,22 @@ namespace DEvA {
             }
             Metric<Types> metric{
                 .name = name,
-                .value = value,
-                .equivalentToFunction = equivalentToFunction,
-                .betterThanFunction = betterThanFunction,
-                .metricToStringFunction = metricToStringFunction
+                .value = value
             };
+            assignFunctions(metric);
             return metric;
         }
+
+        void assignFunctions(Metric<Types> & metric) const {
+            metric.equivalentToFunction = equivalentToFunction;
+            metric.betterThanFunction = betterThanFunction;
+            metric.metricToJSONObjectFunction = metricToJSONObjectFunction;
+        }
         
-        bool valid() const {
+        [[nodiscard]] bool valid() const {
             bool hasExactlyOneComparisonFunction(equivalentToFunction.operator bool() xor betterThanFunction.operator bool());
             bool hasExactlyOneComputeFunction(computeFromGenerationFunction.operator bool() xor computeFromIndividualPtrFunction.operator bool());
             return hasExactlyOneComparisonFunction and hasExactlyOneComputeFunction;
         }
     };
-};
+}

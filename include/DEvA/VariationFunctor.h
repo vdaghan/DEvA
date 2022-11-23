@@ -12,9 +12,9 @@ namespace DEvA {
 	template <typename Spec>
 	struct VariationInfo {
 		std::string name{};
-		Spec::IndividualPtrs parentPtrs{};
+		typename Spec::IndividualPtrs parentPtrs{};
 		IndividualIdentifiers parentIds{};
-		Spec::GenotypeProxies childProxies{};
+		typename Spec::GenotypeProxies childProxies{};
 		IndividualIdentifiers childIds{};
 	};
 
@@ -25,7 +25,7 @@ namespace DEvA {
 
 	template <typename Spec>
 	struct VariationFunctor {
-		Maybe<VariationInfo<Spec>> apply(Spec::IndividualPtrs & matingPool) const {
+		Maybe<VariationInfo<Spec>> apply(typename Spec::IndividualPtrs & matingPool) const {
 			if (matingPool.size() < numberOfParents) {
 				return std::unexpected(ErrorCode::NotEnoughParentsToChoose);
 			}
@@ -59,9 +59,9 @@ namespace DEvA {
 
 		std::string name{};
 		std::size_t numberOfParents{};
-		Spec::FParentSelection parentSelectionFunction{};
-		Spec::FVariationFromGenotypeProxies variationFunctionFromGenotypeProxies{};
-		Spec::FVariationFromIndividualPtrs variationFunctionFromIndividualPtrs{};
+		typename Spec::FParentSelection parentSelectionFunction{};
+		typename Spec::FVariationFromGenotypeProxies variationFunctionFromGenotypeProxies{};
+		typename Spec::FVariationFromIndividualPtrs variationFunctionFromIndividualPtrs{};
 
 		double probability{};
 		bool removeParentsFromMatingPool{};

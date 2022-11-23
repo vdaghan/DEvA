@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
 #include <algorithm>
 #include <array>
 #include <iostream>
@@ -9,6 +12,7 @@
 
 #include "deva_version.h"
 #include "DEvA/EvolutionaryAlgorithm.h"
+#include "DEvA/Filestore.h"
 #include "DEvA/Specialisation.h"
 
 /**
@@ -41,21 +45,20 @@
 
 #include <functional>
 
+struct Specification {
+	using Genotype = std::vector<size_t>;
+	using GenotypeProxy = std::shared_ptr<Genotype>;
+	using Phenotype = std::vector<size_t>;
+	using PhenotypeProxy = std::shared_ptr<Phenotype>;
+	static GenotypeProxy copy(GenotypeProxy gpx) { return gpx; };
+};
+using Spec = DEvA::Specialisation<Specification>;
+
 int main() {
 	std::cout << "DEvA version: " << getDEvAVersion() << std::endl;
-
-	struct Specification {
-		using Genotype = std::vector<size_t>;
-		using GenotypeProxy = std::shared_ptr<Genotype>;
-		using Phenotype = std::vector<size_t>;
-		using PhenotypeProxy = std::shared_ptr<Phenotype>;
-		using Distance = int;
-		using IndividualParameters = DEvA::NullVParameters;
-		static GenotypeProxy copy(GenotypeProxy gpx) { return gpx; };
-	};
-
-	using Spec = DEvA::Specialisation<Specification>;
+	
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
+	ea.datastore = std::make_shared<DEvA::Filestore<Spec>>();
 
 	ea.genotypeFromProxyFunction = [](Spec::GenotypeProxy gpx) -> Spec::Genotype & { return *gpx; };
 	ea.phenotypeFromProxyFunction = [](Spec::PhenotypeProxy ppx) -> Spec::Phenotype & { return *ppx; };
@@ -93,9 +96,9 @@ int main() {
 	DEvA::MetricFunctor<Spec> metricFunctor{
 		.name = "fitness",
 		.computeFromIndividualPtrFunction = fevaluate,
-		.betterThanFunction = fitnessComparison,
-		.metricToStringFunction = fitnessToStringFunction
+		.betterThanFunction = fitnessComparison
 	};
+	metricFunctor.constructDefaultJSONConverter<int>();
 	ea.registerMetricFunctor(metricFunctor, true);
 
 	Spec::FVariationFromGenotypeProxies variation = [](Spec::GenotypeProxies gptrs) {

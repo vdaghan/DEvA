@@ -13,9 +13,9 @@ namespace DEvA {
 	template <typename Types>
 	struct StandardVariations {
 		// For convenience
-		using Genotype = Types::Genotype;
-		using GenotypeProxy = Types::GenotypeProxy;
-		using GenotypeProxies = Types::GenotypeProxies;
+		using Genotype = typename Types::Genotype;
+		using GenotypeProxy = typename Types::GenotypeProxy;
+		using GenotypeProxies = typename Types::GenotypeProxies;
 
 		//static GenotypeProxy copy(GenotypeProxy gpx) {
 		//	return std::make_shared<Genotype>(*gpx);
