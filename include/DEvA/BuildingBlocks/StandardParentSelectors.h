@@ -13,9 +13,6 @@
 namespace DEvA {
 	template <typename Types>
 	struct StandardParentSelectors {
-		using Genotype = typename Types::Genotype;
-		using GenotypeProxy = typename Types::GenotypeProxy;
-		using GenotypeProxies = typename Types::GenotypeProxies;
 		using IndividualPtr = typename Types::IndividualPtr;
 		using IndividualPtrs = typename Types::IndividualPtrs;
 

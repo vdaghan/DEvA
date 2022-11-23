@@ -45,10 +45,6 @@ namespace DEvA {
 			// Targeted number of individuals
 			std::size_t lambda;
 
-			// Specialisation functions
-			typename Types::FGenotypeFromProxy genotypeFromProxyFunction;
-			typename Types::FPhenotypeFromProxy phenotypeFromProxyFunction;
-
 			// Callbacks
 			typename Types::CEAStatsUpdate onEAStatsUpdateCallback;
 			typename Types::COnEpoch onEpochStartCallback;
@@ -85,7 +81,7 @@ namespace DEvA {
 			StepResult search(size_t count);
 			void pause();
 			void stop();
-			typename Types::IndividualPtr createNewIndividual(typename Types::GenotypeProxy);
+			typename Types::IndividualPtr createNewIndividual(typename Types::Genotype);
 			IndividualIdentifier reserveNewIndividualIdentifier();
 			typename Types::IndividualPtr find(IndividualIdentifier);
 

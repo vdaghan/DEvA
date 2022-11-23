@@ -9,9 +9,7 @@ namespace DEvA {
 	template <typename T> concept CSpecificationTypes =
 	requires {
 		typename T::Genotype;
-		typename T::GenotypeProxy;
 		typename T::Phenotype;
-		typename T::PhenotypeProxy;
 	};
 	template <typename T> concept CHasDistance = requires { typename T::Distance; };
 	template <typename T> concept CNoDistance = not CHasDistance<T>;

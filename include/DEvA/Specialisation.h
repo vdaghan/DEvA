@@ -43,16 +43,9 @@ namespace DEvA {
         // Repeat basic types used throughout code for better UX
         using Spec = Specialisation<S>;
         using Genotype = typename S::Genotype;
-        using GenotypeProxy = typename S::GenotypeProxy;
-        using GenotypeProxies = std::list<GenotypeProxy>;
-        using GenotypeProxiesDeque = std::deque<GenotypeProxies>;
+        using Genotypes = std::list<Genotype>;
         using Phenotype = typename S::Phenotype;
-        using PhenotypeProxy = typename S::PhenotypeProxy;
-        using MaybePhenotypeProxy = Maybe<PhenotypeProxy>;
-
-        using FGenotypePtrSet = std::function<GenotypeProxies(GenotypeProxies)>;
-        using FGenotypePtrSetDeque = std::function<GenotypeProxiesDeque(GenotypeProxiesDeque)>;
-        using DequeFGenotypePtrSet = std::deque<FGenotypePtrSet>;
+        using MaybePhenotype = Maybe<Phenotype>;
 
         // Repeat non-POD types used throughout code for better UX
         using SEvolutionaryAlgorithm = EvolutionaryAlgorithm<Spec>;
@@ -78,18 +71,14 @@ namespace DEvA {
         using SMetricMap = MetricMap<Spec>;
         using SMetricFunctor = MetricFunctor<Spec>;
 
-        // Specification function types
-        using FGenotypeFromProxy = std::function<Genotype & (GenotypeProxy)>;
-        using FPhenotypeFromProxy = std::function<Phenotype & (PhenotypeProxy)>;
-
         // EA function types
-        using FGenesis = std::function<GenotypeProxies(void)>;
+        using FGenesis = std::function<Genotypes(void)>;
         using FGenePoolSelection = std::function<Generation(Generation)>;
-        using FCreateGenotype = std::function<GenotypeProxy(void)>;
-        using FTransform = std::function<MaybePhenotypeProxy(GenotypeProxy)>;
+        using FCreateGenotype = std::function<Genotype(void)>;
+        using FTransform = std::function<MaybePhenotype(Genotype)>;
         using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
-        using FVariationFromGenotypeProxies = std::function<GenotypeProxies(GenotypeProxies)>;
-        using FVariationFromIndividualPtrs = std::function<GenotypeProxies(IndividualPtrs)>;
+        using FVariationFromGenotypes = std::function<Genotypes(Genotypes)>;
+        using FVariationFromIndividualPtrs = std::function<Genotypes(IndividualPtrs)>;
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FSortIndividuals = std::function<bool(IndividualPtr, IndividualPtr)>;
         using FConvergenceCheck = std::function<bool(SMetricMap const &)>;
@@ -99,7 +88,7 @@ namespace DEvA {
             FCreateGenotype,
             FTransform,
             FParentSelection,
-            FVariationFromGenotypeProxies,
+            FVariationFromGenotypes,
             FVariationFromIndividualPtrs,
             FSurvivorSelection,
             FSortIndividuals,
@@ -119,18 +108,5 @@ namespace DEvA {
             COnVariation,
             COnEvaluate>;
         using CVariantMap = std::map<Callback, CVariant>;
-
-        struct RFGenotypeProxySet {
-			GenotypeProxies domain;
-			GenotypeProxies preimage;
-			GenotypeProxies rest;
-			GenotypeProxies image;
-        };
-        //using RNonSurjectiveFGenotypePtrSet = std::pair<GenotypePtrSet, GenotypePtrSet>;
-
-        static GenotypeProxies identity(GenotypeProxies gps) { return gps; };
-        static GenotypeProxies toPointerSet(std::initializer_list<Genotype> gl) {
-            return GenotypeProxies({ std::make_shared<Genotype>() });
-        };
     };
 }

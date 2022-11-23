@@ -85,14 +85,14 @@ namespace DEvA {
 		}
 
 		void exportIndividual(typename Types::IndividualPtr iptr) override {
-			std::size_t generation(iptr->id.generation);
-			std::size_t identifier(iptr->id.identifier);
+			std::size_t const generation(iptr->id.generation);
+			std::size_t const identifier(iptr->id.identifier);
 			if (m_individualFileMap.contains(iptr->id)) {
 				return;
 			}
-			std::filesystem::path generationPath(dataDirectory / std::to_string(generation));
+			std::filesystem::path const generationPath(dataDirectory / std::to_string(generation));
 			std::filesystem::create_directories(generationPath);
-			std::filesystem::path individualPath(generationPath / (std::to_string(identifier) + ".deva"));
+			std::filesystem::path const individualPath(generationPath / (std::to_string(identifier) + ".deva"));
 			DEvA::exportToFile<Types>(*iptr, individualPath);
 		}
 

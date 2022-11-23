@@ -14,7 +14,7 @@ namespace DEvA {
 		std::string name{};
 		typename Spec::IndividualPtrs parentPtrs{};
 		IndividualIdentifiers parentIds{};
-		typename Spec::GenotypeProxies childProxies{};
+		typename Spec::Genotypes children{};
 		IndividualIdentifiers childIds{};
 	};
 
@@ -45,14 +45,14 @@ namespace DEvA {
 				}
 			}
 			if (variationFunctionFromIndividualPtrs) {
-				variationInfo.childProxies = variationFunctionFromIndividualPtrs(matingPool);
+				variationInfo.children = variationFunctionFromIndividualPtrs(matingPool);
 			}
-			typename Spec::GenotypeProxies parentGenotypes{};
+			typename Spec::Genotypes parentGenotypes{};
 			for (auto & parentPtr : variationInfo.parentPtrs) {
-				parentGenotypes.emplace_back(parentPtr->genotypeProxy);
+				parentGenotypes.emplace_back(parentPtr->genotype);
 			}
-			if (variationFunctionFromGenotypeProxies) {
-				variationInfo.childProxies = variationFunctionFromGenotypeProxies(parentGenotypes);
+			if (variationFunctionFromGenotypes) {
+				variationInfo.children = variationFunctionFromGenotypes(parentGenotypes);
 			}
 			return variationInfo;
 		}
@@ -60,7 +60,7 @@ namespace DEvA {
 		std::string name{};
 		std::size_t numberOfParents{};
 		typename Spec::FParentSelection parentSelectionFunction{};
-		typename Spec::FVariationFromGenotypeProxies variationFunctionFromGenotypeProxies{};
+		typename Spec::FVariationFromGenotypes variationFunctionFromGenotypes{};
 		typename Spec::FVariationFromIndividualPtrs variationFunctionFromIndividualPtrs{};
 
 		double probability{};

@@ -14,25 +14,25 @@
 namespace DEvA {
 	template <typename Types>
 	struct Individual : public std::enable_shared_from_this<Individual<Types>> {
-		Individual(IndividualIdentifier individualIdentifier, typename Types::GenotypeProxy gpx)
-			: id(individualIdentifier)
-			, genotypeProxy(gpx) {
-		};
-		Individual(Individual && other) noexcept = default;
+        explicit Individual(IndividualIdentifier const individualIdentifier) : id(individualIdentifier) {}
+		explicit Individual(Individual const &) = delete;
+		Individual & operator=(Individual const &) = delete;
+		Individual(Individual &&) noexcept = default;
+		Individual & operator=(Individual &&) noexcept = default;
+		~Individual() = default;
 		void setParents(typename Types::IndividualPtrs parents_) {
 			parents = parents_;
 		}
 
 		[[nodiscard]] bool isInvalid() {
-			bool invalidTransform = std::unexpected(ErrorCode::InvalidTransform) == maybePhenotypeProxy;
+			bool const invalidTransform = std::unexpected(ErrorCode::InvalidTransform) == maybePhenotype;
 			return invalidTransform;
 		}
 
 		IndividualIdentifier id;
 		VariationInfo<Types> variationInfo;
-		typename Types::GenotypeProxy genotypeProxy;
 		typename Types::Genotype genotype;
-		typename Types::MaybePhenotypeProxy maybePhenotypeProxy;
+		typename Types::MaybePhenotype maybePhenotype;
 		typename Types::SMetricMap metricMap;
 		std::vector<IndividualIdentifier> parentIdentifiers;
 		typename Types::IndividualPtrs parents;
