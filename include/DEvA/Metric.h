@@ -21,37 +21,37 @@ namespace DEvA {
 
         [[nodiscard]] bool isEquivalence() const {
             return equivalentToFunction.operator bool();
-        };
+        }
         [[nodiscard]] bool isOrdering() const {
             return betterThanFunction.operator bool();
-        };
-        bool relationTypesMatch(Metric const & other) const {
-            bool bothAreEquivalence(isEquivalence() and other.isEquivalence());
-            bool bothAreOrdering(isOrdering() and other.isOrdering());
-            bool consistent((isOrdering() and not other.isEquivalence()) or (isEquivalence() and not other.isOrdering()));
+        }
+        [[nodiscard]] bool relationTypesMatch(Metric const & other) const {
+            bool const bothAreEquivalence(isEquivalence() and other.isEquivalence());
+            bool const bothAreOrdering(isOrdering() and other.isOrdering());
+            bool const consistent((isOrdering() and not other.isEquivalence()) or (isEquivalence() and not other.isOrdering()));
             return (bothAreEquivalence or bothAreOrdering) and consistent;
-        };
-        bool comparableInTheory(Metric const & other) const {
-            bool namesMatch(name == other.name);
-            bool typesMatch(value.type() == other.value.type());
+        }
+        [[nodiscard]] bool comparableInTheory(Metric const & other) const {
+            bool const namesMatch(name == other.name);
+            bool const typesMatch(value.type() == other.value.type());
             return namesMatch and typesMatch and relationTypesMatch(other);
-        };
-        bool comparableWith(Metric const & other) const {
-            bool hasValue(value.has_value());
-            bool otherHasValue(other.value.has_value());
-            bool comparable(comparableInTheory(other));
+        }
+        [[nodiscard]] bool comparableWith(Metric const & other) const {
+            bool const hasValue(value.has_value());
+            bool const otherHasValue(other.value.has_value());
+            bool const comparable(comparableInTheory(other));
             return hasValue and otherHasValue and comparable;
-        };
+        }
         template <typename T>
-        T as() const {
+        [[nodiscard]] T as() const {
             return std::any_cast<T>(value);
         }
-        bool operator<(Metric const & otherMetric) const {
+        [[nodiscard]] bool operator<(Metric const & otherMetric) const {
             return betterThanFunction(value, otherMetric.value);
-        };
-        bool operator==(Metric const & otherMetric) const {
+        }
+        [[nodiscard]] bool operator==(Metric const & otherMetric) const {
             return equivalentToFunction(value, otherMetric.value);
-        };
+        }
     };
 
     template <typename Types>
@@ -77,7 +77,7 @@ namespace DEvA {
         }
 
         template <typename T>
-        Metric<Types> compute(T const & t) const {
+        [[nodiscard]] Metric<Types> compute(T const & t) const {
             std::any value{};
             if constexpr (std::same_as<T, typename Types::IndividualPtr>) {
                 value = computeFromIndividualPtrFunction(t);
@@ -101,8 +101,8 @@ namespace DEvA {
         }
         
         [[nodiscard]] bool valid() const {
-            bool hasExactlyOneComparisonFunction(equivalentToFunction.operator bool() xor betterThanFunction.operator bool());
-            bool hasExactlyOneComputeFunction(computeFromGenerationFunction.operator bool() xor computeFromIndividualPtrFunction.operator bool());
+            bool const hasExactlyOneComparisonFunction(equivalentToFunction.operator bool() xor betterThanFunction.operator bool());
+            bool const hasExactlyOneComputeFunction(computeFromGenerationFunction.operator bool() xor computeFromIndividualPtrFunction.operator bool());
             return hasExactlyOneComparisonFunction and hasExactlyOneComputeFunction;
         }
     };

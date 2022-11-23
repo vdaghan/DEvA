@@ -1,10 +1,9 @@
 #pragma once
 
 #include <deque>
-#include <initializer_list>
 #include <map>
 #include <memory>
-#include <type_traits>
+#include <variant>
 
 #include "DEvA/Concepts.h"
 
@@ -25,7 +24,7 @@
 
 namespace DEvA {
     template <typename T> class EvolutionaryAlgorithm;
-    template <typename T> class Individual;
+    template <typename T> struct Individual;
     template <typename T> struct StandardInitialisers;
     template <typename T> struct StandardVariations;
     template <typename T> struct StandardTransforms;
@@ -72,9 +71,9 @@ namespace DEvA {
         using SMetricFunctor = MetricFunctor<Spec>;
 
         // EA function types
-        using FGenesis = std::function<Genotypes(void)>;
+        using FGenesis = std::function<Genotypes()>;
         using FGenePoolSelection = std::function<Generation(Generation)>;
-        using FCreateGenotype = std::function<Genotype(void)>;
+        using FCreateGenotype = std::function<Genotype()>;
         using FTransform = std::function<MaybePhenotype(Genotype)>;
         using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
         using FVariationFromGenotypes = std::function<Genotypes(Genotypes)>;
@@ -96,7 +95,7 @@ namespace DEvA {
         using FVariantMap = std::map<EAFunction, FVariant>;
 
         // Callbacks
-        using CVoid = std::function<void(void)>;
+        using CVoid = std::function<void()>;
         using CEAStatsUpdate = std::function<void(EAStatistics<Spec> const &, EAStatisticsUpdateType)>;
         using COnEpoch = std::function<void(std::size_t)>;
         using COnVariation = std::function<void(VariationInfo<Spec> const &)>;

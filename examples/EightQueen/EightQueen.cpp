@@ -57,24 +57,24 @@ int main() {
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
 	ea.datastore = std::make_shared<DEvA::Filestore<Spec>>();
 
-	auto fevaluate = [](Spec::IndividualPtr iptr) -> std::any {
+	auto fevaluate = [](Spec::IndividualPtr const & iptr) -> std::any {
 		auto phenotype(iptr->maybePhenotype.value());
 		auto const last = std::ranges::unique(phenotype).begin();
 		phenotype.erase(last, phenotype.end());
 
-		int fitness(0);
-		int x1(0);
+		std::size_t fitness(0);
+		std::size_t x1(0);
 		for (auto it1 = phenotype.begin(); it1 != phenotype.end(); ++it1, ++x1) {
-			int y1(*it1);
-			int x2(0);
+			std::size_t y1(*it1);
+			std::size_t x2(0);
 			for (auto it2 = phenotype.begin(); it2 != phenotype.end(); ++it2, ++x2) {
-				int y2(*it2);
+				std::size_t y2(*it2);
 				if (x1 >= x2) {
 					continue;
 				}
-				int diffx(x1 - x2);
-				int diffy(y1 - y2);
-				if (0 == std::abs(std::abs(diffx) - std::abs(diffy))) {
+				std::size_t const diffx(std::max(x1, x2) - std::min(x1, x2));
+				std::size_t const diffy(std::max(y1, y2) - std::min(y1, y2));
+				if (diffx == diffy) {
 					++fitness;
 				}
 			}
@@ -82,21 +82,18 @@ int main() {
 		return fitness;
 	};
 	auto fitnessComparison = [](std::any const & lhs, std::any const & rhs) {
-		return std::any_cast<int>(lhs) < std::any_cast<int>(rhs);
-	};
-	auto fitnessToStringFunction = [](std::any const& v) {
-		return std::format("{}", std::any_cast<int>(v));
+		return std::any_cast<std::size_t>(lhs) < std::any_cast<std::size_t>(rhs);
 	};
 	DEvA::MetricFunctor<Spec> metricFunctor{
 		.name = "fitness",
 		.computeFromIndividualPtrFunction = fevaluate,
 		.betterThanFunction = fitnessComparison
 	};
-	metricFunctor.constructDefaultJSONConverter<int>();
+	metricFunctor.constructDefaultJSONConverter<std::size_t>();
 	ea.registerMetricFunctor(metricFunctor, true);
 
 	Spec::FVariationFromGenotypes variation = [](Spec::Genotypes genotypes) {
-		Spec::Genotypes offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(genotypes);
+		Spec::Genotypes offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(std::move(genotypes));
 		for (auto & genotype : offsprings) {
 			double const probability = DEvA::RandomNumberGenerator::get()->getDouble();
 			if (probability <= 0.8) {
@@ -121,9 +118,9 @@ int main() {
 		return lhs->metricMap.at("fitness") < rhs->metricMap.at("fitness");
 	});
 	ea.registerEAFunction(DEvA::EAFunction::SurvivorSelection, DEvA::StandardSurvivorSelectors<Spec>::clamp<100>);
-	ea.registerEAFunction(DEvA::EAFunction::ConvergenceCheck, [](Spec::SMetricMap const & metricMap) { return 0 == metricMap.at("fitness").as<int>(); });
+	ea.registerEAFunction(DEvA::EAFunction::ConvergenceCheck, [](Spec::SMetricMap const & metricMap) { return 0 == metricMap.at("fitness").as<std::size_t>(); });
 	ea.lambda = 50;
-	ea.logger.callback = [](DEvA::LogType t, std::string msg) {
+	ea.logger.callback = [](DEvA::LogType t, std::string const & msg) {
 		std::cout << msg << std::endl;
 	};
 
@@ -155,7 +152,7 @@ int main() {
 	}
 	auto const & bestIndividualMetricMap(ea.bestIndividual->metricMap);
 	auto const & bestIndividualFitness(bestIndividualMetricMap.at("fitness"));
-	std::cout << "Fitness: " << bestIndividualFitness.as<int>() << "\n";
+	std::cout << "Fitness: " << bestIndividualFitness.as<std::size_t>() << "\n";
 
 	return 0;
 }

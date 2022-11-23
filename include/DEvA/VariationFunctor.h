@@ -3,9 +3,7 @@
 #include "DEvA/IndividualIdentifier.h"
 #include "DEvA/RandomNumberGenerator.h"
 
-#include <list>
 #include <memory>
-#include <optional>
 #include <random>
 
 namespace DEvA {
@@ -29,7 +27,7 @@ namespace DEvA {
 			if (matingPool.size() < numberOfParents) {
 				return std::unexpected(ErrorCode::NotEnoughParentsToChoose);
 			}
-			double p = RandomNumberGenerator::get()->getDouble();
+			double const p = RandomNumberGenerator::get()->getDouble();
 			if (p >= probability) {
 				return std::unexpected(ErrorCode::NotApplied);
 			}

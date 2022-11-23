@@ -3,12 +3,8 @@
 #include "DEvA/IndividualIdentifier.h"
 #include "DEvA/Metric.h"
 #include "DEvA/VariationFunctor.h"
-#include "DEvA/VParameters.h"
 
-#include <list>
-#include <map>
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace DEvA {

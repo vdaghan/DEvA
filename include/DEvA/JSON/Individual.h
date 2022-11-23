@@ -14,9 +14,12 @@ struct nlohmann::adl_serializer<DEvA::Individual<Types>> {
         if (j.contains("parentIdentifiers")) {
             j.at("parentIdentifiers").get_to(individual.parentIdentifiers);
         }
-        if (j.contains("genotype")) {
-            j.at("genotype").get_to(individual.genotype);
-        }
+		if (j.contains("genotype")) {
+			j.at("genotype").get_to(individual.genotype);
+		}
+		if (j.contains("phenotype")) {
+			individual.maybePhenotype = j.at("phenotype").get<typename Types::Phenotype>();
+		}
         return individual;
     }
 
@@ -30,6 +33,9 @@ struct nlohmann::adl_serializer<DEvA::Individual<Types>> {
         }
         j["variation"] = individual.variationInfo.name;
         j["genotype"] = individual.genotype;
+		if (individual.maybePhenotype.has_value()) {
+			j["phenotype"] = individual.maybePhenotype.value();
+		}
     }
 };
 
@@ -57,7 +63,7 @@ namespace DEvA {
 	}
 
 	template <typename Types>
-	DEvA::ErrorCode exportToFile(typename DEvA::Individual<Types> const & t, std::filesystem::path const & filename) {
+	DEvA::ErrorCode exportToFile(DEvA::Individual<Types> const & t, std::filesystem::path const & filename) {
  		JSON const j = t;
 		std::ofstream f(filename);
 		if (!f.is_open()) {

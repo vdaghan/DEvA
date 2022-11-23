@@ -10,18 +10,15 @@
 #include "DEvA/Metric.h"
 #include "DEvA/VariationFunctor.h"
 
-#include "DEvA/BuildingBlocks/StandardGenePoolSelectors.h"
-
 #include <algorithm>
 #include <atomic>
 #include <deque>
 #include <execution>
 #include <future>
-#include <iostream>
 #include <list>
 #include <map>
 #include <memory>
-#include <ranges>
+#include <variant>
 #include <set>
 
 namespace DEvA {
@@ -85,7 +82,7 @@ namespace DEvA {
 			IndividualIdentifier reserveNewIndividualIdentifier();
 			typename Types::IndividualPtr find(IndividualIdentifier);
 
-			void addGeneration(typename Types::Generation gen) { genealogy.push_back(gen); };
+			void addGeneration(typename Types::Generation gen) { genealogy.push_back(gen); }
 			Logger logger;
 			typename Types::IndividualPtr bestIndividual;
 			typename Types::Generation newGeneration;
@@ -147,7 +144,7 @@ namespace DEvA {
 						std::lock_guard<std::mutex> lock(callbackMutex);
 						f(vargs...);
 					}
-				};
+				}
 			template <typename ... VTypes>
 				void tryExecuteCallback(Callback callbackType, VTypes ... vargs) {
 					if (callbacks.contains(callbackType)) {
@@ -158,7 +155,7 @@ namespace DEvA {
 						}
 						//callbacks.at(callbackType)(vargs...);
 					}
-				};
+				}
 			std::deque<std::list<VariationInfo<Types>>> variationInfos;
 			EAStatistics<Types> eaStatistics;
 			std::mutex eaStatisticsMutex;
