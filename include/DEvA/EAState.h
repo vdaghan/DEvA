@@ -1,8 +1,17 @@
 #pragma once
 
-#include <atomic>
+#include "DEvA/IndividualIdentifier.h"
 
-struct EAState {
-	std::atomic<std::size_t> currentGeneration;
-	std::atomic<std::size_t> nextIdentifier;
+#include <deque>
+
+template <typename Types>
+struct EAGenerationState {
+	DEvA::IndividualIdentifiers elderIdentifiers;
+	DEvA::IndividualIdentifiers genePoolIdentifiers;
+	DEvA::IndividualIdentifiers newbornIdentifiers;
+	DEvA::IndividualIdentifiers survivorIdentifiers;
+	typename Types::SMetricMap generationMetricMap;
 };
+
+template <typename Types>
+using EAStates = std::deque<EAGenerationState<Types>>;

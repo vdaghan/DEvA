@@ -1,10 +1,12 @@
 #pragma once
 
 #include "DEvA/Datastore.h"
+#include "DEvA/EAState.h"
 #include "DEvA/Error.h"
 #include "DEvA/IndividualIdentifier.h"
 #include "DEvA/JSON/Common.h"
 #include "DEvA/JSON/Individual.h"
+#include "DEvA/JSON/GenerationState.h"
 
 #include <exception>
 #include <fstream>
@@ -94,6 +96,13 @@ namespace DEvA {
 			std::filesystem::create_directories(generationPath);
 			std::filesystem::path const individualPath(generationPath / (std::to_string(identifier) + ".deva"));
 			DEvA::exportToFile<Types>(*iptr, individualPath);
+		}
+
+		void exportGenerationState(EAGenerationState<Types> const & genState, std::size_t generation) override {
+			std::filesystem::path const generationPath(dataDirectory / std::to_string(generation));
+			std::filesystem::create_directories(generationPath);
+			std::filesystem::path const stateFilePath(generationPath / "state.gen");
+			DEvA::exportGenerationStateToFile<Types>(genState, stateFilePath);
 		}
 
 		typename Datastore<Types>::IndividualFileMap & individualFileMap() override {

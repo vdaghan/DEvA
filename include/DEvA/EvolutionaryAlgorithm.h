@@ -91,38 +91,15 @@ namespace DEvA {
 			//Types::SMetricMap genealogyMetricMap;
 
 			std::shared_ptr<Datastore<Types>> datastore;
-			void recallData() {
-				auto const & individuals = datastore->scanIndividuals();
-				for (auto const & individualIdentifier : individuals) {
-					auto const generation(individualIdentifier.generation);
-					genealogy.resize(std::max(generation, genealogy.size()));
-					typename Types::IndividualPtr iptr = datastore->importIndividual(individualIdentifier);
-					if (iptr) {
-						genealogy.at(generation).emplace_back(iptr);
-						for (auto & metricPair : iptr->metricMap) {
-							auto & metricName(metricPair.first);
-							auto & metricObject(metricPair.second);
-							if (registeredMetricFunctors.contains(metricName)) [[likely]] {
-								if (not metricFunctorsInUse.contains(metricName)) [[unlikely]] {
-									metricFunctorsInUse.emplace(metricName);
-								}
-								auto & metricFunctor(registeredMetricFunctors.at(metricName));
-								metricFunctor.assignFunctions(metricObject);
-							}
-						}
-					}
-				}
-			}
-			void saveData() {
-				for (auto & iptr : genealogy.back()) {
-					for (auto & parent : iptr->parents) {
-						iptr->parentIdentifiers.emplace_back (parent->id);
-					}
-					datastore->exportIndividual(iptr);
-				}
-			}
+			void recallData();
+			IndividualIdentifiers extractIdentifiers(typename Types::Generation const &);
+			void saveState(EAGenerationState<Types> const &, std::size_t);
+			void saveIndividuals(typename Types::Generation const &);
+
+	        std::atomic<std::size_t> currentGeneration;
+	        std::atomic<std::size_t> nextIdentifier;
+			EAGenerationState<Types> eaGenerationState;
 		private:
-			EAState eaState;
 			StepResult epoch();
 			typename Types::FVariantMap eaFunctions;
 			typename Types::CVariantMap callbacks;
@@ -166,4 +143,5 @@ namespace DEvA {
 	};
 }
 
-#include "EvolutionaryAlgorithm.hpp"
+#include "DEvA/EvolutionaryAlgorithm.hpp"
+#include "DEvA/EvolutionaryAlgorithm_ImportExport.h"

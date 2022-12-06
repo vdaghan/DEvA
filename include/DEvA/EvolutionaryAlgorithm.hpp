@@ -8,8 +8,8 @@ namespace DEvA {
 	    , stopFlag(false) {
 		//registerEAFunction(DEvA::EAFunction::GenePoolSelection, StandardGenePoolSelectors<Types>::all);
 		eaStatistics.eaProgress.currentGeneration = 0;
-		eaState.currentGeneration.store(0);
-		eaState.nextIdentifier.store(0);
+		currentGeneration.store(0);
+		nextIdentifier.store(0);
 		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 	}
 	template <typename Types>
@@ -41,6 +41,7 @@ namespace DEvA {
 			}
 			variationInfos.push_back({});
 		} else [[likely]] {
+			eaGenerationState.elderIdentifiers = extractIdentifiers(genealogy.back());
 			//logger.info("Selecting gene pool.");
 			//{
 			//	auto lock(eaStatistics.lock());
@@ -49,6 +50,7 @@ namespace DEvA {
 			//}
 			//auto genePool = genePoolSelectionFunction(genealogy.back());
 			auto genePool = genealogy.back();
+			eaGenerationState.genePoolIdentifiers = extractIdentifiers(genealogy.back());
 			logger.info("Creating new individuals.");
 			{
 				auto lock(eaStatistics.lock());
@@ -101,6 +103,8 @@ namespace DEvA {
 			variationInfos.push_back(newVariationInfos);
 		}
 
+		eaGenerationState.newbornIdentifiers = extractIdentifiers(newGeneration);
+
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.eaProgress.numberOfNewIndividualsInGeneration = newGeneration.size();
@@ -110,7 +114,7 @@ namespace DEvA {
 			std::size_t newIndividuals(eaStatistics.eaProgress.numberOfNewIndividualsInGeneration);
 			std::size_t oldIndividuals(eaStatistics.eaProgress.numberOfOldIndividualsInGeneration);
 			std::size_t individuals(eaStatistics.eaProgress.numberOfIndividualsInGeneration);
-			logger.info("Epoch {}: {} new, {} old, {} total individuals.", eaState.currentGeneration.load(), newIndividuals, oldIndividuals, individuals);
+			logger.info("Epoch {}: {} new, {} old, {} total individuals.", currentGeneration.load(), newIndividuals, oldIndividuals, individuals);
 		}
 
 		logger.info("Transforming individuals.");
@@ -142,8 +146,10 @@ namespace DEvA {
 			if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		}
 
-		logger.info("Saving data.");
-		saveData();
+		logger.info("Saving new individuals to disk.");
+		saveIndividuals(newGeneration);
+		logger.info("Saving generation state to disk.");
+		saveState(eaGenerationState, currentGeneration.load());
 
 		logger.info("Selecting survivors.");
 		{
@@ -152,6 +158,8 @@ namespace DEvA {
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
 		std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
+
+		eaGenerationState.survivorIdentifiers = extractIdentifiers(genealogy.back());
 
 		//{
 		//	std::list<typename Types::MetricVariantMap> individualMetrics;
@@ -171,8 +179,8 @@ namespace DEvA {
 		{
 			auto lock(eaStatistics.lock());
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Final);
-			eaStatistics.eaProgress.currentGeneration = eaState.currentGeneration.load();
-			eaState.currentGeneration.fetch_add(1);
+			eaStatistics.eaProgress.currentGeneration = currentGeneration.load();
+			currentGeneration.fetch_add(1);
 			eaStatistics.eaProgress.eaStage = EAStage::End;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
@@ -366,8 +374,8 @@ namespace DEvA {
 	template <typename Types>
 	IndividualIdentifier EvolutionaryAlgorithm<Types>::reserveNewIndividualIdentifier() {
 		IndividualIdentifier const id{
-			.generation = eaState.currentGeneration.load(),
-			.identifier = eaState.nextIdentifier.fetch_add(1)
+			.generation = currentGeneration.load(),
+			.identifier = nextIdentifier.fetch_add(1)
 		};
 		return id;
 	}

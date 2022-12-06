@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DEvA/EAState.h"
 #include "DEvA/Error.h"
 #include "DEvA/IndividualIdentifier.h"
 
@@ -16,6 +17,7 @@ namespace DEvA {
 			virtual IndividualFileSet const & scanIndividuals() = 0;
 			virtual typename Types::IndividualPtr importIndividual(DEvA::IndividualIdentifier id) = 0;
 			virtual void exportIndividual(typename Types::IndividualPtr iptr) = 0;
+			virtual void exportGenerationState(EAGenerationState<Types> const &, std::size_t) = 0;
 			virtual IndividualFileMap & individualFileMap() = 0;
 			virtual IndividualFileSet & individualFileSet() = 0;
 	};
