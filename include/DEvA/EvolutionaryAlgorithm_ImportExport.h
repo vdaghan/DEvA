@@ -37,6 +37,9 @@ namespace DEvA {
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::saveIndividuals(typename Types::Generation const & individuals) {
 		for (auto & iptr : individuals) {
+			if (currentGeneration.load() != iptr->id.generation) [[unlikely]] {
+				continue;
+			}
 			for (auto & parent : iptr->parents) {
 				iptr->parentIdentifiers.emplace_back(parent->id);
 			}
