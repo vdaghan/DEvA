@@ -15,7 +15,7 @@ struct nlohmann::adl_serializer<DEvA::Individual<Types>> {
             j.at("parentIdentifiers").get_to(individual.parentIdentifiers);
         }
 		if (j.contains("genotype")) {
-			j.at("genotype").get_to(individual.genotype);
+			individual.genotype = j.at("genotype").get<typename Types::Genotype>();
 		}
 		if (j.contains("phenotype")) {
 			individual.maybePhenotype = j.at("phenotype").get<typename Types::Phenotype>();

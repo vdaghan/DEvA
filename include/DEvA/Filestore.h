@@ -33,7 +33,6 @@ namespace DEvA {
 			} else {
 				dataDirectory.assign(path);
 			}
-			std::filesystem::remove_all(dataDirectory);
 			std::filesystem::create_directories(dataDirectory);
 		}
 		typename Datastore<Types>::IndividualFileSet const & scanIndividuals() override {
