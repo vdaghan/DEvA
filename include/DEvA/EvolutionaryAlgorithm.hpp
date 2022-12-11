@@ -159,6 +159,10 @@ namespace DEvA {
 		}
 		std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
 
+		logger.info("Sorting generation.");
+		sortGeneration(genealogy.back());
+		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
+
 		eaGenerationState.survivorIdentifiers = extractIdentifiers(genealogy.back());
 
 		//{
