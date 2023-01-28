@@ -16,8 +16,11 @@ namespace DEvA {
 		using IndividualPtr = typename Types::IndividualPtr;
 		using IndividualPtrs = typename Types::IndividualPtrs;
 
-		template <std::size_t N, std::size_t M>
-		static IndividualPtrs bestNofM(std::string metricName, IndividualPtrs domain) {
+		static IndividualPtrs bestNofM(ParameterMap parameters, IndividualPtrs domain) {
+			std::size_t N(parameters.at("N").get<std::size_t>());
+			std::size_t M(parameters.at("M").get<std::size_t>());
+			std::string metricName(parameters.at("metric").get<std::string>());
+
 			std::vector<IndividualPtr> tmp(domain.begin(), domain.end());
 			RandomNumberGenerator::get()->shuffle(tmp);
 			domain.clear();
@@ -30,8 +33,10 @@ namespace DEvA {
 			return domain;
 		};
 
-		template <std::size_t N>
-		static IndividualPtrs randomN(std::string metricName, IndividualPtrs domain) {
+		static IndividualPtrs randomN(ParameterMap parameters, IndividualPtrs domain) {
+			std::size_t N(parameters.at("N").get<std::size_t>());
+			std::string metricName(parameters.at("metric").get<std::string>());
+
 			std::vector<IndividualPtr> tmp(domain.begin(), domain.end());
 			RandomNumberGenerator::get()->shuffle(tmp);
 			domain.clear();
@@ -43,9 +48,12 @@ namespace DEvA {
 			return domain;
 		};
 
-		template <std::size_t N>
-		static IndividualPtrs bestNofAll(std::string metricName, IndividualPtrs domain) {
-			return bestNofM<N, std::numeric_limits<std::size_t>::max()>(metricName, domain);
+		static IndividualPtrs bestNofAll(ParameterMap parameters, IndividualPtrs domain) {
+			std::size_t N(parameters.at("N").get<std::size_t>());
+			std::string metricName(parameters.at("metric").get<std::string>());
+
+			std::size_t const maxSizeT(std::numeric_limits<std::size_t>::max());
+			return bestNofM({{"N", N}, {"M", maxSizeT}, {"metric", metricName}}, domain);
 		};
 	};
 }

@@ -5,17 +5,43 @@
 namespace DEvA {
 	template <typename Types>
 	struct StandardConvergenceCheckers {
-		template <auto N>
-		static bool equalTo(typename Types::Fitness fitness) {
-			return fitness == N;
+		static bool equalTo(ParameterMap parameters, typename Types::SMetricMap metricMap) {
+			std::string metricName(parameters.at("metric").get<std::string>());
+			auto & metric(metricMap.at(metricName));
+			if (parameters.at("N").is_number_float()) {
+				auto N(parameters.at("N").get<float>());
+				return metric.as<float>() == N;
+			}
+			else if (parameters.at("N").is_number_integer()) {
+				auto N(parameters.at("N").get<int>());
+				return metric.as<int>() == N;
+			}
+			return false;
 		}
-		template <auto N>
-		static bool lessThan(typename Types::Fitness fitness) {
-			return fitness < N;
+		static bool lessThan(ParameterMap parameters, typename Types::SMetricMap metricMap) {
+			std::string metricName(parameters.at("metric").get<std::string>());
+			auto & metric(metricMap.at(metricName));
+			if (parameters.at("N").is_number_float()) {
+				auto N(parameters.at("N").get<float>());
+				return metric.as<float>() < N;
+			}
+			else if (parameters.at("N").is_number_integer()) {
+				auto N(parameters.at("N").get<int>());
+				return metric.as<int>() < N;
+			}
+			return false;
 		}
-		template <auto N>
-		static bool biggerThan(typename Types::Fitness fitness) {
-			return fitness > N;
+		static bool biggerThan(ParameterMap parameters, typename Types::SMetricMap metricMap) {
+			std::string metricName(parameters.at("metric").get<std::string>());
+			auto & metric(metricMap.at(metricName));
+			if (parameters.at("N").is_number_float()) {
+				auto N(parameters.at("N").get<float>());
+				return metric.as<float>() > N;
+			} else if (parameters.at("N").is_number_integer()) {
+				auto N(parameters.at("N").get<int>());
+				return metric.as<int>() > N;
+			}
+			return false;
 		}
 	};
 }

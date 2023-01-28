@@ -5,7 +5,7 @@
 namespace DEvA {
 	template <typename Types>
 	struct StandardTransforms {
-		static typename Types::Phenotype copy(typename Types::Genotype in) {
+		static typename Types::Phenotype copy(ParameterMap parameters, typename Types::Genotype in) {
 			return in;
 		}
 	};

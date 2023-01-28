@@ -1,0 +1,81 @@
+{
+  "functions": {
+    "definitions": {
+      "genesisFunctions": {
+        "Permutations_8_100": {
+          "function": "StdInitialiserPermutations",
+          "parameters": {
+            "N": 8,
+            "M": 100
+          }
+        }
+      },
+      "parentSelectors": {
+        "Best2of5Fitness": {
+          "function": "StdParentSelectorBestNofM",
+          "parameters": {
+            "N": 2,
+            "M": 5,
+            "metric": "fitness"
+          }
+        }
+      },
+      "survivorSelectors": {
+        "Clamp100": {
+          "function": "StdSurvivorSelectorClamp",
+          "parameters": {
+            "N": 100
+          }
+        }
+      },
+      "individualSortFunctions": {
+        "FitnessSort": {
+          "function": "StdIndividualSorterMetric",
+          "parameters": {
+            "metric": "fitness"
+          }
+        }
+      },
+      "convergenceCheckFunctions": {
+        "FitnessCheck": {
+          "function": "StdConvergenceCheckerEqualTo",
+          "parameters": {
+            "N": 0,
+            "metric": "fitness"
+          }
+        }
+      }
+    },
+    "used": {
+      "genesisFunctions": [
+        "Permutations_8_100"
+      ],
+      "transformFunctions": [
+        "StdTransformCopy"
+      ],
+      "survivorSelectionFunctions": [
+        "Clamp100"
+      ],
+      "individualSortFunctions": [
+        "FitnessSort"
+      ],
+      "convergenceCheckFunctions": [
+        "FitnessCheck"
+      ]
+    }
+  },
+  "variationFunctors": {
+    "definitions": {
+      "CutAndCrossfillThenMaybeSwap": {
+        "numberOfParents": 2,
+        "probability": 1.0,
+        "removeParentsFromMatingPool": false,
+        "parentSelectionFunction": "Best2of5Fitness",
+        "variationFunctionFromGenotypes": "EightQueenVariation"
+      }
+    },
+    "used":[
+        "CutAndCrossfillThenMaybeSwap"
+     ]
+  }
+}

@@ -3,13 +3,16 @@
 #include <deque>
 #include <map>
 #include <memory>
+#include <string>
 #include <variant>
 
+#include "DEvA/Common.h"
 #include "DEvA/Concepts.h"
 
 #include "DEvA/EAStatistics.h"
 #include "DEvA/Error.h"
 #include "DEvA/EvolutionaryAlgorithm.h"
+#include "DEvA/Functions.h"
 #include "DEvA/Individual.h"
 #include "DEvA/IndividualIdentifier.h"
 #include "DEvA/Metric.h"
@@ -22,7 +25,10 @@
 #include "DEvA/BuildingBlocks/StandardVariations.h"
 #include "DEvA/VariationFunctor.h"
 
+#include <DEvA/JSON/Common.h>
+
 namespace DEvA {
+
     template <typename T> class EvolutionaryAlgorithm;
     template <typename T> struct Individual;
     template <typename T> struct StandardInitialisers;
@@ -71,6 +77,17 @@ namespace DEvA {
         using SMetricFunctor = MetricFunctor<Spec>;
 
         // EA function types
+        using FPGenesis = std::function<Genotypes(ParameterMap)>;
+        using FPGenePoolSelection = std::function<Generation(ParameterMap, Generation)>;
+        using FPCreateGenotype = std::function<Genotype(ParameterMap)>;
+        using FPTransform = std::function<MaybePhenotype(ParameterMap, Genotype)>;
+        using FPParentSelection = std::function<IndividualPtrs(ParameterMap, IndividualPtrs)>;
+        using FPVariationFromGenotypes = std::function<Genotypes(ParameterMap, Genotypes)>;
+        using FPVariationFromIndividualPtrs = std::function<Genotypes(ParameterMap, IndividualPtrs)>;
+        using FPSurvivorSelection = std::function<void(ParameterMap, IndividualPtrs&)>;
+        using FPSortIndividuals = std::function<bool(ParameterMap, IndividualPtr, IndividualPtr)>;
+        using FPConvergenceCheck = std::function<bool(ParameterMap, SMetricMap const&)>;
+
         using FGenesis = std::function<Genotypes()>;
         using FGenePoolSelection = std::function<Generation(Generation)>;
         using FCreateGenotype = std::function<Genotype()>;

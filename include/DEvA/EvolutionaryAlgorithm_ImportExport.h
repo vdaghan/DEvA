@@ -1,6 +1,32 @@
 #pragma once
 
+#include <filesystem>
+
+#include "DEvA/Logger.h"
+#include <DEvA/JSON/Functions.h>
+
 namespace DEvA {
+	template <typename Types>
+	void EvolutionaryAlgorithm<Types>::importSetup(std::filesystem::path const & filename) {
+		if (not std::filesystem::exists(filename)) {
+			return;
+		}
+		std::ifstream f;
+		f.open(filename, std::ios_base::in);
+		if (not f.is_open()) {
+			return;
+		}
+		JSON parseResult{};
+		try {
+			parseResult = JSON::parse(f);
+			f.close();
+		} catch (const std::exception&) {
+			f.close();
+			return;
+		}
+		importFunctions<Types>(parseResult, functions);
+	}
+
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::recallData() {
 		auto const & individuals = datastore->scanIndividuals();

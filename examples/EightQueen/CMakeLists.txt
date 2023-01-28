@@ -1,3 +1,4 @@
-add_executable(EightQueeen "EightQueen.cpp")
-add_executable(DEvA::EightQueeen ALIAS EightQueeen)
-target_link_libraries(EightQueeen PUBLIC DEvA::DEvA)
+add_executable(EightQueen "EightQueen.cpp")
+add_executable(DEvA::EightQueen ALIAS EightQueen)
+target_link_libraries(EightQueen PUBLIC DEvA::DEvA)
+file(COPY "./EASetup.json" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

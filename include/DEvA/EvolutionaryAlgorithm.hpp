@@ -5,7 +5,9 @@ namespace DEvA {
 	EvolutionaryAlgorithm<Types>::EvolutionaryAlgorithm()
 		: lambda(0)
 	    , pauseFlag(false)
-	    , stopFlag(false) {
+	    , stopFlag(false)
+	{
+		setupStandardFunctions();
 		//registerEAFunction(DEvA::EAFunction::GenePoolSelection, StandardGenePoolSelectors<Types>::all);
 		eaStatistics.eaProgress.currentGeneration = 0;
 		currentGeneration.store(0);
@@ -33,7 +35,9 @@ namespace DEvA {
 				eaStatistics.eaProgress.eaStage = EAStage::Genesis;
 				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			}
-			auto genotypeProxies(std::get<typename Types::FGenesis>(eaFunctions.at(EAFunction::Initialisation))());
+			
+			auto genotypeProxies(functions.getGenesis()());
+			//auto genotypeProxies(std::get<typename Types::FGenesis>(eaFunctions.at(EAFunction::Initialisation))());
 			//lambda = genotypeProxies.size();
 			for (auto& genotypeProxy : genotypeProxies) {
 				auto newIndividual = createNewIndividual(genotypeProxy);
@@ -125,6 +129,8 @@ namespace DEvA {
 		removeInvalidIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
+		eaGenerationState.healthyIdentifiers = extractIdentifiers(newGeneration);
+
 		logger.info("Evaluating individual metrics.");
 		evaluateIndividualMetrics(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
@@ -157,7 +163,8 @@ namespace DEvA {
 			eaStatistics.eaProgress.eaStage = EAStage::SelectSurvivors;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
+		functions.getSurvivorSelection()(genealogy.back());
+		//std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
 
 		logger.info("Sorting generation.");
 		sortGeneration(genealogy.back());
@@ -191,7 +198,9 @@ namespace DEvA {
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
-		if (std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividual->metricMap)) [[unlikely]] {
+		bool converged(functions.getConvergenceCheck()(bestIndividual->metricMap));
+		//bool converged(std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividual->metricMap));
+		if (converged) [[unlikely]] {
 			return StepResult::Convergence;
 		}
 		return StepResult::Inconclusive;
@@ -208,7 +217,8 @@ namespace DEvA {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
 			}
-			iptr->maybePhenotype = std::get<typename Types::FTransform>(eaFunctions.at(EAFunction::Transformation))(iptr->genotype);
+			iptr->maybePhenotype = functions.getTransform()(iptr->genotype);
+			//iptr->maybePhenotype = std::get<typename Types::FTransform>(eaFunctions.at(EAFunction::Transformation))(iptr->genotype);
 			{
 				auto lock(eaStatistics.lock());
 				++eaStatistics.eaProgress.numberOfTransformedIndividualsInGeneration;
@@ -268,36 +278,38 @@ namespace DEvA {
 
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::sortGeneration(typename Types::Generation & generation) {
-		if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
-			return;
-		}
+		//if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
+		//	return;
+		//}
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
-			return std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals))(lhs, rhs);
+			return functions.getSortIndividuals()(lhs, rhs);
+			//return std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals))(lhs, rhs);
 		});
 	}
 
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::evaluateVariations() {
-		if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
-			return;
-		}
-		auto & sortFunction(std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals)));
-		auto const& varInfos = variationInfos.back();
+		//if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
+		//	return;
+		//}
+		auto sortFunction(functions.getSortIndividuals());
+		//auto & sortFunction(std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals)));
+		auto const & varInfos = variationInfos.back();
 		VariationStatisticsMap varStatMap{};
-		for (auto const& varInfo : varInfos) {
+		for (auto const & varInfo : varInfos) {
 			if (!varStatMap.contains(varInfo.name)) {
 				varStatMap.emplace(std::make_pair(varInfo.name, VariationStatistics{ .success = 0, .fail = 0, .error = 0, .total = 0 }));
 			}
-			auto& varStat = varStatMap.at(varInfo.name);
-			for (auto const& childId : varInfo.childIds) {
-				auto const& child = find(childId);
+			auto & varStat = varStatMap.at(varInfo.name);
+			for (auto const & childId : varInfo.childIds) {
+				auto const & child = find(childId);
 				++varStat.total;
 				if (!child or !child->maybePhenotype.has_value()) {
 					++varStat.fail;
 					continue;
 				}
 				bool betterThanSome(false);
-				for (auto const& parent : varInfo.parentPtrs) {
+				for (auto const & parent : varInfo.parentPtrs) {
 					if (sortFunction(child, parent)) {
 						betterThanSome = true;
 					}

@@ -9,6 +9,7 @@ struct EAGenerationState {
 	DEvA::IndividualIdentifiers elderIdentifiers;
 	DEvA::IndividualIdentifiers genePoolIdentifiers;
 	DEvA::IndividualIdentifiers newbornIdentifiers;
+	DEvA::IndividualIdentifiers healthyIdentifiers;
 	DEvA::IndividualIdentifiers survivorIdentifiers;
 	typename Types::SMetricMap generationMetricMap;
 };

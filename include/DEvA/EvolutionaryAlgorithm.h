@@ -1,14 +1,16 @@
 #pragma once
 
-#include "DEvA/Datastore.h"
+#include "DEvA/Project/Datastore.h"
 #include "DEvA/EAState.h"
 #include "DEvA/EAStatistics.h"
 #include "DEvA/Error.h"
 #include "DEvA/Individual.h"
 #include "DEvA/IndividualIdentifier.h"
+#include "DEvA/Functions.h"
 #include "DEvA/Logger.h"
 #include "DEvA/Metric.h"
 #include "DEvA/VariationFunctor.h"
+#include "DEvA/VariationFunctors.h"
 
 #include <algorithm>
 #include <atomic>
@@ -38,6 +40,7 @@ namespace DEvA {
 	class EvolutionaryAlgorithm {
 		public:
 			EvolutionaryAlgorithm();
+			void importSetup(std::filesystem::path const &);
 
 			// Targeted number of individuals
 			std::size_t lambda;
@@ -96,10 +99,14 @@ namespace DEvA {
 			void saveState(EAGenerationState<Types> const &, std::size_t);
 			void saveIndividuals(typename Types::Generation const &);
 
+			Functions<Types> functions;
+			VariationFunctors<Types> variationFunctors;
+
 	        std::atomic<std::size_t> currentGeneration;
 	        std::atomic<std::size_t> nextIdentifier;
 			EAGenerationState<Types> eaGenerationState;
 		private:
+			void setupStandardFunctions();
 			StepResult epoch();
 			typename Types::FVariantMap eaFunctions;
 			typename Types::CVariantMap callbacks;
@@ -144,4 +151,5 @@ namespace DEvA {
 }
 
 #include "DEvA/EvolutionaryAlgorithm.hpp"
+#include "DEvA/EvolutionaryAlgorithm_BuildingBlocks.hpp"
 #include "DEvA/EvolutionaryAlgorithm_ImportExport.h"

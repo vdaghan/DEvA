@@ -7,7 +7,7 @@ set(DEvA_BUILD_TESTS TRUE CACHE BOOL "Build tests for DEvA")
 
 include(FetchContent)
 
-project(DEvA LANGUAGES CXX VERSION 0.5.0.6)
+project(DEvA LANGUAGES CXX VERSION 0.5.0.7)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_CURRENT_BINARY_DIR}/DEvA.dot -o ${CMAKE_CURRENT_BINARY_DIR}/DEvA.svg)
@@ -39,7 +39,9 @@ target_include_directories(DEvA PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(DEvA PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(DEvA PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/BuildingBlocks")
 target_link_libraries(DEvA nlohmann_json::nlohmann_json)
-target_precompile_headers(DEvA PRIVATE <map> <string> <vector>)
+target_precompile_headers(DEvA PRIVATE
+	<algorithm> <any> <chrono> <deque> <filesystem> <fstream> <list>
+	<map> <memory> <optional> <random> <string> <utility> <vector>)
 
 if (DEvA_BUILD_TESTS)
 	add_subdirectory("tests")
