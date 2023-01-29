@@ -29,34 +29,23 @@ namespace DEvA {
 						}
 					}
 				};
-				defineFunctionLambda("genesisFunctions", functions.genesis);
-				defineFunctionLambda("parentSelectors", functions.parentSelection);
-				defineFunctionLambda("transformFunctions", functions.transform);
-				defineFunctionLambda("survivorSelectors", functions.survivorSelection);
-				defineFunctionLambda("individualSortFunctions", functions.sortIndividuals);
-				defineFunctionLambda("convergenceCheckFunctions", functions.convergenceCheck);
+				defineFunctionLambda("genesis", functions.genesis);
+				defineFunctionLambda("genePoolSelection", functions.genePoolSelection);
+				defineFunctionLambda("createGenotype", functions.createGenotype);
+				defineFunctionLambda("transform", functions.transform);
+				defineFunctionLambda("parentSelection", functions.parentSelection);
+				defineFunctionLambda("variationFromGenotype", functions.variationFromGenotypes);
+				defineFunctionLambda("variationFromIndividualPtrs", functions.variationFromIndividualPtrs);
+				defineFunctionLambda("survivorSelection", functions.survivorSelection);
+				defineFunctionLambda("individualSort", functions.sortIndividuals);
+				defineFunctionLambda("convergenceCheck", functions.convergenceCheck);
 			}
 		}
 		if (functionsJSON.contains("used")) {
-			auto & usedFunctionTypes(functionsJSON.at("used"));
-			auto useLambda = [&](std::string functionType) {
-				if (usedFunctionTypes.contains(functionType)) {
-					auto & usedFunctions(usedFunctionTypes.at(functionType));
-					for (auto & function : usedFunctions) {
-						functions.use({ function });
-					}
-				}
-			};
-			useLambda("genesisFunctions");
-			useLambda("genePoolSelectionFunctions");
-			useLambda("createGenotypeFunctions");
-			useLambda("transformFunctions");
-			useLambda("parentSelectionFunctions");
-			useLambda("variationFromGenotypeFunctions");
-			useLambda("variationFromIndividualPtrsFunctions");
-			useLambda("survivorSelectionFunctions");
-			useLambda("individualSortFunctions");
-			useLambda("convergenceCheckFunctions");
+			auto & usedFunctions(functionsJSON.at("used"));
+			for (auto& function : usedFunctions) {
+				functions.use({ function });
+			}
 		}
 	}
 }

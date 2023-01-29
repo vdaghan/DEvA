@@ -1,7 +1,7 @@
 {
   "functions": {
     "definitions": {
-      "genesisFunctions": {
+      "genesis": {
         "Permutations_8_100": {
           "function": "StdInitialiserPermutations",
           "parameters": {
@@ -10,7 +10,7 @@
           }
         }
       },
-      "parentSelectors": {
+      "parentSelection": {
         "Best2of5Fitness": {
           "function": "StdParentSelectorBestNofM",
           "parameters": {
@@ -20,7 +20,7 @@
           }
         }
       },
-      "survivorSelectors": {
+      "survivorSelection": {
         "Clamp100": {
           "function": "StdSurvivorSelectorClamp",
           "parameters": {
@@ -28,7 +28,7 @@
           }
         }
       },
-      "individualSortFunctions": {
+      "individualSort": {
         "FitnessSort": {
           "function": "StdIndividualSorterMetric",
           "parameters": {
@@ -36,7 +36,7 @@
           }
         }
       },
-      "convergenceCheckFunctions": {
+      "convergenceCheck": {
         "FitnessCheck": {
           "function": "StdConvergenceCheckerEqualTo",
           "parameters": {
@@ -46,23 +46,13 @@
         }
       }
     },
-    "used": {
-      "genesisFunctions": [
-        "Permutations_8_100"
-      ],
-      "transformFunctions": [
-        "StdTransformCopy"
-      ],
-      "survivorSelectionFunctions": [
-        "Clamp100"
-      ],
-      "individualSortFunctions": [
-        "FitnessSort"
-      ],
-      "convergenceCheckFunctions": [
-        "FitnessCheck"
-      ]
-    }
+    "used": [
+      "Permutations_8_100",
+      "StdTransformCopy",
+      "Clamp100",
+      "FitnessSort",
+      "FitnessCheck"
+    ]
   },
   "variationFunctors": {
     "definitions": {
