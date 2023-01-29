@@ -4,6 +4,7 @@
 
 #include "DEvA/Logger.h"
 #include <DEvA/JSON/Functions.h>
+#include <DEvA/JSON/VariationFunctors.h>
 
 namespace DEvA {
 	template <typename Types>
@@ -25,6 +26,7 @@ namespace DEvA {
 			return;
 		}
 		importFunctions<Types>(parseResult, functions);
+		importVariationFunctors<Types>(parseResult, functions, variationFunctors);
 	}
 
 	template <typename Types>

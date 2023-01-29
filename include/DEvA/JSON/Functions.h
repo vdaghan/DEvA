@@ -30,6 +30,7 @@ namespace DEvA {
 					}
 				};
 				defineFunctionLambda("genesisFunctions", functions.genesis);
+				defineFunctionLambda("parentSelectors", functions.parentSelection);
 				defineFunctionLambda("transformFunctions", functions.transform);
 				defineFunctionLambda("survivorSelectors", functions.survivorSelection);
 				defineFunctionLambda("individualSortFunctions", functions.sortIndividuals);

@@ -70,8 +70,8 @@
         "numberOfParents": 2,
         "probability": 1.0,
         "removeParentsFromMatingPool": false,
-        "parentSelectionFunction": "Best2of5Fitness",
-        "variationFunctionFromGenotypes": "EightQueenVariation"
+        "parentSelection": "Best2of5Fitness",
+        "variationFromGenotypes": "EightQueenVariation"
       }
     },
     "used":[

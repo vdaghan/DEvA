@@ -53,18 +53,18 @@ namespace DEvA {
 			typename Types::CVoid onPauseCallback;
 			typename Types::CVoid onStopCallback;
 
-			void registerEAFunction(EAFunction functionType, typename Types::FVariant function) {
-				eaFunctions.emplace(std::make_pair(functionType, function));
-			}
-			void registerVariationFunctor(VariationFunctor<Types> variationFunctor, bool use = false) {
-				registeredVariationFunctors[variationFunctor.name] = variationFunctor;
-				if (use) {
-					useVariationFunctor(variationFunctor.name);
-				}
-			}
-			void useVariationFunctor(std::string vfName) {
-				variationFunctorsInUse.emplace(vfName);
-			}
+			//void registerEAFunction(EAFunction functionType, typename Types::FVariant function) {
+			//	eaFunctions.emplace(std::make_pair(functionType, function));
+			//}
+			//void registerVariationFunctor(VariationFunctor<Types> variationFunctor, bool use = false) {
+			//	registeredVariationFunctors[variationFunctor.name] = variationFunctor;
+			//	if (use) {
+			//		useVariationFunctor(variationFunctor.name);
+			//	}
+			//}
+			//void useVariationFunctor(std::string vfName) {
+			//	variationFunctorsInUse.emplace(vfName);
+			//}
 			void registerMetricFunctor(MetricFunctor<Types> metricFunctor, bool use = false) {
 				registeredMetricFunctors[metricFunctor.name] = metricFunctor;
 				if (use) {
@@ -108,12 +108,9 @@ namespace DEvA {
 		private:
 			void setupStandardFunctions();
 			StepResult epoch();
-			typename Types::FVariantMap eaFunctions;
 			typename Types::CVariantMap callbacks;
 			std::map<std::string, MetricFunctor<Types>> registeredMetricFunctors;
 			std::set<std::string> metricFunctorsInUse;
-			std::map<std::string, VariationFunctor<Types>> registeredVariationFunctors;
-			std::set<std::string> variationFunctorsInUse;
 
 			void transformIndividuals(typename Types::Generation &);
 			void removeInvalidIndividuals(typename Types::Generation &);

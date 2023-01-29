@@ -22,15 +22,15 @@ namespace DEvA {
 			variationFunctor.numberOfParents = parameters.at("numberOfParents").get<std::size_t>();
 			variationFunctor.probability = parameters.at("probability").get<double>();
 			variationFunctor.removeParentsFromMatingPool = parameters.at("removeParentsFromMatingPool").get<bool>();
-			std::string parentSelectionFunctionName(parameters.at("parentSelectionFunction").get<std::string>());
-			variationFunctor.parentSelectionFunction = functions.parentSelectionFunctions.at(parentSelectionFunctionName);
-			if (parameters.contains("variationFromGenotypesFunction")) {
-				std::string variationFromGenotypesFunctionName(parameters.at("variationFromGenotypesFunction").get<std::string>());
-				variationFunctor.variationFunctionFromGenotypes = functions.variationFromGenotypeFunctions.at(variationFromGenotypesFunctionName);
+			std::string parentSelectionFunctionName(parameters.at("parentSelection").get<std::string>());
+			variationFunctor.parentSelectionFunction = functions.parentSelection.parametrised.at(parentSelectionFunctionName);
+			if (parameters.contains("variationFromGenotypes")) {
+				std::string variationFromGenotypesFunctionName(parameters.at("variationFromGenotypes").get<std::string>());
+				variationFunctor.variationFunctionFromGenotypes = functions.variationFromGenotypes.parametrised.at(variationFromGenotypesFunctionName);
 			}
-			if (parameters.contains("variationFromIndividualPtrsFunction")) {
-				std::string variationFromIndividualPtrsFunctionName(parameters.at("variationFromIndividualPtrsFunction").get<std::string>());
-				variationFunctor.variationFunctionFromIndividualPtrs = functions.variationFromIndividualPtrsFunctions.at(variationFromIndividualPtrsFunctionName);
+			if (parameters.contains("variationFromIndividualPtrs")) {
+				std::string variationFromIndividualPtrsFunctionName(parameters.at("variationFromIndividualPtrs").get<std::string>());
+				variationFunctor.variationFunctionFromIndividualPtrs = functions.variationFromIndividualPtrs.parametrised.at(variationFromIndividualPtrsFunctionName);
 			}
 			functors.emplace(std::make_pair(name, variationFunctor));
 		}

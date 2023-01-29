@@ -64,8 +64,8 @@ namespace DEvA {
 			std::list<VariationInfo<Types>> newVariationInfos;
 			while (newGeneration.size() < lambda) {
 				bool notEnoughParents(true);
-				for (auto const & variationFunctorName : variationFunctorsInUse) {
-					auto const & variationFunctor(registeredVariationFunctors.at(variationFunctorName));
+				for (auto const & variationFunctorName : variationFunctors.used) {
+					auto const & variationFunctor(variationFunctors.functors.at(variationFunctorName));
 					if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 					if (newGeneration.size() >= lambda) {
 						break;
