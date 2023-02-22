@@ -3,6 +3,7 @@
 #include "DEvA/RandomNumberGenerator.h"
 #include <DEvA/Specialisation.h>
 
+#include <concepts>
 #include <numeric>
 #include <random>
 #include <vector>
@@ -14,7 +15,8 @@ namespace DEvA {
 			return {};
 		}
 
-		static typename Types::Genotypes permutations(ParameterMap parameters) {
+		static typename Types::Genotypes permutations(ParameterMap parameters)
+		requires requires(typename Types::Genotype genotype) { genotype.emplace_back(std::size_t{}); } {
 			std::size_t N(parameters.at("N").get<std::size_t>());
 			std::size_t M(parameters.at("M").get<std::size_t>());
 			auto createRandomGenotype = [&]() -> typename Types::Genotype {
