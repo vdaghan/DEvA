@@ -14,7 +14,7 @@ namespace DEvA {
 	template <typename Types>
 	void EvolutionaryAlgorithm<Types>::setupStandardFunctions() {
 		functions.genesis.defineParametrisable("StdInitialiserEmpty", DEvA::StandardInitialisers<Types>::empty);
-		if constexpr (DEvA::StandardInitialisers<Types>::permutations) {
+		if constexpr (requires {DEvA::StandardInitialisers<Types>::template permutations({}); }) {
 			functions.genesis.defineParametrisable("StdInitialiserPermutations", DEvA::StandardInitialisers<Types>::permutations);
 		}
 
