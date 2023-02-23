@@ -131,5 +131,17 @@ namespace DEvA {
 			}
 			return convergenceCheck.parametrised.at(convergenceCheck.used);
 		}
+		typename Types::FVariationFromGenotypes getVariationFromGenotypes(std::string functionName) {
+			if (variationFromGenotypesWrapper) {
+				return std::bind_front(variationFromGenotypesWrapper, variationFromGenotypes.parametrised.at(functionName));
+			}
+			return variationFromGenotypes.parametrised.at(functionName);
+		}
+		typename Types::FVariationFromIndividualPtrs getVariationFromIndividualPtrs(std::string functionName) {
+			if (variationFromIndividualPtrsWrapper) {
+				return std::bind_front(variationFromIndividualPtrsWrapper, variationFromIndividualPtrs.parametrised.at(functionName));
+			}
+			return variationFromIndividualPtrs.parametrised.at(functionName);
+		}
 	};
 }

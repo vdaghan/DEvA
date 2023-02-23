@@ -26,11 +26,11 @@ namespace DEvA {
 			variationFunctor.parentSelectionFunction = functions.parentSelection.parametrised.at(parentSelectionFunctionName);
 			if (parameters.contains("variationFromGenotypes")) {
 				std::string variationFromGenotypesFunctionName(parameters.at("variationFromGenotypes").get<std::string>());
-				variationFunctor.variationFunctionFromGenotypes = functions.variationFromGenotypes.parametrised.at(variationFromGenotypesFunctionName);
+				variationFunctor.variationFunctionFromGenotypes = functions.getVariationFromGenotypes(variationFromGenotypesFunctionName);
 			}
 			if (parameters.contains("variationFromIndividualPtrs")) {
 				std::string variationFromIndividualPtrsFunctionName(parameters.at("variationFromIndividualPtrs").get<std::string>());
-				variationFunctor.variationFunctionFromIndividualPtrs = functions.variationFromIndividualPtrs.parametrised.at(variationFromIndividualPtrsFunctionName);
+				variationFunctor.variationFunctionFromIndividualPtrs = functions.getVariationFromIndividualPtrs(variationFromIndividualPtrsFunctionName);
 			}
 			functors.emplace(std::make_pair(name, variationFunctor));
 		}

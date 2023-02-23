@@ -11,5 +11,8 @@ namespace DEvA {
 				iptrs.resize(N);
 			}
 		}
+		static void all(ParameterMap parameters, typename Types::IndividualPtrs& iptrs) {
+			return;
+		}
 	};
 }

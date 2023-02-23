@@ -43,5 +43,8 @@ namespace DEvA {
 			}
 			return false;
 		}
+		static bool never(ParameterMap parameters, typename Types::SMetricMap metricMap) {
+			return false;
+		}
 	};
 }
