@@ -98,6 +98,18 @@ namespace DEvA {
         using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
         using FSortIndividuals = std::function<bool(IndividualPtr, IndividualPtr)>;
         using FConvergenceCheck = std::function<bool(SMetricMap const &)>;
+
+        using FWGenesis = std::function<Genotypes(FGenesis)>;
+        using FWGenePoolSelection = std::function<Generation(FGenePoolSelection, Generation)>;
+        using FWCreateGenotype = std::function<Genotype(FCreateGenotype)>;
+        using FWTransform = std::function<MaybePhenotype(FTransform, Genotype)>;
+        using FWParentSelection = std::function<IndividualPtrs(FParentSelection, IndividualPtrs)>;
+        using FWVariationFromGenotypes = std::function<Genotypes(FVariationFromGenotypes, Genotypes)>;
+        using FWVariationFromIndividualPtrs = std::function<Genotypes(FVariationFromIndividualPtrs, IndividualPtrs)>;
+        using FWSurvivorSelection = std::function<void(FSurvivorSelection, IndividualPtrs&)>;
+        using FWSortIndividuals = std::function<bool(FSortIndividuals, IndividualPtr, IndividualPtr)>;
+        using FWConvergenceCheck = std::function<bool(FConvergenceCheck, SMetricMap const &)>;
+
         using FVariant = std::variant<
             FGenesis,
             FGenePoolSelection,

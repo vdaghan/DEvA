@@ -4,6 +4,7 @@
 
 #include <any>
 #include <initializer_list>
+#include <functional>
 #include <list>
 #include <map>
 #include <set>
@@ -46,6 +47,17 @@ namespace DEvA {
 		FunctionTemplates<Types, typename Types::FPSortIndividuals, typename Types::FSortIndividuals> sortIndividuals;
 		FunctionTemplates<Types, typename Types::FPConvergenceCheck, typename Types::FConvergenceCheck> convergenceCheck;
 
+		typename Types::FWGenesis genesisWrapper;
+		typename Types::FWGenePoolSelection genePoolSelectionWrapper;
+		typename Types::FWCreateGenotype createGenotypeWrapper;
+		typename Types::FWTransform transformWrapper;
+		typename Types::FWParentSelection parentSelectionWrapper;
+		typename Types::FWVariationFromGenotypes variationFromGenotypesWrapper;
+		typename Types::FWVariationFromIndividualPtrs variationFromIndividualPtrsWrapper;
+		typename Types::FWSurvivorSelection survivorSelectionWrapper;
+		typename Types::FWSortIndividuals sortIndividualsWrapper;
+		typename Types::FWConvergenceCheck convergenceCheckWrapper;
+
 		void use(std::initializer_list<std::string> names) {
 			for (auto & name : names) {
 				if (genesis.parametrised.contains(name)) {
@@ -85,7 +97,10 @@ namespace DEvA {
 			return [&]() {
 				typename Types::Genotypes genotypes{};
 				for (auto & name : genesis.usedSet) {
-					auto & g(genesis.parametrised.at(name));
+					auto g(genesis.parametrised.at(name));
+					if (genesisWrapper) {
+						g = std::bind_front(genesisWrapper, g);
+					}
 					auto genotypesFromName(g());
 					genotypes.insert(genotypes.end(), genotypesFromName.begin(), genotypesFromName.end());
 				}
@@ -93,15 +108,27 @@ namespace DEvA {
 			};
 		}
 		typename Types::FTransform getTransform() {
+			if (transformWrapper) {
+				return std::bind_front(transformWrapper, transform.parametrised.at(transform.used));
+			}
 			return transform.parametrised.at(transform.used);
 		}
 		typename Types::FSurvivorSelection getSurvivorSelection() {
+			if (survivorSelectionWrapper) {
+				return std::bind_front(survivorSelectionWrapper, survivorSelection.parametrised.at(survivorSelection.used));
+			}
 			return survivorSelection.parametrised.at(survivorSelection.used);
 		}
 		typename Types::FSortIndividuals getSortIndividuals() {
+			if (sortIndividualsWrapper) {
+				return std::bind_front(sortIndividualsWrapper, sortIndividuals.parametrised.at(sortIndividuals.used));
+			}
 			return sortIndividuals.parametrised.at(sortIndividuals.used);
 		}
 		typename Types::FConvergenceCheck getConvergenceCheck() {
+			if (convergenceCheckWrapper) {
+				return std::bind_front(convergenceCheckWrapper, convergenceCheck.parametrised.at(convergenceCheck.used));
+			}
 			return convergenceCheck.parametrised.at(convergenceCheck.used);
 		}
 	};
