@@ -14,6 +14,12 @@ namespace DEvA {
 		nextIdentifier.store(0);
 		tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 	}
+
+	template <typename Types>
+	bool EvolutionaryAlgorithm<Types>::compile() {
+		return metricFunctors.compile();
+	}
+
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::epoch() {
 		{
@@ -251,14 +257,16 @@ namespace DEvA {
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
 		auto evaluateLambda = [&](auto & iptr) {
-			for (auto const & metricFunctorName : metricFunctorsInUse) {
+			for (auto const & metricFunctorName : metricFunctors.usedIndividualMetricFunctors) {
 				if (checkStopFlagAndMaybeWait()) return;
-				auto & metricFunctor(registeredMetricFunctors.at(metricFunctorName));
-				if (metricFunctor.valid()) [[likely]] {
-					if (metricFunctor.computeFromIndividualPtrFunction) {
-						iptr->metricMap.emplace(std::make_pair(metricFunctorName, metricFunctor.compute<typename Types::IndividualPtr>(iptr)));
-					}
+				auto & metricFunctor(metricFunctors.functors.at(metricFunctorName));
+				if (not metricFunctor.valid()) [[unlikely]] {
+					continue;
 				}
+				if (not metricFunctor.computeFromIndividualPtrFunction) [[unlikely]] {
+					continue;
+				}
+				iptr->metricMap.emplace(std::make_pair(metricFunctorName, metricFunctor.compute<typename Types::IndividualPtr>(iptr)));
 			}
 			tryExecuteCallback<IndividualIdentifier>(Callback::Evaluation, iptr->id);
 			if (checkStopFlagAndMaybeWait()) return;

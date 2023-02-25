@@ -68,7 +68,6 @@ int main() {
 		return offsprings;
 	};
 	ea.functions.variationFromGenotypes.define("EightQueenVariation", variation);
-	ea.importSetup("./EASetup.json");
 
 	auto fevaluate = [](Spec::IndividualPtr const & iptr) -> std::any {
 		auto phenotype(iptr->maybePhenotype.value());
@@ -94,16 +93,9 @@ int main() {
 		}
 		return fitness;
 	};
-	auto fitnessComparison = [](std::any const & lhs, std::any const & rhs) {
-		return std::any_cast<int>(lhs) < std::any_cast<int>(rhs);
-	};
-	DEvA::MetricFunctor<Spec> metricFunctor{
-		.name = "fitness",
-		.computeFromIndividualPtrFunction = fevaluate,
-		.betterThanFunction = fitnessComparison
-	};
-	metricFunctor.constructDefaultJSONConverter<int>();
-	ea.registerMetricFunctor(metricFunctor, true);
+	ea.metricFunctors.computeFromIndividualPtrFunctions.emplace(std::pair("fitnessEvaluation", fevaluate));
+	ea.importSetup("./EASetup.json");
+	ea.compile();
 
 	ea.lambda = 50;
 	ea.logger.callback = [](DEvA::LogType t, std::string const & msg) {

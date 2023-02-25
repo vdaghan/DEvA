@@ -9,6 +9,8 @@
 #include "DEvA/Functions.h"
 #include "DEvA/Logger.h"
 #include "DEvA/Metric.h"
+#include "DEvA/MetricFunctor.h"
+#include "DEvA/MetricFunctors.h"
 #include "DEvA/VariationFunctor.h"
 #include "DEvA/VariationFunctors.h"
 
@@ -65,15 +67,6 @@ namespace DEvA {
 			//void useVariationFunctor(std::string vfName) {
 			//	variationFunctorsInUse.emplace(vfName);
 			//}
-			void registerMetricFunctor(MetricFunctor<Types> metricFunctor, bool use = false) {
-				registeredMetricFunctors[metricFunctor.name] = metricFunctor;
-				if (use) {
-					useMetricFunctor(metricFunctor.name);
-				}
-			}
-			void useMetricFunctor(std::string mfName) {
-				metricFunctorsInUse.emplace(mfName);
-			}
 			void registerCallback(Callback callbackType, typename Types::CVariant function) {
 				callbacks.emplace(std::make_pair(callbackType, function));
 			}
@@ -101,6 +94,8 @@ namespace DEvA {
 
 			Functions<Types> functions;
 			VariationFunctors<Types> variationFunctors;
+			MetricFunctors<Types> metricFunctors;
+			bool compile();
 
 	        std::atomic<std::size_t> currentGeneration;
 	        std::atomic<std::size_t> nextIdentifier;
@@ -109,8 +104,8 @@ namespace DEvA {
 			void setupStandardFunctions();
 			StepResult epoch();
 			typename Types::CVariantMap callbacks;
-			std::map<std::string, MetricFunctor<Types>> registeredMetricFunctors;
-			std::set<std::string> metricFunctorsInUse;
+			//std::map<std::string, MetricFunctor<Types>> registeredMetricFunctors;
+			//std::set<std::string> metricFunctorsInUse;
 
 			void transformIndividuals(typename Types::Generation &);
 			void removeInvalidIndividuals(typename Types::Generation &);

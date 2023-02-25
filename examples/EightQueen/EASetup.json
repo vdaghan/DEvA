@@ -64,8 +64,20 @@
         "variationFromGenotypes": "EightQueenVariation"
       }
     },
-    "used":[
-        "CutAndCrossfillThenMaybeSwap"
-     ]
+    "used": [
+      "CutAndCrossfillThenMaybeSwap"
+    ]
+  },
+  "metricFunctors": {
+    "definitions": {
+      "fitness": {
+        "type": "int",
+        "basicBetterThan": "lesser",
+        "computeFromIndividualPtr": "fitnessEvaluation"
+      }
+    },
+    "usedForIndividuals": [
+      "fitness"
+    ]
   }
 }

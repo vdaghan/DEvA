@@ -4,6 +4,7 @@
 
 #include "DEvA/Logger.h"
 #include <DEvA/JSON/Functions.h>
+#include <DEvA/JSON/MetricFunctors.h>
 #include <DEvA/JSON/VariationFunctors.h>
 
 namespace DEvA {
@@ -27,6 +28,7 @@ namespace DEvA {
 		}
 		importFunctions<Types>(parseResult, functions);
 		importVariationFunctors<Types>(parseResult, functions, variationFunctors);
+		importMetricFunctors<Types>(parseResult, metricFunctors);
 	}
 
 	template <typename Types>
@@ -41,11 +43,11 @@ namespace DEvA {
 				for (auto & metricPair : iptr->metricMap) {
 					auto & metricName(metricPair.first);
 					auto & metricObject(metricPair.second);
-					if (registeredMetricFunctors.contains(metricName)) [[likely]] {
-						if (not metricFunctorsInUse.contains(metricName)) [[unlikely]] {
-							metricFunctorsInUse.emplace(metricName);
+					if (metricFunctors.functors.contains(metricName)) [[likely]] {
+						if (not metricFunctors.usedIndividualMetricFunctors.contains(metricName)) [[unlikely]] {
+							metricFunctors.usedIndividualMetricFunctors.emplace(metricName);
 						}
-						auto & metricFunctor(registeredMetricFunctors.at(metricName));
+						auto & metricFunctor(metricFunctors.functors.at(metricName));
 						metricFunctor.assignFunctions(metricObject);
 					}
 				}

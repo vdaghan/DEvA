@@ -27,13 +27,14 @@ namespace DEvA {
 		functions.parentSelection.defineParametrisable("StdParentSelectorBestNofAll", DEvA::StandardParentSelectors<Types>::bestNofAll);
 
 		functions.survivorSelection.defineParametrisable("StdSurvivorSelectorClamp", DEvA::StandardSurvivorSelectors<Types>::clamp);
-		functions.survivorSelection.defineParametrisable("StdSurvivorSelectorAll", DEvA::StandardSurvivorSelectors<Types>::all);
+		functions.survivorSelection.defineParametrisable("StdSurvivorSelectorMetricComparison", DEvA::StandardSurvivorSelectors<Types>::metricComparison);
+		functions.survivorSelection.defineParametrised("StdSurvivorSelectorAll", DEvA::StandardSurvivorSelectors<Types>::all, {});
 
 		functions.sortIndividuals.defineParametrisable("StdIndividualSorterMetric", DEvA::StandardIndividualSorters<Types>::metricSort);
 
 		functions.convergenceCheck.defineParametrisable("StdConvergenceCheckerEqualTo", DEvA::StandardConvergenceCheckers<Types>::equalTo);
 		functions.convergenceCheck.defineParametrisable("StdConvergenceCheckerLessThan", DEvA::StandardConvergenceCheckers<Types>::lessThan);
 		functions.convergenceCheck.defineParametrisable("StdConvergenceCheckerBiggerThan", DEvA::StandardConvergenceCheckers<Types>::biggerThan);
-		functions.convergenceCheck.defineParametrisable("StdConvergenceCheckerNever", DEvA::StandardConvergenceCheckers<Types>::never);
+		functions.convergenceCheck.defineParametrised("StdConvergenceCheckerNever", DEvA::StandardConvergenceCheckers<Types>::never, {});
 	}
 }
