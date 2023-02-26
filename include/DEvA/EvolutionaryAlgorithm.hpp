@@ -31,7 +31,9 @@ namespace DEvA {
 			}
 			return unsatisfiedNow == 0;
 		};
-		return compileLambda(variationFunctors.dependencies) and compileLambda(metricFunctors.dependencies);
+		return compileLambda(functions.dependencies)
+			and compileLambda(variationFunctors.dependencies)
+			and compileLambda(metricFunctors.dependencies);
 	}
 
 	template <typename Types>

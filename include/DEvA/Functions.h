@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DEvA/Common.h>
+#include "DEvA/BuildingBlocks/Dependency/Dependency.h"
 
 #include <any>
 #include <initializer_list>
@@ -60,36 +61,45 @@ namespace DEvA {
 
 		void use(std::initializer_list<std::string> names) {
 			for (auto & name : names) {
-				if (genesis.parametrised.contains(name)) {
-					genesis.use(name);
-				}
-				else if (genePoolSelection.parametrised.contains(name)) {
-					genePoolSelection.use(name);
-				}
-				else if (createGenotype.parametrised.contains(name)) {
-					createGenotype.use(name);
-				}
-				else if (transform.parametrised.contains(name)) {
-					transform.use(name);
-				}
-				else if (parentSelection.parametrised.contains(name)) {
-					parentSelection.use(name);
-				}
-				else if (variationFromGenotypes.parametrised.contains(name)) {
-					variationFromGenotypes.use(name);
-				}
-				else if (variationFromIndividualPtrs.parametrised.contains(name)) {
-					variationFromIndividualPtrs.use(name);
-				}
-				else if (survivorSelection.parametrised.contains(name)) {
-					survivorSelection.use(name);
-				}
-				else if (sortIndividuals.parametrised.contains(name)) {
-					sortIndividuals.use(name);
-				}
-				else if (convergenceCheck.parametrised.contains(name)) {
-					convergenceCheck.use(name);
-				}
+				dependencies.emplace_back(Dependency{
+					.condition = [&, name]() {
+						auto checkLambda = [&, name](auto & container) {
+							if (container.parametrised.contains(name)) {
+								return true;
+							}
+							return false;
+						};
+						return checkLambda(genesis)
+							|| checkLambda(genePoolSelection)
+							|| checkLambda(createGenotype)
+							|| checkLambda(transform)
+							|| checkLambda(parentSelection)
+							|| checkLambda(variationFromGenotypes)
+							|| checkLambda(variationFromIndividualPtrs)
+							|| checkLambda(survivorSelection)
+							|| checkLambda(sortIndividuals)
+							|| checkLambda(convergenceCheck);
+					},
+					.action = [&, name]() {
+						auto useLambda = [&, name](auto & container) {
+							if (container.parametrised.contains(name)) {
+								container.use(name);
+								return true;
+							}
+							return false;
+						};
+						return useLambda(genesis)
+							|| useLambda(genePoolSelection)
+							|| useLambda(createGenotype)
+							|| useLambda(transform)
+							|| useLambda(parentSelection)
+							|| useLambda(variationFromGenotypes)
+							|| useLambda(variationFromIndividualPtrs)
+							|| useLambda(survivorSelection)
+							|| useLambda(sortIndividuals)
+							|| useLambda(convergenceCheck);
+					}
+				});
 			}
 		}
 
@@ -143,5 +153,7 @@ namespace DEvA {
 			}
 			return variationFromIndividualPtrs.parametrised.at(functionName);
 		}
+
+		Dependencies dependencies{};
 	};
 }
