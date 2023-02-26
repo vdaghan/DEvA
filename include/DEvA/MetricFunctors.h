@@ -39,22 +39,22 @@ namespace DEvA {
 			if (parameters.contains("equivalence")) {
 				auto equivalenceFunctionName = parameters.at("equivalence").get<std::string>();
 				dependencies.emplace_back(Dependency{
-					.condition = [&]() { return equivalences.contains(equivalenceFunctionName); },
-					.action = [&]() { functor.equivalentToFunction = equivalences.at(equivalenceFunctionName); }
+					.condition = [&, equivalenceFunctionName]() { return equivalences.contains(equivalenceFunctionName); },
+					.action = [&, equivalenceFunctionName]() { functor.equivalentToFunction = equivalences.at(equivalenceFunctionName); }
 				});
 			}
 			if (parameters.contains("betterThan")) {
 				auto orderingFunctionName = parameters.at("betterThan").get<std::string>();
 				dependencies.emplace_back(Dependency{
-					.condition = [&]() { return orderings.contains(orderingFunctionName); },
-					.action = [&]() { functor.betterThanFunction = orderings.at(orderingFunctionName); }
+					.condition = [&, orderingFunctionName]() { return orderings.contains(orderingFunctionName); },
+					.action = [&, orderingFunctionName]() { functor.betterThanFunction = orderings.at(orderingFunctionName); }
 				});
 			}
 			if (parameters.contains("metricToJSON")) {
 				auto metricToJSONFunctionName = parameters.at("metricToJSON").get<std::string>();
 				dependencies.emplace_back(Dependency{
-					.condition = [&]() { return metricToJSONObjectFunctions.contains(metricToJSONFunctionName); },
-					.action = [&]() { functor.metricToJSONObjectFunction = metricToJSONObjectFunctions.at(metricToJSONFunctionName); }
+					.condition = [&, metricToJSONFunctionName]() { return metricToJSONObjectFunctions.contains(metricToJSONFunctionName); },
+					.action = [&, metricToJSONFunctionName]() { functor.metricToJSONObjectFunction = metricToJSONObjectFunctions.at(metricToJSONFunctionName); }
 					});
 			}
 			if (parameters.contains("computeFromIndividualPtr")) {
