@@ -55,18 +55,6 @@ namespace DEvA {
 			typename Types::CVoid onPauseCallback;
 			typename Types::CVoid onStopCallback;
 
-			//void registerEAFunction(EAFunction functionType, typename Types::FVariant function) {
-			//	eaFunctions.emplace(std::make_pair(functionType, function));
-			//}
-			//void registerVariationFunctor(VariationFunctor<Types> variationFunctor, bool use = false) {
-			//	registeredVariationFunctors[variationFunctor.name] = variationFunctor;
-			//	if (use) {
-			//		useVariationFunctor(variationFunctor.name);
-			//	}
-			//}
-			//void useVariationFunctor(std::string vfName) {
-			//	variationFunctorsInUse.emplace(vfName);
-			//}
 			void registerCallback(Callback callbackType, typename Types::CVariant function) {
 				callbacks.emplace(std::make_pair(callbackType, function));
 			}
@@ -104,8 +92,6 @@ namespace DEvA {
 			void setupStandardFunctions();
 			StepResult epoch();
 			typename Types::CVariantMap callbacks;
-			//std::map<std::string, MetricFunctor<Types>> registeredMetricFunctors;
-			//std::set<std::string> metricFunctorsInUse;
 
 			void transformIndividuals(typename Types::Generation &);
 			void removeInvalidIndividuals(typename Types::Generation &);

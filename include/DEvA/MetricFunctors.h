@@ -55,7 +55,7 @@ namespace DEvA {
 				dependencies.emplace_back(Dependency{
 					.condition = [&, metricToJSONFunctionName]() { return metricToJSONObjectFunctions.contains(metricToJSONFunctionName); },
 					.action = [&, metricToJSONFunctionName]() { functor.metricToJSONObjectFunction = metricToJSONObjectFunctions.at(metricToJSONFunctionName); }
-					});
+				});
 			}
 			if (parameters.contains("computeFromIndividualPtr")) {
 				auto computeFromIndividualPtrFunctionName = parameters.at("computeFromIndividualPtr").get<std::string>();
@@ -86,19 +86,5 @@ namespace DEvA {
 		std::set<std::string> usedIndividualMetricFunctors;
 
 		Dependencies dependencies{};
-		bool compile() {
-			std::size_t unsatisfiedBefore(std::numeric_limits<std::size_t>::max());
-			std::size_t unsatisfiedNow(0);
-			while (unsatisfiedBefore != unsatisfiedNow) {
-				unsatisfiedBefore = unsatisfiedNow;
-				unsatisfiedNow = 0;
-				for (auto & dependency : dependencies) {
-					if (not dependency.isSatisfied()) {
-						++unsatisfiedNow;
-					}
-				}
-			}
-			return unsatisfiedNow == 0;
-		}
 	};
 }

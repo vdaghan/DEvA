@@ -17,7 +17,21 @@ namespace DEvA {
 
 	template <typename Types>
 	bool EvolutionaryAlgorithm<Types>::compile() {
-		return metricFunctors.compile();
+		auto compileLambda = [&](Dependencies & dependencies) {
+			std::size_t unsatisfiedBefore(std::numeric_limits<std::size_t>::max());
+			std::size_t unsatisfiedNow(0);
+			while (unsatisfiedBefore != unsatisfiedNow) {
+				unsatisfiedBefore = unsatisfiedNow;
+				unsatisfiedNow = 0;
+				for (auto & dependency : dependencies) {
+					if (not dependency.isSatisfied()) {
+						++unsatisfiedNow;
+					}
+				}
+			}
+			return unsatisfiedNow == 0;
+		};
+		return compileLambda(variationFunctors.dependencies) and compileLambda(metricFunctors.dependencies);
 	}
 
 	template <typename Types>
