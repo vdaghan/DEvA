@@ -28,12 +28,14 @@ namespace DEvA {
 			auto & variationFunctorRef(functors.at(name));
 			std::string parentSelectionFunctionName(parameters.at("parentSelection").get<std::string>());
 			dependencies.emplace_back(Dependency{
+				.explanation = "VariationFunctor::parentSelectionFunction: " + parentSelectionFunctionName,
 				.condition = [&, parentSelectionFunctionName]() { return functions.parentSelection.parametrised.contains(parentSelectionFunctionName); },
 				.action = [&, parentSelectionFunctionName]() { variationFunctorRef.parentSelectionFunction = functions.parentSelection.parametrised.at(parentSelectionFunctionName); }
 			});
 			if (parameters.contains("variationFromGenotypes")) {
 				std::string variationFromGenotypesFunctionName(parameters.at("variationFromGenotypes").get<std::string>());
 				dependencies.emplace_back(Dependency{
+					.explanation = "VariationFunctor::variationFunctionFromGenotypes: " + variationFromGenotypesFunctionName,
 					.condition = [&, variationFromGenotypesFunctionName]() { return functions.variationFromGenotypes.parametrised.contains(variationFromGenotypesFunctionName); },
 					.action = [&, variationFromGenotypesFunctionName]() { variationFunctorRef.variationFunctionFromGenotypes = functions.getVariationFromGenotypes(variationFromGenotypesFunctionName); }
 				});
@@ -41,6 +43,7 @@ namespace DEvA {
 			if (parameters.contains("variationFromIndividualPtrs")) {
 				std::string variationFromIndividualPtrsFunctionName(parameters.at("variationFromIndividualPtrs").get<std::string>());
 				dependencies.emplace_back(Dependency{
+					.explanation = "VariationFunctor::variationFunctionFromIndividualPtrs: " + variationFromIndividualPtrsFunctionName,
 					.condition = [&, variationFromIndividualPtrsFunctionName]() { return functions.variationFromIndividualPtrs.parametrised.contains(variationFromIndividualPtrsFunctionName); },
 					.action = [&, variationFromIndividualPtrsFunctionName]() { variationFunctorRef.variationFunctionFromIndividualPtrs = functions.getVariationFromIndividualPtrs(variationFromIndividualPtrsFunctionName); }
 				});

@@ -8,6 +8,7 @@
 
 namespace DEvA {
 	struct Dependency {
+		std::string explanation{};
 		std::function<bool()> condition;
 		std::function<void()> action;
 		inline bool isSatisfied() {

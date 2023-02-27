@@ -39,6 +39,7 @@ namespace DEvA {
 			if (parameters.contains("equivalence")) {
 				auto equivalenceFunctionName = parameters.at("equivalence").get<std::string>();
 				dependencies.emplace_back(Dependency{
+					.explanation = "MetricFunctor::equivalentToFunction: " + equivalenceFunctionName,
 					.condition = [&, equivalenceFunctionName]() { return equivalences.contains(equivalenceFunctionName); },
 					.action = [&, equivalenceFunctionName]() { functor.equivalentToFunction = equivalences.at(equivalenceFunctionName); }
 				});
@@ -46,6 +47,7 @@ namespace DEvA {
 			if (parameters.contains("betterThan")) {
 				auto orderingFunctionName = parameters.at("betterThan").get<std::string>();
 				dependencies.emplace_back(Dependency{
+					.explanation = "MetricFunctor::betterThanFunction: " + orderingFunctionName,
 					.condition = [&, orderingFunctionName]() { return orderings.contains(orderingFunctionName); },
 					.action = [&, orderingFunctionName]() { functor.betterThanFunction = orderings.at(orderingFunctionName); }
 				});
@@ -53,6 +55,7 @@ namespace DEvA {
 			if (parameters.contains("metricToJSON")) {
 				auto metricToJSONFunctionName = parameters.at("metricToJSON").get<std::string>();
 				dependencies.emplace_back(Dependency{
+					.explanation = "MetricFunctor::metricToJSONObjectFunction: " + metricToJSONFunctionName,
 					.condition = [&, metricToJSONFunctionName]() { return metricToJSONObjectFunctions.contains(metricToJSONFunctionName); },
 					.action = [&, metricToJSONFunctionName]() { functor.metricToJSONObjectFunction = metricToJSONObjectFunctions.at(metricToJSONFunctionName); }
 				});
@@ -60,6 +63,7 @@ namespace DEvA {
 			if (parameters.contains("computeFromIndividualPtr")) {
 				auto computeFromIndividualPtrFunctionName = parameters.at("computeFromIndividualPtr").get<std::string>();
 				dependencies.emplace_back(Dependency{
+					.explanation = "MetricFunctor::computeFromIndividualPtrFunction: " + computeFromIndividualPtrFunctionName,
 					.condition = [&, computeFromIndividualPtrFunctionName]() {
 						return computeFromIndividualPtrFunctions.contains(computeFromIndividualPtrFunctionName);
 					},

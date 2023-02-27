@@ -17,23 +17,32 @@ namespace DEvA {
 
 	template <typename Types>
 	bool EvolutionaryAlgorithm<Types>::compile() {
+		std::string uncompiled{};
 		auto compileLambda = [&](Dependencies & dependencies) {
 			std::size_t unsatisfiedBefore(std::numeric_limits<std::size_t>::max());
 			std::size_t unsatisfiedNow(0);
 			while (unsatisfiedBefore != unsatisfiedNow) {
+				uncompiled = "";
 				unsatisfiedBefore = unsatisfiedNow;
 				unsatisfiedNow = 0;
 				for (auto & dependency : dependencies) {
 					if (not dependency.isSatisfied()) {
+						uncompiled += dependency.explanation + "\n";
 						++unsatisfiedNow;
 					}
 				}
 			}
 			return unsatisfiedNow == 0;
 		};
-		return compileLambda(functions.dependencies)
-			and compileLambda(variationFunctors.dependencies)
-			and compileLambda(metricFunctors.dependencies);
+		Dependencies allDependencies{};
+		std::copy(functions.dependencies.begin(), functions.dependencies.end(), std::back_inserter(allDependencies));
+		std::copy(variationFunctors.dependencies.begin(), variationFunctors.dependencies.end(), std::back_inserter(allDependencies));
+		std::copy(metricFunctors.dependencies.begin(), metricFunctors.dependencies.end(), std::back_inserter(allDependencies));
+		bool compileSuccessful(compileLambda(allDependencies));
+		if (not compileSuccessful) {
+			logger.error("Metrics compilation error. {}", uncompiled);
+		}
+		return compileSuccessful;
 	}
 
 	template <typename Types>
@@ -362,18 +371,33 @@ namespace DEvA {
 
 	template <typename Types>
 	StepResult EvolutionaryAlgorithm<Types>::search(size_t count) {
+		StepResult stepResult(StepResult::Unknown);
 		for (size_t i(0); i < count; ++i) {
 			if (checkStopFlagAndMaybeWait()) {
-				return StepResult::Stopped;
+				stepResult = StepResult::Stopped;
+				break;
 			}
 			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochStartCallback, genealogy.size());
 			StepResult const epochResult = epoch();
 			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
 			if (StepResult::Inconclusive != epochResult) [[unlikely]] {
-				return epochResult;
+				stepResult = epochResult;
+				break;
 			}
 		}
-		return StepResult::StepCount;
+		if (StepResult::Unknown == stepResult) {
+			stepResult = StepResult::StepCount;
+		}
+		if (StepResult::Convergence == stepResult) {
+			logger.info("Search converged.");
+		} else if (StepResult::Inconclusive == stepResult) {
+			logger.info("Search inconclusive.");
+		} else if (StepResult::StepCount == stepResult) {
+			logger.info("Step limit reached.");
+		} else if (StepResult::Stopped == stepResult) {
+			logger.info("Search stopped externally.");
+		}
+		return stepResult;
 	}
 
 	template <typename Types>

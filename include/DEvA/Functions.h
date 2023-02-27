@@ -62,6 +62,7 @@ namespace DEvA {
 		void use(std::initializer_list<std::string> names) {
 			for (auto & name : names) {
 				dependencies.emplace_back(Dependency{
+					.explanation = "Functions::use " + name,
 					.condition = [&, name]() {
 						auto checkLambda = [&, name](auto & container) {
 							if (container.parametrised.contains(name)) {

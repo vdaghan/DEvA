@@ -110,19 +110,6 @@ namespace DEvA {
         using FWSortIndividuals = std::function<bool(FSortIndividuals, IndividualPtr, IndividualPtr)>;
         using FWConvergenceCheck = std::function<bool(FConvergenceCheck, SMetricMap const &)>;
 
-        using FVariant = std::variant<
-            FGenesis,
-            FGenePoolSelection,
-            FCreateGenotype,
-            FTransform,
-            FParentSelection,
-            FVariationFromGenotypes,
-            FVariationFromIndividualPtrs,
-            FSurvivorSelection,
-            FSortIndividuals,
-            FConvergenceCheck>;
-        using FVariantMap = std::map<EAFunction, FVariant>;
-
         // Callbacks
         using CVoid = std::function<void()>;
         using CEAStatsUpdate = std::function<void(EAStatistics<Spec> const &, EAStatisticsUpdateType)>;

@@ -26,7 +26,7 @@
 #include <set>
 
 namespace DEvA {
-	enum class StepResult { Inconclusive, StepCount, Exhaustion, Convergence, Stopped };
+	enum class StepResult { Unknown, Inconclusive, StepCount, Exhaustion, Convergence, Stopped };
 
 	enum class EAFunction {
 		Initialisation,
