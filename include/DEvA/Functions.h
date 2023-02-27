@@ -84,20 +84,18 @@ namespace DEvA {
 						auto useLambda = [&, name](auto & container) {
 							if (container.parametrised.contains(name)) {
 								container.use(name);
-								return true;
 							}
-							return false;
 						};
-						return useLambda(genesis)
-							|| useLambda(genePoolSelection)
-							|| useLambda(createGenotype)
-							|| useLambda(transform)
-							|| useLambda(parentSelection)
-							|| useLambda(variationFromGenotypes)
-							|| useLambda(variationFromIndividualPtrs)
-							|| useLambda(survivorSelection)
-							|| useLambda(sortIndividuals)
-							|| useLambda(convergenceCheck);
+						useLambda(genesis);
+						useLambda(genePoolSelection);
+						useLambda(createGenotype);
+						useLambda(transform);
+						useLambda(parentSelection);
+						useLambda(variationFromGenotypes);
+						useLambda(variationFromIndividualPtrs);
+						useLambda(survivorSelection);
+						useLambda(sortIndividuals);
+						useLambda(convergenceCheck);
 					}
 				});
 			}
