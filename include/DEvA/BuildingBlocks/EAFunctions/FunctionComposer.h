@@ -55,7 +55,7 @@ namespace DEvA {
 						if ("compose" == node) {
 							stack.push(node);
 						} else {
-							stack.push(FT::parametrised.at(node));
+							stack.push(FT::getParametrised(node));
 						}
 					}
 
@@ -98,11 +98,7 @@ namespace DEvA {
 			}
 
 			Function get() {
-				if (FT::wrapper) {
-					return std::bind_front(FT::wrapper, composed);
-				} else {
-					return composed;
-				}
+				return composed;
 			}
 		private:
 			static inline ReturnType differenceOf(ReturnType input1, ReturnType input2) {

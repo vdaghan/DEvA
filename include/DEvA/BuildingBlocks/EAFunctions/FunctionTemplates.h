@@ -43,7 +43,15 @@ namespace DEvA {
 			parametrised.emplace(name, function);
 		}
 		Function getParametrised(std::string name) {
-			return parametrised.at(name);
+			return tryWrap(parametrised.at(name));
+		}
+		Function tryWrap(Function f) {
+			if (wrapper) {
+				return std::bind_front(wrapper, f);
+			} else {
+				return f;
+			}
+
 		}
 		std::map<std::string, Parametrisable> parametrisable{};
 		std::map<std::string, Function> parametrised{};
