@@ -12,14 +12,13 @@
 #include <fstream>
 #include <optional>
 #include <string>
+#include <sstream>
 
 namespace DEvA {
 	inline std::optional<std::size_t> stringToSizeT(std::string const & s) {
 		std::size_t retVal;
-		try {
-			retVal = std::stoul(s);
-		}
-		catch (const std::exception&) {
+		std::stringstream ss(s);
+		if (!(ss >> retVal) || !ss.eof()) {
 			return std::nullopt;
 		}
 		return retVal;

@@ -30,6 +30,7 @@ namespace DEvA {
 		typename Types::Genotype genotype;
 		typename Types::MaybePhenotype maybePhenotype;
 		typename Types::SMetricMap metricMap;
+		std::map<std::string, std::any> anyMap;
 		std::vector<IndividualIdentifier> parentIdentifiers;
 		typename Types::IndividualPtrs parents;
 	};
@@ -42,5 +43,9 @@ namespace DEvA {
 	template <typename Types>
 	bool operator==(std::shared_ptr<Individual<Types>> const & lhs, std::shared_ptr<Individual<Types>> const & rhs) {
 		return *lhs == *rhs;
+	}
+	template <typename Types>
+	bool operator<(std::shared_ptr<Individual<Types>> const & lhs, std::shared_ptr<Individual<Types>> const & rhs) {
+		return lhs->id < rhs->id;
 	}
 }

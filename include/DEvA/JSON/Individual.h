@@ -49,8 +49,7 @@ namespace DEvA {
 		f.open(filename, std::ios_base::in);
 		if (not f.is_open()) {
 			return std::unexpected(DEvA::ErrorCode::FileNotOpen);
-		}
-		try {
+		} try {
 			JSON const parseResult = JSON::parse(f);
 			f.close();
 			typename Types::SIndividual retVal = parseResult;

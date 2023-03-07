@@ -9,45 +9,33 @@
 namespace DEvA {
 	template <typename Types>
 	struct StandardSurvivorSelectors {
-		static void all(ParameterMap parameters, typename Types::IndividualPtrs& iptrs) {
-			return;
+		using IPtrs = typename Types::IndividualPtrs;
+		static IPtrs all(ParameterMap parameters, IPtrs iptrs) {
+			return iptrs;
 		}
-		static void clamp(ParameterMap parameters, typename Types::IndividualPtrs & iptrs) {
+		static IPtrs clamp(ParameterMap parameters, IPtrs iptrs) {
 			std::size_t N(parameters.at("N").get<std::size_t>());
 			if (iptrs.size() > N) {
 				iptrs.resize(N);
 			}
+			return iptrs;
 		}
-		static void metricComparison(ParameterMap parameters, typename Types::IndividualPtrs& iptrs) {
+		static IPtrs metricComparison(ParameterMap parameters, IPtrs iptrs) {
 			std::string metric(parameters.at("metric").get<std::string>());
-			std::string comparisonType(parameters.at("comparison").get<std::string>());
-			std::any value;
-			if (parameters.at("value").is_number_float()) {
-				value = parameters.at("value").get<double>();
-			} else if (parameters.at("value").is_number_integer()) {
-				value = parameters.at("value").get<int64_t>();
-			}
 
-			std::function<bool(typename Types::IndividualPtr)> comparisonFunction;
+			auto comparisonFunction = [&](typename Types::IndividualPtr iptr) {
+				auto & metricObject(iptr->metricMap.at(metric));
+				std::any value(metricObject.JSONObjectToAnyFunction(parameters.at("value")));
 
-			comparisonFunction = [&](typename Types::IndividualPtr iptr) {
-				bool lt(iptr->metricMap.at(metric) < value);
-				bool et(iptr->metricMap.at(metric) == value);
-				if ("lt" == comparisonType) {
-					return lt;
-				} else if ("lte" == comparisonType) {
-					return lt or et;
-				} else if ("gt" == comparisonType) {
-					return not (lt or et);
-				} else if ("gte" == comparisonType) {
-					return not lt;
-				} else if ("eq" == comparisonType) {
-					return et;
-				} else if ("ne" == comparisonType) {
-					return not et;
-				} else {
-					throw std::invalid_argument("Invalid comparison type in EASetup: " + comparisonType);
-				}
+				Metric<Types> anchor{
+					.name = metric,
+					.value = value,
+					.equivalentToFunction = metricObject.equivalentToFunction,
+					.betterThanFunction = metricObject.betterThanFunction,
+					.metricToJSONObjectFunction = metricObject.metricToJSONObjectFunction,
+					.JSONObjectToAnyFunction = metricObject.JSONObjectToAnyFunction
+				};
+				return metricObject.isBetterThan(anchor);
 			};
 
 			bool hasAny = std::any_of(iptrs.begin(), iptrs.end(), [&](auto const & iptr) {
@@ -61,6 +49,7 @@ namespace DEvA {
 				});
 				iptrs = survivors;
 			}
+			return iptrs;
 		}
 	};
 }

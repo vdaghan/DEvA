@@ -22,7 +22,7 @@ namespace DEvA {
 			std::size_t unsatisfiedBefore(std::numeric_limits<std::size_t>::max());
 			std::size_t unsatisfiedNow(0);
 			while (unsatisfiedBefore != unsatisfiedNow) {
-				uncompiled = "";
+				uncompiled.clear();
 				unsatisfiedBefore = unsatisfiedNow;
 				unsatisfiedNow = 0;
 				for (auto & dependency : dependencies) {
@@ -34,8 +34,10 @@ namespace DEvA {
 			}
 			return unsatisfiedNow == 0;
 		};
+
 		Dependencies allDependencies{};
-		std::copy(functions.dependencies.begin(), functions.dependencies.end(), std::back_inserter(allDependencies));
+		auto functionsDependencies(functions.getDependencies());
+		std::copy(functionsDependencies.begin(), functionsDependencies.end(), std::back_inserter(allDependencies));
 		std::copy(variationFunctors.dependencies.begin(), variationFunctors.dependencies.end(), std::back_inserter(allDependencies));
 		std::copy(metricFunctors.dependencies.begin(), metricFunctors.dependencies.end(), std::back_inserter(allDependencies));
 		bool compileSuccessful(compileLambda(allDependencies));
@@ -67,7 +69,7 @@ namespace DEvA {
 				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			}
 			
-			auto genotypeProxies(functions.getGenesis()());
+			auto genotypeProxies(functions.genesis.get()());
 			//auto genotypeProxies(std::get<typename Types::FGenesis>(eaFunctions.at(EAFunction::Initialisation))());
 			//lambda = genotypeProxies.size();
 			for (auto& genotypeProxy : genotypeProxies) {
@@ -194,7 +196,8 @@ namespace DEvA {
 			eaStatistics.eaProgress.eaStage = EAStage::SelectSurvivors;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		functions.getSurvivorSelection()(genealogy.back());
+		auto survivorSelection(functions.survivorSelection.get());
+		genealogy.back() = survivorSelection(genealogy.back());
 		//std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
 
 		logger.info("Sorting generation.");
@@ -229,7 +232,8 @@ namespace DEvA {
 		if (genealogy.back().empty()) [[unlikely]] {
 			return StepResult::Exhaustion;
 		}
-		bool converged(functions.getConvergenceCheck()(bestIndividual->metricMap));
+		auto convergenceCheck(functions.convergenceCheck.get());
+		bool converged(convergenceCheck(bestIndividual->metricMap));
 		//bool converged(std::get<typename Types::FConvergenceCheck>(eaFunctions.at(EAFunction::ConvergenceCheck))(bestIndividual->metricMap));
 		if (converged) [[unlikely]] {
 			return StepResult::Convergence;
@@ -248,7 +252,8 @@ namespace DEvA {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
 			}
-			iptr->maybePhenotype = functions.getTransform()(iptr->genotype);
+			auto transform(functions.transform.get());
+			iptr->maybePhenotype = transform(iptr->genotype);
 			//iptr->maybePhenotype = std::get<typename Types::FTransform>(eaFunctions.at(EAFunction::Transformation))(iptr->genotype);
 			{
 				auto lock(eaStatistics.lock());
@@ -315,7 +320,8 @@ namespace DEvA {
 		//	return;
 		//}
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
-			return functions.getSortIndividuals()(lhs, rhs);
+			auto sortIndividuals(functions.sortIndividuals.get());
+			return sortIndividuals(lhs, rhs);
 			//return std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals))(lhs, rhs);
 		});
 	}
@@ -325,7 +331,7 @@ namespace DEvA {
 		//if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
 		//	return;
 		//}
-		auto sortFunction(functions.getSortIndividuals());
+		auto sortFunction(functions.sortIndividuals.get());
 		//auto & sortFunction(std::get<typename Types::FSortIndividuals>(eaFunctions.at(EAFunction::SortIndividuals)));
 		auto const & varInfos = variationInfos.back();
 		VariationStatisticsMap varStatMap{};
@@ -359,7 +365,7 @@ namespace DEvA {
             auto const varSuccessRate = static_cast<double>(varStat.success) / totalChildren;
             auto const varFailureRate = static_cast<double>(varStat.fail) / totalChildren;
             auto const varErrorRate = static_cast<double>(varStat.error) / totalChildren;
-			logger.info("Variation {} : (success%, failure%, error%, total#) = ({:5.1f}%, {:5.1f}%, {:5.1f}%, {})", varName, varSuccessRate * 100, varFailureRate * 100, varErrorRate * 100, varStat.total);
+			logger.info("Variation {} : (success%, failure%, error%, total#) = ({:5.1f}%, {:5.1f}%, {:5.1f}%, {})", varName, varSuccessRate * 100.0, varFailureRate * 100.0, varErrorRate * 100.0, varStat.total);
 		}
 
 		{
@@ -390,8 +396,6 @@ namespace DEvA {
 		}
 		if (StepResult::Convergence == stepResult) {
 			logger.info("Search converged.");
-		} else if (StepResult::Inconclusive == stepResult) {
-			logger.info("Search inconclusive.");
 		} else if (StepResult::StepCount == stepResult) {
 			logger.info("Step limit reached.");
 		} else if (StepResult::Stopped == stepResult) {

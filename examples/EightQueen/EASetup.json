@@ -46,13 +46,14 @@
         }
       }
     },
-    "used": [
-      "Permutations_8_100",
-      "StdTransformCopy",
-      "Clamp100",
-      "FitnessSort",
-      "FitnessCheck"
-    ]
+    "compile": {
+      "genesis": [ "Permutations_8_100" ],
+      "transform": [ "StdTransformCopy" ],
+      "parentSelection": [ "Best2of5Fitness" ],
+      "survivorSelection": [ "Clamp100" ],
+      "individualSort": [ "FitnessSort" ],
+      "convergenceCheck": [ "FitnessCheck" ]
+    }
   },
   "variationFunctors": {
     "definitions": {

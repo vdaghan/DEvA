@@ -1,0 +1,13 @@
+Checks: '-*,
+        bugprone*,
+        lang-analyzer*,
+        cert*,
+        cppcore*,
+        misc*,
+        modernize*,-modernize-use-trailing-return-type
+        performance*,
+        portability*,
+        readability*,-readability-function-cognitive-complexity,-readability-identifier-length
+        google*,
+        -google-runtime-references
+FormatStyle: file

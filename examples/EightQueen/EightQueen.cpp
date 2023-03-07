@@ -57,7 +57,7 @@ int main() {
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
 	ea.datastore = std::make_shared<DEvA::Filestore<Spec>>();
 
-	Spec::FVariationFromGenotypes variation = [](Spec::Genotypes genotypes) {
+	Spec::BPVariationFromGenotypes::Function variation = [](Spec::Genotypes genotypes) {
 		Spec::Genotypes offsprings = DEvA::StandardVariations<Spec>::cutAndCrossfill(std::move(genotypes));
 		for (auto& genotype : offsprings) {
 			double const probability = DEvA::RandomNumberGenerator::get()->getDouble();
@@ -67,7 +67,7 @@ int main() {
 		}
 		return offsprings;
 	};
-	ea.functions.variationFromGenotypes.define("EightQueenVariation", variation);
+	ea.functions.variationFromGenotypes.definePlain("EightQueenVariation", variation);
 
 	auto fevaluate = [](Spec::IndividualPtr const & iptr) -> std::any {
 		auto phenotype(iptr->maybePhenotype.value());
@@ -103,14 +103,6 @@ int main() {
 	};
 
 	auto const result = ea.search(1000);
-	if (DEvA::StepResult::Convergence == result) {
-		std::cout << "Converged.\n";
-	//} else if (DEvA::StepResult::Stopped == result) {
-	//	std::cout << "Stopped.\n";
-	//	return 0;
-	} else {
-		std::cout << "Step limit reached.\n";
-	}
 
 	std::cout << "Best genotype: [";
 	auto const & bestGenotype(ea.bestIndividual->genotype);

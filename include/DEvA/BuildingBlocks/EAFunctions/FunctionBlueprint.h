@@ -1,0 +1,27 @@
+#pragma once
+
+#include <DEvA/Common.h>
+
+#include <functional>
+#include <tuple>
+
+// https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAMzwBtMA7AQwFtMQByARg9KtQYEAysib0QXACx8BBAKoBnTAAUAHpwAMvAFYTStJg1DIApACYAQuYukl9ZATwDKjdAGFUtAK4sGIAOzSrgAyeAyYAHI%2BAEaYxCBmZqQADqgKhE4MHt6%2BAdKp6Y4CoeFRLLHxibaY9kUMQgRMxATZPn6B1bWZDU0EJZExcQlJCo3Nrbkdo739ZRXDAJS2qF7EyOwc5gDMYcjeWADUJltuaAzryQQKx9gmGgCC27v7mEcnVF7ndWI3d49mO3OLzebgIXmS9F%2BDyeQK8h2OoIAnslMAB9AjEJiEa5bW7Qh6jYheBwHZRNViYAhxAAqyNeJn8Vn8ABFjlYHlSWBCmFSEQQ6cw2AcAEqkA78lGC14AOllB0euL%2BhOJBAOADFPg5MtTMFyDFSjoy/gcTQcvOkjOrNXU3syDqN0CAQB8vpkEcKIPcDrLpQtflt2V7TeawsBSeS2Bi8Ep0Lb7QRHc7rW6Th6yZjIzS6WKvT6/YqA8bgxawwB1THJFGx452h1Ol1agTuiAa10CHPe2X526F6Estl/JUYlUiymrBi0lGGpms3v3EOWtXUjRx1uNie67m81Nj4gTun%2BwMLsNLrir5MCHV6nmYd27/cosVhAiHv7H9XUszntsb6/btzCvek6YE%2BghiugKzRJCBaBn8z4HCwWIMBACzTkWJrTI4yCokwChKM0EB1iACgUjhOJuEuGhOmudRikRDZ1HeYJ7sBKH%2Btg%2BaBqa8Y8ng2G4fhBCEQmTokWwZEIpRTrphSUYxnRIlJj%2BTHjqxMmZsQwHdjcnHoTxWFkYJwmJmJaK4ZJy5OuWTCVpg6AKYmDEpgBQF0i2lkgDRmTabiun4kGGGNAZAlxEJRGmRJJyntRF4MA59axSpLFuc%2BPkcQODzcZhfGGaFxmiaR5lRdSXDSRGlLENGdnxUp65JQ%2BmAQOplJZo%2BBypexfkBfpOUhQR4WFeR0UgNZtn2fGjmJTuzENe5pWebFoEEGlXV6dl/F4XlA3iUVFGfjFP41U5TbTapKVgQcEFeFBmArRl3Xrbl/WKRFu1LmYZUZhVVXjfRU0uTNanlVSmnZu1F1XTdd1zllQW9Ztz0mYNFkfSNFZVkd/2AYDbnvQd65LeBkH0NDsGZaaxD3gcGj3QyzIcEstCcAArLwfgcFopCoJwbjWNY9orGs9IAjwpAEJoDNLAA1iAzMaPonCSGzEtc5wvAKCA8vixzDOkHAsAwIgKCoFydBxOQlBoKb9DxAAbsglaorbXAAJyolsWyoqoABs0hYLbfGYAAangmAAO4APKSpwos0LQIMaxA0Qq9EYRNIiMe8KnzDEIiEfRNomAOCrVtsIIEcMLQGc66QWCIUY4g1/glNarbmAazXmCqEXXhUirz41Jn%2Bh4NEmK5x4WBD1GLCZ0sVAGMACgh%2BHUeMEP/CCCIYjsFIMiCIoKjqDXuhcPohjGHzljD9EGuQEsqCXJkHcAPR1qYljWGYnN2EXdQuAw7hPBtD0CEMIAxyhDFPgUDIAgJh%2BCgWkGBDBZiDHiKfH%2B64ejjCAbkdBNRf7dDGH0MBcxIG2CIXAvQ0xmgoIgWgpYChBbrAkIzFmysa7cw4AcH2kgEIKHtgcZ2LtpQewOBAXAhASBHBFgsXg2stBLAgEgK2yQzZkAoBAFRaiUAGCMFwOW8t/aB2XpHaO3BeBxwTpQZONds7pyHnY3O%2BdC7FxrqXRgBAK5VxVnXc%2BjdObNwIW3DunMu49z7jXAeTNzHXzHoiCeGxRbT1nnwBeS9Q6mLXjEjewhRDiF3jkg%2BagVa6CSLoi%2BH8r60BHrfFCXNH4CA7gAWiaQ6Gs78rCWC/urfB65/6AJyPA0goDSioL0NAuolCEGFEyLQ%2BYeCugCCwS0HBQyMF1GWXMsh1CVmDKoUQrZ9DlirGYVwVhHBWakHZpzTh3CAAc3smm%2BwOHsc%2BBx9HSg0J8sREiiDEGkVsM5ciJaKOUSbVRNsLaaPBdo4AXAqhGPWCY1e7NY50CsUnFOadc4OOxXnAuv8S4mzLp4yu1cAm6j8RsAJeAW6OGCSrMJyBe7Ut4FEoe1TR7pwSVPSqM9zFzzScisxsdZBb3ydIQpShinHxAFsM%2BRgUCXxsJy2p98GkMGaa0hM7TlXdM6AQ5wEBXBTOGQAw54zEGTNWZamZxQSFjIWYa%2BoFCbVOswQch1dD9m9FNTsi1ZzjlCxYQrC57CbmcHuY855wBkDIHeWYaUX5xH4D%2BQCoFYsQXS1lvLaJStSAzzllclWnD1YJEzTrRRhslEgBWAQZIvcoV2UkZVR0p8cnip3pK2QRSj6cxPqQMOFYUnRMudc3gnCI69wbaqVAVBuHPJYPw%2BNQiRFbDER4a2cR02yIrQovWSA60zqhVom2EQKScFUA8p5vDXmWg%2BV80JqaSB4DbXvXJ28JDdv3tKvtOhy1DpsiOthxaOGcCnfW3uBw51RpvS88p7zmafO%2BRATdELt3bDMLu%2BRusa1HsbRo09cRz1sEvdemNcaE1Jt4M2v5r69AdryV299vaSlysHcOgVoax0lvA9OqDMGr3Rt4bG%2BN8Kk0bphTbAFWxsNZtIAgTATAsDxDqXm3ghb5bjtVhwMtSQcMLGzUW6JWxw0TrVnuyWoazBmZ08CytSw27EHSM4SQQA
+namespace DEvA {
+    template<typename R, typename ... A>
+    struct FunctionBlueprint {
+        using ReturnType = R;
+        using ArgumentTuple = std::tuple<A ...>;
+        using Function = std::function<ReturnType(A ...)>;
+        using Parametrisable = std::function<ReturnType(ParameterMap, A ...)>;
+        using Wrapper = std::function<ReturnType(Function, A ...)>;
+        static constexpr std::size_t numArgs = sizeof...(A);
+    };
+
+    template <typename Blueprint>
+    concept CEndomorphism = requires {
+        requires std::same_as<
+            typename Blueprint::Function,
+            std::function<typename Blueprint::ReturnType(typename Blueprint::ReturnType)>
+        >;
+    };
+}

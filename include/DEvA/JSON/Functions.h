@@ -15,18 +15,15 @@ namespace DEvA {
 			for (auto definitionIt = definitions.begin(); definitionIt != definitions.end(); ++definitionIt) {
 				std::string functionType(definitionIt.key());
 				auto & functionsOfType(definitionIt.value());
-				auto defineFunctionLambda = [&](std::string type, auto & functionTemplate) {
-					if (type == functionType) {
-						for (auto functionIt(functionsOfType.begin()); functionIt != functionsOfType.end(); ++functionIt) {
-							auto const & functionName(functionIt.key());
-							auto const & functionValue(functionIt.value());
-							auto const & parametrisableFunctionName(functionValue.at("function"));
-							if (not functionTemplate.parametrisable.contains(parametrisableFunctionName)) {
-								continue;
-							}
-							auto parametrisableFunction(functionTemplate.parametrisable.at(parametrisableFunctionName));
-							functionTemplate.defineParametrised(functionName, parametrisableFunction, functionValue.at("parameters"));
-						}
+				auto defineFunctionLambda = [&](std::string type, auto & functionComposer) {
+					if (not (type == functionType)) {
+						return;
+					}
+					for (auto functionIt(functionsOfType.begin()); functionIt != functionsOfType.end(); ++functionIt) {
+						auto const & functionName(functionIt.key());
+						auto const & functionValue(functionIt.value());
+						auto const & parametrisableFunctionName(functionValue.at("function"));
+						functionComposer.defineParametrised(functionName, parametrisableFunctionName, functionValue.at("parameters"));
 					}
 				};
 				defineFunctionLambda("genesis", functions.genesis);
@@ -41,10 +38,27 @@ namespace DEvA {
 				defineFunctionLambda("convergenceCheck", functions.convergenceCheck);
 			}
 		}
-		if (functionsJSON.contains("used")) {
-			auto & usedFunctions(functionsJSON.at("used"));
-			for (auto& function : usedFunctions) {
-				functions.use({ function });
+		if (functionsJSON.contains("compile")) {
+			auto & compilations(functionsJSON.at("compile"));
+			for (auto compilationIt = compilations.begin(); compilationIt != compilations.end(); ++compilationIt) {
+				std::string functionType(compilationIt.key());
+				auto compilationRecipe(compilationIt.value().get<std::vector<std::string>>());
+				auto compileFunctionLambda = [&](std::string type, auto & functionComposer) {
+					if (not (type == functionType)) {
+						return;
+					}
+					functionComposer.compile(type+"Compiled", compilationRecipe);
+				};
+				compileFunctionLambda("genesis", functions.genesis);
+				compileFunctionLambda("genePoolSelection", functions.genePoolSelection);
+				compileFunctionLambda("createGenotype", functions.createGenotype);
+				compileFunctionLambda("transform", functions.transform);
+				compileFunctionLambda("parentSelection", functions.parentSelection);
+				compileFunctionLambda("variationFromGenotype", functions.variationFromGenotypes);
+				compileFunctionLambda("variationFromIndividualPtrs", functions.variationFromIndividualPtrs);
+				compileFunctionLambda("survivorSelection", functions.survivorSelection);
+				compileFunctionLambda("individualSort", functions.sortIndividuals);
+				compileFunctionLambda("convergenceCheck", functions.convergenceCheck);
 			}
 		}
 	}

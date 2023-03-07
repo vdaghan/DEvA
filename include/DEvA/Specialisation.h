@@ -17,6 +17,7 @@
 #include "DEvA/IndividualIdentifier.h"
 #include "DEvA/Metric.h"
 #include "DEvA/Parameters.h"
+#include "DEvA/BuildingBlocks/EAFunctions/FunctionBlueprint.h"
 #include "DEvA/BuildingBlocks/StandardConvergenceCheckers.h"
 #include "DEvA/BuildingBlocks/StandardInitialisers.h"
 #include "DEvA/BuildingBlocks/StandardParentSelectors.h"
@@ -76,39 +77,17 @@ namespace DEvA {
         using SMetricMap = MetricMap<Spec>;
         using SMetricFunctor = MetricFunctor<Spec>;
 
-        // EA function types
-        using FPGenesis = std::function<Genotypes(ParameterMap)>;
-        using FPGenePoolSelection = std::function<Generation(ParameterMap, Generation)>;
-        using FPCreateGenotype = std::function<Genotype(ParameterMap)>;
-        using FPTransform = std::function<MaybePhenotype(ParameterMap, Genotype)>;
-        using FPParentSelection = std::function<IndividualPtrs(ParameterMap, IndividualPtrs)>;
-        using FPVariationFromGenotypes = std::function<Genotypes(ParameterMap, Genotypes)>;
-        using FPVariationFromIndividualPtrs = std::function<Genotypes(ParameterMap, IndividualPtrs)>;
-        using FPSurvivorSelection = std::function<void(ParameterMap, IndividualPtrs&)>;
-        using FPSortIndividuals = std::function<bool(ParameterMap, IndividualPtr, IndividualPtr)>;
-        using FPConvergenceCheck = std::function<bool(ParameterMap, SMetricMap const&)>;
-
-        using FGenesis = std::function<Genotypes()>;
-        using FGenePoolSelection = std::function<Generation(Generation)>;
-        using FCreateGenotype = std::function<Genotype()>;
-        using FTransform = std::function<MaybePhenotype(Genotype)>;
-        using FParentSelection = std::function<IndividualPtrs(IndividualPtrs)>;
-        using FVariationFromGenotypes = std::function<Genotypes(Genotypes)>;
-        using FVariationFromIndividualPtrs = std::function<Genotypes(IndividualPtrs)>;
-        using FSurvivorSelection = std::function<void(IndividualPtrs&)>;
-        using FSortIndividuals = std::function<bool(IndividualPtr, IndividualPtr)>;
-        using FConvergenceCheck = std::function<bool(SMetricMap const &)>;
-
-        using FWGenesis = std::function<Genotypes(FGenesis)>;
-        using FWGenePoolSelection = std::function<Generation(FGenePoolSelection, Generation)>;
-        using FWCreateGenotype = std::function<Genotype(FCreateGenotype)>;
-        using FWTransform = std::function<MaybePhenotype(FTransform, Genotype)>;
-        using FWParentSelection = std::function<IndividualPtrs(FParentSelection, IndividualPtrs)>;
-        using FWVariationFromGenotypes = std::function<Genotypes(FVariationFromGenotypes, Genotypes)>;
-        using FWVariationFromIndividualPtrs = std::function<Genotypes(FVariationFromIndividualPtrs, IndividualPtrs)>;
-        using FWSurvivorSelection = std::function<void(FSurvivorSelection, IndividualPtrs&)>;
-        using FWSortIndividuals = std::function<bool(FSortIndividuals, IndividualPtr, IndividualPtr)>;
-        using FWConvergenceCheck = std::function<bool(FConvergenceCheck, SMetricMap const &)>;
+        // EA function blueprints
+        using BPGenesis = FunctionBlueprint<Genotypes>;
+        using BPGenePoolSelection = FunctionBlueprint<Generation, Generation>;
+        using BPCreateGenotype = FunctionBlueprint<Genotype>;
+        using BPTransform = FunctionBlueprint<MaybePhenotype, Genotype>;
+        using BPParentSelection = FunctionBlueprint<IndividualPtrs, IndividualPtrs>;
+        using BPVariationFromGenotypes = FunctionBlueprint<Genotypes, Genotypes>;
+        using BPVariationFromIndividualPtrs = FunctionBlueprint<Genotypes, IndividualPtrs>;
+        using BPSurvivorSelection = FunctionBlueprint<IndividualPtrs, IndividualPtrs>;
+        using BPSortIndividuals = FunctionBlueprint<bool, IndividualPtr, IndividualPtr>;
+        using BPConvergenceCheck = FunctionBlueprint<bool, SMetricMap const &>;
 
         // Callbacks
         using CVoid = std::function<void()>;

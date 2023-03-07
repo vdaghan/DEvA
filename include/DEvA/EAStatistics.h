@@ -58,8 +58,8 @@ namespace DEvA {
 
 			EAProgress eaProgress;
 			std::list<typename Types::SMetricMap> individualMetrics;
-			Types::SMetricMap generationMetrics;
-			Types::SMetricMap genealogyMetrics;
+			typename Types::SMetricMap generationMetrics;
+			typename Types::SMetricMap genealogyMetrics;
 			VariationStatisticsMap variationStatisticsMap;
 
 			std::unique_lock<std::mutex> lock() const { return std::unique_lock(accessMutex); };

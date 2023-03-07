@@ -27,7 +27,7 @@ namespace DEvA {
 			domain.assign(tmp.begin(), tmp.end());
 			domain.resize(std::min(M, domain.size()));
 			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs){
-				return lhs->metricMap.at(metricName) < rhs->metricMap.at(metricName);
+				return lhs->metricMap.at(metricName).isBetterThan(rhs->metricMap.at(metricName));
 			});
 			domain.resize(N);
 			return domain;
@@ -43,7 +43,7 @@ namespace DEvA {
 			domain.assign(tmp.begin(), tmp.end());
 			domain.resize(N);
 			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs) {
-				return lhs->metricMap.at(metricName) < rhs->metricMap.at(metricName);
+				return lhs->metricMap.at(metricName).isBetterThan(rhs->metricMap.at(metricName));
 			});
 			return domain;
 		};
@@ -52,7 +52,7 @@ namespace DEvA {
 			std::size_t N(parameters.at("N").get<std::size_t>());
 			std::string metricName(parameters.at("metric").get<std::string>());
 
-			std::size_t const maxSizeT(std::numeric_limits<std::size_t>::max());
+			constexpr std::size_t maxSizeT(std::numeric_limits<std::size_t>::max());
 			return bestNofM({{"N", N}, {"M", maxSizeT}, {"metric", metricName}}, domain);
 		};
 	};

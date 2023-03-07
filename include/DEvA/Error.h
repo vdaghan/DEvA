@@ -14,7 +14,12 @@ namespace DEvA{
 		// JSON errors
 		FileNotOpen,
 		FileNotFound,
-		ParseError
+		ParseError,
+
+		// Function composition errors
+		SyntaxError,
+		CompositionFailed,
+		FunctionNotDefined
 	};
 	template <typename T> using Maybe = std::expected<T, ErrorCode>;
 }

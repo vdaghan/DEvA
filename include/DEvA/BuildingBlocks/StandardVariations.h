@@ -33,8 +33,8 @@ namespace DEvA {
 			size_t const genotypeSize = firstParent.size();
 			std::random_device r;
 			std::default_random_engine randGen(r());
-			std::uniform_int_distribution<int> distribution(0, genotypeSize - 1);
-			size_t crossoverIndex = distribution(randGen);
+			std::uniform_int_distribution<std::size_t> distribution(0, genotypeSize - 1);
+			std::size_t crossoverIndex = distribution(randGen);
 
 			auto itCrossover1 = Common::iteratorForNthListElement<Types>(firstParent, crossoverIndex);
 			auto itCrossover2 = Common::iteratorForNthListElement<Types>(secondParent, crossoverIndex);
@@ -68,9 +68,9 @@ namespace DEvA {
 
 		static Genotype swap(Genotype genotype) {
 			std::default_random_engine randGen;
-			std::uniform_int_distribution<int> distribution(0, genotype.size() - 1);
-			size_t swapIndex1 = distribution(randGen);
-			size_t swapIndex2 = distribution(randGen);
+			std::uniform_int_distribution<std::size_t> distribution(0, genotype.size() - 1);
+			std::size_t swapIndex1 = distribution(randGen);
+			std::size_t swapIndex2 = distribution(randGen);
 
 			auto it1 = Common::iteratorForNthListElement<Types>(genotype, swapIndex1);
 			auto it2 = Common::iteratorForNthListElement<Types>(genotype, swapIndex2);

@@ -57,9 +57,9 @@ namespace DEvA {
 
 		std::string name{};
 		std::size_t numberOfParents{};
-		typename Spec::FParentSelection parentSelectionFunction{};
-		typename Spec::FVariationFromGenotypes variationFunctionFromGenotypes{};
-		typename Spec::FVariationFromIndividualPtrs variationFunctionFromIndividualPtrs{};
+		typename Spec::BPParentSelection::Function parentSelectionFunction{};
+		typename Spec::BPVariationFromGenotypes::Function variationFunctionFromGenotypes{};
+		typename Spec::BPVariationFromIndividualPtrs::Function variationFunctionFromIndividualPtrs{};
 
 		double probability{};
 		bool removeParentsFromMatingPool{};

@@ -12,12 +12,14 @@ namespace DEvA {
         using FMetricEquivalence = std::function<bool(std::any const &, std::any const &)>;
         using FMetricOrdering = std::function<bool(std::any const &, std::any const &)>;
         using FMetricToJSONObject = std::function<JSON(std::any const &)>;
+        using FJSONObjectToAny = std::function<std::any(JSON)>;
 
         std::string const name;
         std::any const value;
         FMetricEquivalence equivalentToFunction;
         FMetricOrdering betterThanFunction;
         FMetricToJSONObject metricToJSONObjectFunction;
+        FJSONObjectToAny JSONObjectToAnyFunction;
 
         [[nodiscard]] bool isEquivalence() const {
             return equivalentToFunction.operator bool();
@@ -46,17 +48,11 @@ namespace DEvA {
         [[nodiscard]] T as() const {
             return std::any_cast<T>(value);
         }
-        [[nodiscard]] bool operator<(Metric const & otherMetric) const {
+        [[nodiscard]] bool isBetterThan(Metric const & otherMetric) const {
             return betterThanFunction(value, otherMetric.value);
         }
-        [[nodiscard]] bool operator<(std::any & otherValue) const {
-            return betterThanFunction(value, otherValue);
-        }
-        [[nodiscard]] bool operator==(Metric const & otherMetric) const {
+        [[nodiscard]] bool isEquivalentTo(Metric const & otherMetric) const {
             return equivalentToFunction(value, otherMetric.value);
-        }
-        [[nodiscard]] bool operator==(std::any & otherValue) const {
-            return equivalentToFunction(value, otherValue);
         }
     };
 

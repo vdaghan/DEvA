@@ -18,6 +18,7 @@ namespace DEvA {
         typename Metric<Types>::FMetricEquivalence equivalentToFunction{};
         typename Metric<Types>::FMetricOrdering betterThanFunction{};
         typename Metric<Types>::FMetricToJSONObject metricToJSONObjectFunction{};
+        typename Metric<Types>::FJSONObjectToAny JSONObjectToAnyFunction{};
 
         template <typename T>
         void constructDefaultJSONConverter() {
@@ -28,35 +29,34 @@ namespace DEvA {
 
         template <typename T>
         void constructAsBasicType(std::string betterThan) {
-            equivalentToFunction = [&](std::any const& lhs, std::any const& rhs) -> T {
+            equivalentToFunction = [](std::any const & lhs, std::any const & rhs) -> T {
                 return std::any_cast<T>(lhs) == std::any_cast<T>(rhs);
             };
             if (betterThan == "greater") {
-                betterThanFunction = [&](std::any const & lhs, std::any const & rhs) -> T {
+                betterThanFunction = [](std::any const & lhs, std::any const & rhs) -> T {
                     return std::any_cast<T>(lhs) > std::any_cast<T>(rhs);
                 };
             } else if (betterThan == "lesser") {
-                betterThanFunction = [&](std::any const & lhs, std::any const & rhs) -> T {
+                betterThanFunction = [](std::any const & lhs, std::any const & rhs) -> T {
 					return std::any_cast<T>(lhs) < std::any_cast<T>(rhs);
 				};
             }
             
-            metricToJSONObjectFunction = [&](std::any const& value) -> JSON {
+            metricToJSONObjectFunction = [](std::any const& value) -> JSON {
                 return std::any_cast<T>(value);
             };
+            JSONObjectToAnyFunction = [](JSON const & j) -> std::any {
+                return j.get<T>();
+			};
         }
 
         template <typename T>
-        [[nodiscard]] Metric<Types> compute(T const& t) const {
+        [[nodiscard]] Metric<Types> compute(T const & t) const {
             std::any value{};
             if constexpr (std::same_as<T, typename Types::IndividualPtr>) {
                 value = computeFromIndividualPtrFunction(t);
-            }
-            else if constexpr (std::same_as<T, typename Types::Generation>) {
+            } else if constexpr (std::same_as<T, typename Types::Generation>) {
                 value = computeFromGenerationFunction(t);
-            }
-            else {
-                throw;
             }
             Metric<Types> metric{
                 .name = name,
@@ -70,6 +70,7 @@ namespace DEvA {
             metric.equivalentToFunction = equivalentToFunction;
             metric.betterThanFunction = betterThanFunction;
             metric.metricToJSONObjectFunction = metricToJSONObjectFunction;
+            metric.JSONObjectToAnyFunction = JSONObjectToAnyFunction;
         }
 
         //[[nodiscard]] bool valid() const {
