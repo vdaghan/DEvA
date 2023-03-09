@@ -23,12 +23,12 @@ namespace DEvA {
 			};
 			double getDouble();
 			unsigned int rand() { return randomDevice(); };
-		private:
-			static std::shared_ptr<RandomNumberGenerator> singletonInstance;
-			RandomNumberGenerator();
 
 			std::random_device randomDevice;
 			std::mt19937_64 generator;
+		private:
+			static std::shared_ptr<RandomNumberGenerator> singletonInstance;
+			RandomNumberGenerator();
 			std::uniform_real_distribution<double> doubleDistribution;
 	};
 }
