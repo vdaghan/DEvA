@@ -69,7 +69,7 @@ int main() {
 	};
 	ea.functions.variationFromGenotypes.definePlain("EightQueenVariation", variation);
 
-	auto fevaluate = [](Spec::IndividualPtr const & iptr) -> std::any {
+	auto fevaluate = [](DEvA::ParameterMap pMap, Spec::IndividualPtr const & iptr) -> std::any {
 		auto phenotype(iptr->maybePhenotype.value());
 		auto const last = std::ranges::unique(phenotype).begin();
 		phenotype.erase(last, phenotype.end());

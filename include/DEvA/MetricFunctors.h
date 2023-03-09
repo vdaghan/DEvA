@@ -72,6 +72,9 @@ namespace DEvA {
 					}
 				});
 			}
+			if (parameters.contains("computeParameters")) {
+				functor.computeParameters = parameters.at("computeParameters").get<ParameterMap>();
+			}
 		};
 
 		void useForIndividuals(std::initializer_list<std::string> names) {

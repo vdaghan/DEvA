@@ -4,17 +4,19 @@
 
 #include <any>
 #include <functional>
+#include <optional>
 #include <string>
 
 namespace DEvA {
     template <typename Types>
     struct MetricFunctor {
-        using FComputeFromIndividualPtr = std::function<std::any(typename Types::IndividualPtr const&)>;
-        using FComputeFromGeneration = std::function<std::any(typename Types::Generation const&)>;
+        using FComputeFromIndividualPtr = std::function<std::any(ParameterMap, typename Types::IndividualPtr const&)>;
+        using FComputeFromGeneration = std::function<std::any(ParameterMap, typename Types::Generation const&)>;
 
         std::string name{};
         FComputeFromIndividualPtr computeFromIndividualPtrFunction{};
         FComputeFromGeneration computeFromGenerationFunction{};
+        std::optional<ParameterMap> computeParameters{};
         typename Metric<Types>::FMetricEquivalence equivalentToFunction{};
         typename Metric<Types>::FMetricOrdering betterThanFunction{};
         typename Metric<Types>::FMetricToJSONObject metricToJSONObjectFunction{};
@@ -54,9 +56,17 @@ namespace DEvA {
         [[nodiscard]] Metric<Types> compute(T const & t) const {
             std::any value{};
             if constexpr (std::same_as<T, typename Types::IndividualPtr>) {
-                value = computeFromIndividualPtrFunction(t);
+                if (computeParameters) {
+					value = computeFromIndividualPtrFunction(computeParameters.value(), t);
+                } else {
+                    value = computeFromIndividualPtrFunction({}, t);
+				}
             } else if constexpr (std::same_as<T, typename Types::Generation>) {
-                value = computeFromGenerationFunction(t);
+                if (computeParameters) {
+                    value = computeFromGenerationFunction(computeParameters.value(), t);
+                } else {
+                    value = computeFromGenerationFunction({}, t);
+                }
             }
             Metric<Types> metric{
                 .name = name,
