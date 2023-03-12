@@ -35,17 +35,13 @@ namespace DEvA {
 
 		static IndividualPtrs randomN(ParameterMap parameters, IndividualPtrs domain) {
 			std::size_t N(parameters.at("N").get<std::size_t>());
-			std::string metricName(parameters.at("metric").get<std::string>());
+			if (domain.size() < N) {
+				return {};
+			}
 
-			std::vector<IndividualPtr> tmp(domain.begin(), domain.end());
-			RandomNumberGenerator::get()->shuffle(tmp);
-			domain.clear();
-			domain.assign(tmp.begin(), tmp.end());
-			domain.resize(N);
-			std::stable_sort(domain.begin(), domain.end(), [&](auto & lhs, auto & rhs) {
-				return lhs->metricMap.at(metricName).isBetterThan(rhs->metricMap.at(metricName));
-			});
-			return domain;
+			IndividualPtrs retVal{};
+			std::sample(domain.begin(), domain.end(), std::back_inserter(retVal), N, RandomNumberGenerator::get()->generator);
+			return retVal;
 		};
 
 		static IndividualPtrs bestNofAll(ParameterMap parameters, IndividualPtrs domain) {

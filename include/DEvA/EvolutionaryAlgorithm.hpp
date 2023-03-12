@@ -248,7 +248,7 @@ namespace DEvA {
 			eaStatistics.eaProgress.eaStage = EAStage::Transform;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
-		auto transformLambda = [&](auto & iptr) {
+		auto transformLambda = [&](auto iptr) {
 			if (checkStopFlagAndMaybeWait()) {
 				return;
 			}
@@ -261,7 +261,12 @@ namespace DEvA {
 				tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 			}
 		};
-		std::for_each(std::execution::par, generation.begin(), generation.end(), transformLambda);
+		//std::for_each(std::execution::par, generation.begin(), generation.end(), transformLambda);
+		std::list<std::jthread> threads{};
+		for (auto iptr : generation) {
+			std::jthread j(transformLambda, iptr);
+			threads.emplace_back(std::move(j));
+		}
 	}
 
 	template <typename Types>

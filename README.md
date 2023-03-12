@@ -71,3 +71,6 @@ These targets imply that throughout minor a version, say v0.X, respective target
     |                | Inversion mutation       | Cycle crossover                 |
     +----------------+--------------------------+---------------------------------+
 ```
+## Long shots (one can dream, right?)
+  * Bibliography feature for when building an algorithm, DEvA would provide references to scientific papers which introduce or use same building blocks.
+  * Visual algorithm building interface.
