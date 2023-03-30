@@ -9,7 +9,7 @@ set(DEvA_BUILD_TESTS TRUE CACHE BOOL "Build tests for DEvA")
 
 include(FetchContent)
 
-project(DEvA LANGUAGES CXX VERSION 0.5.2.2)
+project(DEvA LANGUAGES CXX VERSION 0.5.2.3)
 configure_file(deva_version.cpp.in deva_version.cpp @ONLY)
 
 add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_CURRENT_BINARY_DIR}/DEvA.dot -o ${CMAKE_CURRENT_BINARY_DIR}/DEvA.svg)
@@ -25,11 +25,13 @@ add_custom_target(Flowchart COMMAND dot -Tsvg ${CMAKE_CURRENT_BINARY_DIR}/DEvA.d
 #add_library(Lua ${lua_SOURCE_DIR}/onelua.c)
 #target_include_directories(Lua PUBLIC ${lua_SOURCE_DIR})
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+FetchContent_Declare(spdlog GIT_REPOSITORY https://github.com/gabime/spdlog.git GIT_TAG 76fb40d95455f249bd70824ecfcae7a8f0930fa3 GIT_PROGRESS TRUE SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/spdlog) # release-1.10.0
 FetchContent_Declare(json GIT_REPOSITORY https://github.com/nlohmann/json.git GIT_TAG bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d GIT_PROGRESS TRUE SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/json) # release-3.11.2
-FetchContent_MakeAvailable(json)
+FetchContent_MakeAvailable(spdlog json)
 
 set(DEvA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/deva_version.cpp"
 				 "${CMAKE_CURRENT_SOURCE_DIR}/src/Bibliography.cpp"
+				 "${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp"
 				 "${CMAKE_CURRENT_SOURCE_DIR}/src/RandomNumberGenerator.cpp"
 				 "${CMAKE_CURRENT_SOURCE_DIR}/src/Strategy.cpp")
 
@@ -41,7 +43,7 @@ target_compile_features(DEvA PUBLIC cxx_std_23)
 target_include_directories(DEvA PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(DEvA PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(DEvA PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/BuildingBlocks")
-target_link_libraries(DEvA nlohmann_json::nlohmann_json)
+target_link_libraries(DEvA spdlog::spdlog nlohmann_json::nlohmann_json)
 #target_precompile_headers(DEvA PRIVATE
 #	<algorithm> <any> <chrono> <deque> <filesystem> <fstream> <list>
 #	<map> <memory> <optional> <random> <string> <utility> <vector>)

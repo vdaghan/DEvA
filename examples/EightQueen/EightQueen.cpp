@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "deva_version.h"
 #include "DEvA/EvolutionaryAlgorithm.h"
 #include "DEvA/Project/Filestore.h"
 #include "DEvA/Specialisation.h"
@@ -52,8 +51,6 @@ struct Specification {
 using Spec = DEvA::Specialisation<Specification>;
 
 int main() {
-	std::cout << "DEvA version: " << getDEvAVersion() << std::endl;
-	
 	DEvA::EvolutionaryAlgorithm<Spec> ea;
 	ea.datastore = std::make_shared<DEvA::Filestore<Spec>>();
 
@@ -98,9 +95,6 @@ int main() {
 	ea.compile();
 
 	ea.lambda = 50;
-	ea.logger.callback = [](DEvA::LogType t, std::string const & msg) {
-		std::cout << msg << std::endl;
-	};
 
 	auto const result = ea.search(1000);
 

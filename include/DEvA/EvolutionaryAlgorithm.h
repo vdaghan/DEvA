@@ -67,7 +67,6 @@ namespace DEvA {
 			typename Types::IndividualPtr find(IndividualIdentifier);
 
 			void addGeneration(typename Types::Generation gen) { genealogy.push_back(gen); }
-			Logger logger;
 			typename Types::IndividualPtr bestIndividual;
 			typename Types::Generation newGeneration;
 			typename Types::Genealogy genealogy;
@@ -90,7 +89,9 @@ namespace DEvA {
 			EAGenerationState<Types> eaGenerationState;
 		private:
 			void setupStandardFunctions();
+			void epochStart();
 			StepResult epoch();
+			void epochEnd();
 			typename Types::CVariantMap callbacks;
 
 			void transformIndividuals(typename Types::Generation &);

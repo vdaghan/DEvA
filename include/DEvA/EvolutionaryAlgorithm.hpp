@@ -1,5 +1,8 @@
 #pragma once
 
+#include "deva_version.h"
+#include "DEvA/Logger.h"
+
 namespace DEvA {
 	template <typename Types>
 	EvolutionaryAlgorithm<Types>::EvolutionaryAlgorithm()
@@ -7,6 +10,8 @@ namespace DEvA {
 	    , pauseFlag(false)
 	    , stopFlag(false)
 	{
+		initialiseLogger();
+		spdlog::info("DEvA version: {}", getDEvAVersion());
 		setupStandardFunctions();
 		//registerEAFunction(DEvA::EAFunction::GenePoolSelection, StandardGenePoolSelectors<Types>::all);
 		eaStatistics.eaProgress.currentGeneration = 0;
@@ -42,7 +47,7 @@ namespace DEvA {
 		std::copy(metricFunctors.dependencies.begin(), metricFunctors.dependencies.end(), std::back_inserter(allDependencies));
 		bool compileSuccessful(compileLambda(allDependencies));
 		if (not compileSuccessful) {
-			logger.error("Metrics compilation error. {}", uncompiled);
+			spdlog::error("Metrics compilation error. {}", uncompiled);
 		}
 		return compileSuccessful;
 	}
@@ -62,7 +67,7 @@ namespace DEvA {
 		}
 		newGeneration = {};
 		if (0 == genealogy.size()) [[unlikely]] {
-			logger.info("Creating new individuals.");
+			spdlog::info("Creating new individuals.");
 			{
 				auto lock(eaStatistics.lock());
 				eaStatistics.eaProgress.eaStage = EAStage::Genesis;
@@ -79,7 +84,7 @@ namespace DEvA {
 			variationInfos.push_back({});
 		} else [[likely]] {
 			eaGenerationState.elderIdentifiers = extractIdentifiers(genealogy.back());
-			//logger.info("Selecting gene pool.");
+			//spdlog::info("Selecting gene pool.");
 			//{
 			//	auto lock(eaStatistics.lock());
 			//	eaStatistics.eaProgress.eaStage = EAStage::SelectGenePool;
@@ -88,7 +93,7 @@ namespace DEvA {
 			//auto genePool = genePoolSelectionFunction(genealogy.back());
 			auto genePool = genealogy.back();
 			eaGenerationState.genePoolIdentifiers = extractIdentifiers(genealogy.back());
-			logger.info("Creating new individuals.");
+			spdlog::info("Creating new individuals.");
 			{
 				auto lock(eaStatistics.lock());
 				eaStatistics.eaProgress.eaStage = EAStage::Variation;
@@ -151,46 +156,46 @@ namespace DEvA {
 			std::size_t newIndividuals(eaStatistics.eaProgress.numberOfNewIndividualsInGeneration);
 			std::size_t oldIndividuals(eaStatistics.eaProgress.numberOfOldIndividualsInGeneration);
 			std::size_t individuals(eaStatistics.eaProgress.numberOfIndividualsInGeneration);
-			logger.info("Epoch {}: {} new, {} old, {} total individuals.", currentGeneration.load(), newIndividuals, oldIndividuals, individuals);
+			spdlog::info("Epoch {}: {} new, {} old, {} total individuals.", currentGeneration.load(), newIndividuals, oldIndividuals, individuals);
 		}
 
-		logger.info("Transforming individuals.");
+		spdlog::info("Transforming individuals.");
 		transformIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
-		logger.info("Removing invalid individuals.");
+		spdlog::info("Removing invalid individuals.");
 		removeInvalidIndividuals(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		eaGenerationState.healthyIdentifiers = extractIdentifiers(newGeneration);
 
-		logger.info("Evaluating individual metrics.");
+		spdlog::info("Evaluating individual metrics.");
 		evaluateIndividualMetrics(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
-		logger.info("Combining previous generation and new individuals into a new generation.");
+		spdlog::info("Combining previous generation and new individuals into a new generation.");
 		if (0 != genealogy.size()) [[likely]] {
 			mergeGenerations(genealogy.back(), newGeneration);
 		}
 		genealogy.push_back(newGeneration);
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
-		logger.info("Sorting generation.");
+		spdlog::info("Sorting generation.");
 		sortGeneration(genealogy.back());
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
 		if (!variationInfos.back().empty()) {
-			logger.info("Evaluating variations.");
+			spdlog::info("Evaluating variations.");
 			evaluateVariations();
 			if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 		}
 
-		logger.info("Saving new individuals to disk.");
+		spdlog::info("Saving new individuals to disk.");
 		saveIndividuals(newGeneration);
-		logger.info("Saving generation state to disk.");
+		spdlog::info("Saving generation state to disk.");
 		saveState(eaGenerationState, currentGeneration.load());
 
-		logger.info("Selecting survivors.");
+		spdlog::info("Selecting survivors.");
 		{
 			auto lock(eaStatistics.lock());
 			eaStatistics.eaProgress.eaStage = EAStage::SelectSurvivors;
@@ -200,7 +205,7 @@ namespace DEvA {
 		genealogy.back() = survivorSelection(genealogy.back());
 		//std::get<typename Types::FSurvivorSelection>(eaFunctions.at(EAFunction::SurvivorSelection))(genealogy.back());
 
-		logger.info("Sorting generation.");
+		spdlog::info("Sorting generation.");
 		sortGeneration(genealogy.back());
 		if (checkStopFlagAndMaybeWait()) return StepResult::Stopped;
 
@@ -225,7 +230,6 @@ namespace DEvA {
 			auto lock(eaStatistics.lock());
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Final);
 			eaStatistics.eaProgress.currentGeneration = currentGeneration.load();
-			currentGeneration.fetch_add(1);
 			eaStatistics.eaProgress.eaStage = EAStage::End;
 			tryExecuteCallback<typename Types::CEAStatsUpdate, EAStatistics<Types>>(onEAStatsUpdateCallback, eaStatistics, EAStatisticsUpdateType::Progress);
 		}
@@ -239,6 +243,38 @@ namespace DEvA {
 			return StepResult::Convergence;
 		}
 		return StepResult::Inconclusive;
+	}
+
+	template <typename Types>
+	void EvolutionaryAlgorithm<Types>::epochStart() {
+		spdlog::info("Epoch {} started.", currentGeneration.load());
+	}
+
+	template <typename Types>
+	void EvolutionaryAlgorithm<Types>::epochEnd() {
+		spdlog::info("Epoch {} ended.", currentGeneration.load());
+
+		auto const & bestIndividualPtr = genealogy.back().front();
+		spdlog::info("Best individual: {}", bestIndividualPtr->id);
+		std::string bestIndividualParents{};
+		for (auto & parent : bestIndividualPtr->variationInfo.parentIds) {
+			auto parentGeneration(std::to_string(parent.generation));
+			auto parentIdentifier(std::to_string(parent.identifier));
+			bestIndividualParents += "(" + parentGeneration + ", " + parentIdentifier + ") ";
+		}
+		spdlog::info("Best individual variation: {} from parent(s) {}", bestIndividualPtr->variationInfo.name, bestIndividualParents);
+
+		auto & bestIndividualMetric(bestIndividualPtr->metricMap);
+		for (auto & [metricName, metric] : bestIndividualPtr->metricMap) {
+			if (metric.value.type() == std::type_index(typeid(double))) {
+				spdlog::info("Best individual {}: {}", metricName, metric.as<double>());
+			} else if (metric.metricToJSONObjectFunction) {
+				auto metricAsJSON(metric.metricToJSONObjectFunction(metric.value));
+				spdlog::info("Best individual {}: {}", metricName, metricAsJSON.dump());
+			}
+		}
+
+		currentGeneration.fetch_add(1);
 	}
 
 	template <typename Types>
@@ -370,7 +406,7 @@ namespace DEvA {
             auto const varSuccessRate = static_cast<double>(varStat.success) / totalChildren;
             auto const varFailureRate = static_cast<double>(varStat.fail) / totalChildren;
             auto const varErrorRate = static_cast<double>(varStat.error) / totalChildren;
-			logger.info("Variation {} : (success%, failure%, error%, total#) = ({:5.1f}%, {:5.1f}%, {:5.1f}%, {})", varName, varSuccessRate * 100.0, varFailureRate * 100.0, varErrorRate * 100.0, varStat.total);
+			spdlog::info("Variation {} : (success%, failure%, error%, total#) = ({:5.1f}%, {:5.1f}%, {:5.1f}%, {})", varName, varSuccessRate * 100.0, varFailureRate * 100.0, varErrorRate * 100.0, varStat.total);
 		}
 
 		{
@@ -388,9 +424,11 @@ namespace DEvA {
 				stepResult = StepResult::Stopped;
 				break;
 			}
+			epochStart();
 			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochStartCallback, genealogy.size());
 			StepResult const epochResult = epoch();
 			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
+			epochEnd();
 			if (StepResult::Inconclusive != epochResult) [[unlikely]] {
 				stepResult = epochResult;
 				break;
@@ -400,11 +438,11 @@ namespace DEvA {
 			stepResult = StepResult::StepCount;
 		}
 		if (StepResult::Convergence == stepResult) {
-			logger.info("Search converged.");
+			spdlog::info("Search converged.");
 		} else if (StepResult::StepCount == stepResult) {
-			logger.info("Step limit reached.");
+			spdlog::info("Step limit reached.");
 		} else if (StepResult::Stopped == stepResult) {
-			logger.info("Search stopped externally.");
+			spdlog::info("Search stopped externally.");
 		}
 		return stepResult;
 	}
