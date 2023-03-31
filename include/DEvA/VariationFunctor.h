@@ -43,7 +43,7 @@ namespace DEvA {
 				}
 			}
 			if (variationFunctionFromIndividualPtrs) {
-				variationInfo.children = variationFunctionFromIndividualPtrs(matingPool);
+				variationInfo.children = variationFunctionFromIndividualPtrs(variationInfo.parentPtrs);
 			}
 			typename Spec::Genotypes parentGenotypes{};
 			for (auto & parentPtr : variationInfo.parentPtrs) {

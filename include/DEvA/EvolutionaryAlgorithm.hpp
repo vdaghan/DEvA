@@ -427,8 +427,8 @@ namespace DEvA {
 			epochStart();
 			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochStartCallback, genealogy.size());
 			StepResult const epochResult = epoch();
-			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
 			epochEnd();
+			tryExecuteCallback<typename Types::COnEpoch, std::size_t>(onEpochEndCallback, genealogy.size() - 1);
 			if (StepResult::Inconclusive != epochResult) [[unlikely]] {
 				stepResult = epochResult;
 				break;
