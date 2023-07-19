@@ -360,6 +360,9 @@ namespace DEvA {
 		//if (!eaFunctions.contains(EAFunction::SortIndividuals)) {
 		//	return;
 		//}
+		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto & lhs, auto & rhs) {
+			return lhs->id.generation < rhs->id.generation;
+		});
 		std::stable_sort(genealogy.back().begin(), genealogy.back().end(), [&](auto& lhs, auto& rhs) {
 			auto sortIndividuals(functions.sortIndividuals.get());
 			return sortIndividuals(lhs, rhs);

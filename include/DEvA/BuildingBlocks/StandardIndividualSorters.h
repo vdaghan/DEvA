@@ -17,7 +17,11 @@ namespace DEvA {
 		using IndividualPtr = typename Types::IndividualPtr;
 		static bool metricSort(ParameterMap parameters, IndividualPtr lhs, IndividualPtr rhs) {
 			std::string metricName(parameters.at("metric").get<std::string>());
-			return lhs->metricMap.at(metricName).isBetterThan(rhs->metricMap.at(metricName));
+			bool isBetterThan(lhs->metricMap.at(metricName).isBetterThan(rhs->metricMap.at(metricName)));
+			//bool isEquivalentTo(lhs->metricMap.at(metricName).isEquivalentTo(rhs->metricMap.at(metricName)));
+			//bool isOlderThan(lhs->id.generation < rhs->id.generation);
+			//return isBetterThan or (isEquivalentTo and isOlderThan);
+			return isBetterThan;
 		}
 	};
 }
